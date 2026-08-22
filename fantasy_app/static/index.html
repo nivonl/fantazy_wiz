@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PitchMetric</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%2324002F'/%3E%3Ccircle cx='10' cy='10' r='6' fill='none' stroke='%2304F5FF' stroke-width='2'/%3E%3Cline x1='14.5' y1='14.5' x2='19' y2='19' stroke='%23963CFF' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <h1><span class="brand-pitch">Pitch</span><span class="brand-metric">Metric</span></h1>
+    <p>FPL &amp; La Liga analytics — score predictions and squad recommendations backed by real data. Runs against live sources.</p>
+    <nav class="tabs">
+      <button data-tab="fpl" class="active">Premier League (FPL)</button>
+      <button data-tab="laliga">La Liga</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="panel-fpl" class="panel active">
+      <div class="card">
+        <h2>Current team &amp; top recommendations</h2>
+        <p class="hint">
+          Five kinds of advice, each over the horizon it actually needs: live status flags on your squad right
+          now, this gameweek's captain/vice/bench, the single best transfer (evaluated a few gameweeks ahead,
+          since it sticks around), and a quantified lift for each chip — Free Hit judged over just this
+          gameweek, Wildcard over several, since one is temporary and the other permanent. Hover (or tab to) any
+          player name for their scoring history against this week's opponent, over the last 5 PL seasons.
+        </p>
+        <div class="mode-toggle">
+          <label><input type="radio" name="ct-mode" value="entry" checked onchange="toggleCurrentTeamMode()" /> From FPL entry ID</label>
+          <label><input type="radio" name="ct-mode" value="manual" onchange="toggleCurrentTeamMode()" /> Enter manually</label>
+        </div>
+
+        <div id="ct-entry-mode">
+          <div class="controls">
+            <div class="field">
+              <label for="ct-entry-id">FPL entry ID</label>
+              <input id="ct-entry-id" type="number" placeholder="e.g. 1234567" />
+            </div>
+            <div class="field">
+              <label for="ct-entry-free-transfers">Free transfers</label>
+              <input id="ct-entry-free-transfers" type="number" min="0" value="1" />
+            </div>
+          </div>
+          <p class="hint">
+            Only works <em>after</em> this gameweek's deadline has passed — FPL keeps everyone's picks private
+            before lock. Use "Enter manually" before then.
+          </p>
+        </div>
+
+        <div id="ct-manual-mode" hidden>
+          <div class="field" style="margin-bottom: 12px;">
+            <label for="ct-players">Your current 15, comma-separated</label>
+            <textarea id="ct-players" rows="3" style="width: 100%;"
+              placeholder="e.g. Raya, Gabriel, Saliba, White, Saka, Haaland, ... (partial names like &quot;Salah&quot; work too)"></textarea>
+          </div>
+          <div class="controls">
+            <div class="field">
+              <label for="ct-bank">Bank (£m)</label>
+              <input id="ct-bank" type="number" step="0.1" value="0" />
+            </div>
+            <div class="field">
+              <label for="ct-manual-free-transfers">Free transfers</label>
+              <input id="ct-manual-free-transfers" type="number" min="0" value="1" />
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="action" onclick="getCurrentTeamRecommendation()">Get top recommendations</button>
+        </div>
+        <div id="ct-output" class="output"><p class="empty">Nothing loaded yet.</p></div>
+      </div>
+
+      <div class="card">
+        <h2>Team builder</h2>
+        <p class="hint">
+          Builds around a shortlist of the best candidates (base model, already adjusted for opponent history).
+          Pick a favorite club to require players from it, and/or name 1-2 players to lock into the squad.
+        </p>
+        <div class="controls">
+          <div class="field">
+            <label for="tb-favorite-team">Favorite club (optional)</label>
+            <input id="tb-favorite-team" list="tb-team-list" placeholder="e.g. Arsenal" />
+            <datalist id="tb-team-list"></datalist>
+          </div>
+          <div class="field">
+            <label for="tb-min-count">Min. from that club</label>
+            <input id="tb-min-count" type="number" min="1" max="3" value="3" />
+          </div>
+          <div class="field">
+            <label for="tb-event">Gameweek (optional)</label>
+            <input id="tb-event" type="number" min="1" placeholder="current" />
+          </div>
+        </div>
+        <div class="controls">
+          <div class="field" style="flex: 1; min-width: 260px;">
+            <label for="tb-favorite-players">Favorite player(s), comma-separated</label>
+            <input id="tb-favorite-players" list="tb-player-list" placeholder="e.g. Saka, Haaland" style="width: 100%;" />
+            <datalist id="tb-player-list"></datalist>
+          </div>
+          <button class="action" onclick="buildTeamBuilder()">Build my team</button>
+        </div>
+        <div id="tb-output" class="output"><p class="empty">Nothing loaded yet.</p></div>
+      </div>
+
+      <div class="card">
+        <h2>Build a squad from scratch</h2>
+        <p class="hint">Optimal 15 under the 100m budget, valid formation, max 3 per club — no favorites applied.</p>
+        <div class="controls">
+          <button class="action" onclick="buildFplSquad()">Build squad</button>
+        </div>
+        <div id="fpl-build-output" class="output"><p class="empty">Nothing loaded yet.</p></div>
+      </div>
+
+      <div class="card">
+        <h2>Score predictions</h2>
+        <p class="hint">Fitted from real results this season (blends in the last 2 seasons via football-data.org until there's enough current-season data).</p>
+        <div class="controls">
+          <div class="field">
+            <label for="fpl-event">Gameweek (optional)</label>
+            <input id="fpl-event" type="number" min="1" placeholder="current" />
+          </div>
+          <button class="action" onclick="loadFplPredictions()">Predict</button>
+        </div>
+        <div id="fpl-predictions-output" class="output"><p class="empty">Nothing loaded yet.</p></div>
+      </div>
+    </section>
+
+    <section id="panel-laliga" class="panel">
+      <div class="card">
+        <h2>Score predictions</h2>
+        <p class="hint">Fitted from football-data.org results (blends in last season early on). Needs FOOTBALL_DATA_TOKEN in .env.</p>
+        <div class="controls">
+          <div class="field">
+            <label for="laliga-matchday">Matchday (optional)</label>
+            <input id="laliga-matchday" type="number" min="1" placeholder="next" />
+          </div>
+          <button class="action" onclick="loadLaligaPredictions()">Predict</button>
+        </div>
+        <div id="laliga-predictions-output" class="output"><p class="empty">Nothing loaded yet.</p></div>
+      </div>
+
+      <div class="card">
+        <h2>Squad recommendation</h2>
+        <p class="hint">
+          No live squad source yet for 9cat.co.il (see NOTES-9cat.md) — paste your current squad below.
+          <code>goal_share</code>/<code>assist_share</code>/<code>start_prob</code> are optional per player;
+          leave them out unless you've actually researched that player this week. <code>watchlist</code> players
+          are the only pool transfers can be suggested from.
+        </p>
+        <div class="field" style="margin-bottom: 14px;">
+          <label for="laliga-squad-json">Squad JSON</label>
+          <textarea id="laliga-squad-json">{
+  "bank": 0.5,
+  "free_transfers": 1,
+  "players": [
+    {"name": "Example GK", "position": "GK", "team": "Real Madrid", "price": 5.0, "is_starter": true},
+    {"name": "Example DEF", "position": "DEF", "team": "Barcelona", "price": 6.5, "is_starter": true},
+    {"name": "Example MID", "position": "MID", "team": "Atletico Madrid", "price": 7.0, "is_starter": true,
+     "goal_share": 0.1, "assist_share": 0.2, "start_prob": 0.9}
+  ],
+  "watchlist": [
+    {"name": "Candidate MID", "position": "MID", "team": "Sevilla", "price": 7.5}
+  ]
+}</textarea>
+        </div>
+        <button class="action" onclick="recommendLaliga()">Get recommendation</button>
+        <div id="laliga-output" class="output" style="margin-top: 14px;"><p class="empty">Nothing loaded yet.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+[project]
+name = "fantasy-app"
+version = "0.1.0"
+description = "Score predictions and squad recommendations for FPL (full) and La Liga via 9cat.co.il (recs)."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

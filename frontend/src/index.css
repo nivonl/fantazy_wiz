@@ -1,0 +1,66 @@
+@import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700;800&display=swap");
+
+:root {
+  --bg: #24002f;
+  --bg-grad: radial-gradient(ellipse at top, #34063f 0%, #24002f 55%, #1a0022 100%);
+  --panel: #34063f;
+  --panel-2: #3d0a4a;
+  --panel-border: #4a1259;
+  --input-bg: #170021;
+  --text: #ffffff;
+  --text-dim: #a6a6b3;
+  --accent: #963cff;
+  --accent-dim: #6e2bbf;
+  --analytics: #04f5ff;
+  --good: #00ff85;
+  --bad: #ff3b5c;
+  --warn: #ffc24b;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --display: "Exo 2", var(--sans);
+  --radius: 14px;
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg-grad) fixed;
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+button { font-family: inherit; }
+
+a { color: var(--analytics); }
+
+code {
+  font-family: var(--mono);
+  background: var(--input-bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}

@@ -1,0 +1,386 @@
+.app-shell {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+
+/* ---------- Header ---------- */
+
+header.top {
+  padding: 28px 4px 0;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: linear-gradient(var(--bg) 70%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 4px;
+}
+
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.brand h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  letter-spacing: 0.01em;
+}
+
+.brand-pitch { color: var(--text); }
+.brand-metric {
+  background: linear-gradient(90deg, var(--accent), var(--analytics));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+header.top > p {
+  margin: 2px 0 18px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  max-width: 640px;
+}
+
+nav.tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+nav.tabs button {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+nav.tabs button:hover { color: var(--text); }
+
+nav.tabs button.active {
+  color: var(--analytics);
+  border-bottom-color: var(--analytics);
+}
+
+/* ---------- Panels ---------- */
+
+.panel-fade {
+  animation: fadeSlideUp 0.25s ease both;
+}
+
+/* ---------- Card ---------- */
+
+.card {
+  background: linear-gradient(160deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s ease;
+}
+
+.card:hover { border-color: var(--accent-dim); }
+
+.card h2 {
+  margin: 0 0 4px;
+  font-size: 1.08rem;
+  font-family: var(--display);
+  font-weight: 700;
+  color: var(--analytics);
+}
+
+.card .hint {
+  color: var(--text-dim);
+  font-size: 0.83rem;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+
+/* ---------- Form controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+  margin-bottom: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field label {
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.field input, .field textarea, .field select {
+  background: var(--input-bg);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  font-family: var(--mono);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field input:focus, .field textarea:focus, .field select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(150, 60, 255, 0.2);
+}
+
+.field textarea { width: 100%; min-height: 90px; resize: vertical; font-family: var(--sans); }
+
+.mode-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: var(--input-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 3px;
+  width: fit-content;
+}
+
+.mode-toggle button {
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mode-toggle button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  border: none;
+  border-radius: 9px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.1s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn:disabled { opacity: 0.6; cursor: default; }
+
+.btn-primary {
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) { box-shadow: 0 0 0 3px rgba(150, 60, 255, 0.28); }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text-dim);
+}
+.btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+
+.btn-spinner {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: spin 0.6s linear infinite;
+}
+
+/* ---------- Loading / error / empty states ---------- */
+
+.output { font-size: 0.88rem; }
+
+.spinner-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--analytics);
+  padding: 6px 0;
+}
+
+.spinner-ring {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(4, 245, 255, 0.25);
+  border-top-color: var(--analytics);
+  animation: spin 0.7s linear infinite;
+}
+
+.error-banner {
+  color: var(--bad);
+  background: rgba(255, 59, 92, 0.1);
+  border: 1px solid rgba(255, 59, 92, 0.35);
+  border-radius: 8px;
+  padding: 10px 14px;
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+}
+
+.empty { color: var(--text-dim); font-style: italic; font-size: 0.85rem; }
+
+.reveal { animation: fadeSlideUp 0.3s ease both; }
+
+/* ---------- Tables ---------- */
+
+.table-wrap { overflow-x: auto; border-radius: 10px; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--panel-border);
+  white-space: nowrap;
+}
+
+th { color: var(--text-dim); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; }
+
+tbody tr { transition: background 0.12s ease; }
+tbody tr:hover { background: rgba(150, 60, 255, 0.08); }
+
+/* ---------- Tags / badges ---------- */
+
+.tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 5px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.tag-captain { background: rgba(4, 245, 255, 0.18); color: var(--analytics); }
+.tag-vice { background: rgba(166, 166, 179, 0.18); color: var(--text-dim); }
+.tag-hit { background: rgba(255, 59, 92, 0.18); color: var(--bad); }
+
+.value-positive { color: var(--good); font-weight: 700; }
+.value-negative { color: var(--bad); font-weight: 700; }
+
+.summary-line { margin: 0 0 12px; color: var(--text-dim); font-size: 0.87rem; line-height: 1.6; }
+.summary-line b { color: var(--text); }
+
+.section-heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  margin: 18px 0 8px;
+}
+.section-heading:first-child { margin-top: 0; }
+
+ul.flags { margin: 0; padding-left: 0; list-style: none; }
+ul.flags li {
+  padding: 8px 10px;
+  background: rgba(255, 194, 75, 0.08);
+  border-left: 2px solid var(--warn);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+}
+
+/* ---------- Tooltip ---------- */
+
+.tip-wrap {
+  position: relative;
+  border-bottom: 1px dotted var(--text-dim);
+  cursor: help;
+}
+
+.tip-bubble {
+  position: absolute;
+  bottom: 130%;
+  left: 0;
+  z-index: 30;
+  background: var(--input-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  white-space: normal;
+  width: 235px;
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  font-family: var(--sans);
+  animation: fadeSlideUp 0.12s ease both;
+}
+
+/* ---------- Chip lift bars ---------- */
+
+.chip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.chip-card {
+  background: var(--input-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.chip-card .chip-name { font-weight: 700; font-size: 0.88rem; }
+.chip-card .chip-horizon { color: var(--text-dim); font-size: 0.72rem; margin-left: 6px; }
+.chip-card .chip-lift { font-size: 1.4rem; margin: 4px 0; font-family: var(--display); }
+.chip-card .chip-note { color: var(--text-dim); font-size: 0.76rem; line-height: 1.4; }
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+  .app-shell { padding: 0 12px 60px; }
+  nav.tabs { overflow-x: auto; }
+  .card { padding: 16px; }
+  table { font-size: 0.76rem; }
+  th, td { padding: 6px 8px; }
+}

@@ -1,0 +1,5 @@
+# Railway builds with Nixpacks by default. PuLP's bundled CBC solver binary needs libgomp at
+# runtime; some minimal base images don't have it, which shows up as a cryptic solver failure
+# only when a squad-optimization endpoint is actually hit (predictions work fine without it).
+[phases.setup]
+aptPkgs = ["libgomp1"]

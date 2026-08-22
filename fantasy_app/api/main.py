@@ -1,0 +1,264 @@
+"""
+Thin FastAPI layer over the service functions — exists so a future frontend (or multi-user
+deployment) is an additive layer on top of this, not a rewrite. For solo local use, the CLI
+(cli.py) calls the same service functions directly and is the faster day-to-day entry point.
+The React app in frontend/ (dev: Vite on localhost:5173; prod: Netlify) is the primary UI now;
+static/index.html is kept as a dependency-free fallback, still served by the StaticFiles mount
+at the bottom. Run with `uvicorn fantasy_app.api.main:app --reload`.
+"""
+
+from __future__ import annotations
+
+import os
+
+import httpx
+from dataclasses import asdict
+from pathlib import Path
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+
+from fantasy_app.providers.cat9 import ManualSquad
+from fantasy_app.providers.fpl import POSITION_BY_ELEMENT_TYPE, FPLClient
+from fantasy_app.providers.football_data import FootballDataClient
+from fantasy_app.recommend.fpl import optimize_squad
+from fantasy_app.recommend.laliga import recommend_laliga
+from fantasy_app.services import fpl_service, laliga_service
+
+STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+
+# Explicit path, not a bare load_dotenv(): the process's cwd depends on how uvicorn was
+# launched (e.g. --app-dir), and relying on that guess silently no-ops the token loading.
+load_dotenv(dotenv_path=STATIC_DIR.parent.parent / ".env")
+
+app = FastAPI(title="PitchMetric", version="0.1.0")
+
+# The frontend is hosted separately (Netlify) from this backend (Railway/Render/etc.), so
+# browser requests are cross-origin. Nothing behind this API is secret or user-specific in a
+# way that requires locking the origin down (no auth, no write endpoints, no per-user data —
+# FOOTBALL_DATA_TOKEN never leaves the server), so a permissive default is fine; set
+# ALLOWED_ORIGINS (comma-separated) in production if you want to restrict it to your actual
+# Netlify domain instead.
+_allowed_origins = os.environ.get("ALLOWED_ORIGINS", "*")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"] if _allowed_origins == "*" else [o.strip() for o in _allowed_origins.split(",")],
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+
+
+@app.exception_handler(RuntimeError)
+def handle_runtime_error(request: Request, exc: RuntimeError) -> JSONResponse:
+    # Raised deliberately by the service layer for known, explainable gaps (e.g. "the season
+    # hasn't started yet, there's nothing to fit ratings from") — surface the message as-is
+    # rather than a stack trace.
+    return JSONResponse(status_code=400, content={"detail": str(exc)})
+
+
+@app.exception_handler(httpx.HTTPStatusError)
+def handle_upstream_error(request: Request, exc: httpx.HTTPStatusError) -> JSONResponse:
+    return JSONResponse(
+        status_code=502,
+        content={"detail": f"Upstream API error ({exc.response.status_code}): {exc.request.url}"},
+    )
+
+
+@app.get("/health")
+def health() -> dict:
+    return {"status": "ok"}
+
+
+@app.get("/predict/fpl")
+def predict_fpl(event: int | None = None) -> list[dict]:
+    with FPLClient() as client:
+        predictions = fpl_service.predict_gameweek(client, event=event)
+    return [
+        {"home_team": p.home_team, "away_team": p.away_team, **asdict(p.prediction)} for p in predictions
+    ]
+
+
+@app.get("/predict/laliga")
+def predict_laliga(matchday: int | None = None) -> list[dict]:
+    with FootballDataClient() as client:
+        predictions = laliga_service.predict_matchday(client, matchday=matchday)
+    return [
+        {"home_team": p.home_team, "away_team": p.away_team, **asdict(p.prediction)} for p in predictions
+    ]
+
+
+def _squad_result_dict(result) -> dict:
+    return {
+        "squad": [asdict(p) for p in result.squad],
+        "starters": [asdict(p) for p in result.starters],
+        "bench": [asdict(p) for p in result.bench],
+        "captain": asdict(result.captain),
+        "vice_captain": asdict(result.vice_captain),
+        "total_price": result.total_price,
+        "starting_xp": result.starting_xp,
+    }
+
+
+@app.get("/recommend/fpl/build")
+def recommend_fpl_build(event: int | None = None) -> dict:
+    with FPLClient() as client:
+        pool = fpl_service.build_candidate_pool(client, event=event)
+    result = optimize_squad(pool)
+    return _squad_result_dict(result)
+
+
+@app.get("/fpl/teams")
+def fpl_teams() -> list[dict]:
+    with FPLClient() as client:
+        bootstrap = client.bootstrap()
+    return [{"id": t["id"], "name": t["name"]} for t in bootstrap["teams"]]
+
+
+@app.get("/fpl/players")
+def fpl_players() -> list[dict]:
+    with FPLClient() as client:
+        bootstrap = client.bootstrap()
+    team_name_by_id = {t["id"]: t["name"] for t in bootstrap["teams"]}
+    return [
+        {
+            "id": e["id"],
+            "name": e["web_name"],
+            "team": team_name_by_id[e["team"]],
+            "pos": POSITION_BY_ELEMENT_TYPE[e["element_type"]],
+        }
+        for e in bootstrap["elements"]
+    ]
+
+
+@app.get("/recommend/fpl/team-builder")
+def recommend_fpl_team_builder(
+    event: int | None = None,
+    favorite_team: str | None = None,
+    favorite_players: str = "",
+    min_favorite_team_count: int = 3,
+) -> dict:
+    names = [n.strip() for n in favorite_players.split(",") if n.strip()]
+    with FPLClient() as client:
+        result = fpl_service.build_team_builder(
+            client,
+            event=event,
+            favorite_team=favorite_team or None,
+            favorite_player_names=names,
+            min_favorite_team_count=min_favorite_team_count,
+        )
+    out = _squad_result_dict(result.squad)
+    out["injury_notes"] = {
+        pid: note for pid, note in result.injury_notes.items() if pid in {p["id"] for p in out["squad"]}
+    }
+    out["shortlisted_count"] = result.shortlisted_count
+    out["favorite_team"] = result.favorite_team
+    out["favorite_players_matched"] = result.favorite_players_matched
+    out["favorite_players_unmatched"] = result.favorite_players_unmatched
+    return out
+
+
+def _full_recommendation_dict(rec, unmatched_names: list[str] | None = None) -> dict:
+    return {
+        "risk_flags": [
+            {
+                "player": asdict(f.player),
+                "status": f.status,
+                "news": f.news,
+                "suggested_replacement": asdict(f.suggested_replacement) if f.suggested_replacement else None,
+            }
+            for f in rec.risk_flags
+        ],
+        "captain": asdict(rec.captain),
+        "vice_captain": asdict(rec.vice_captain),
+        "starters": [asdict(p) for p in rec.starters],
+        "bench": [asdict(p) for p in rec.bench],
+        "lineup_changes": rec.lineup_changes,
+        "best_transfer": (
+            {
+                "out": asdict(rec.best_transfer.player_out),
+                "in": asdict(rec.best_transfer.player_in),
+                "xp_gain": rec.best_transfer.xp_gain,
+                "is_hit": rec.best_transfer.is_hit,
+            }
+            if rec.best_transfer
+            else None
+        ),
+        "transfer_horizon_gameweeks": rec.transfer_horizon_gameweeks,
+        "chip_lifts": [asdict(c) for c in rec.chip_lifts],
+        "unmatched_names": unmatched_names or [],
+    }
+
+
+@app.get("/recommend/fpl/full")
+def recommend_fpl_full(
+    entry_id: int | None = None,
+    players: str = "",
+    bank: float = 0.0,
+    free_transfers: int = 1,
+    event: int | None = None,
+    transfer_horizon: int = fpl_service.DEFAULT_TRANSFER_HORIZON,
+    wildcard_horizon: int = fpl_service.DEFAULT_WILDCARD_HORIZON,
+) -> dict:
+    """
+    The main "what should I do" endpoint: risk flags on your current squad, optimal
+    captain/vice/bench for this gameweek, the single best transfer (evaluated over
+    `transfer_horizon` gameweeks, since it sticks around), and quantified lift for each chip
+    (bench boost / triple captain / free hit / wildcard), each over its own proper horizon.
+    Pass `entry_id` if this gameweek's deadline has passed (FPL 404s picks before that), or
+    `players` (comma-separated names) to enter your current 15 manually otherwise.
+    """
+    unmatched: list[str] = []
+    with FPLClient() as client:
+        pool = fpl_service.build_candidate_pool(client, event=event)
+        actual_starter_ids = None
+        if entry_id is not None:
+            current_squad, actual_starter_ids = fpl_service.entry_squad_and_starters(client, entry_id, pool)
+            entry = client.entry(entry_id)
+            bank = entry.get("last_deadline_bank", 0) / 10.0
+        else:
+            names = [n.strip() for n in players.split(",") if n.strip()]
+            current_squad, unmatched = fpl_service.match_player_names(names, pool)
+            if len(current_squad) < 11:
+                raise RuntimeError(
+                    f"Only matched {len(current_squad)} of {len(names)} names to real FPL "
+                    f"players — need at least 11 to pick a starting XI. "
+                    f"{'Unmatched: ' + ', '.join(unmatched) if unmatched else ''}"
+                )
+        rec = fpl_service.full_recommendation(
+            client,
+            current_squad,
+            pool,
+            bank=bank,
+            free_transfers=free_transfers,
+            event=event,
+            transfer_horizon=transfer_horizon,
+            wildcard_horizon=wildcard_horizon,
+            actual_starter_ids=actual_starter_ids,
+        )
+    return _full_recommendation_dict(rec, unmatched_names=unmatched)
+
+
+@app.post("/recommend/laliga")
+def recommend_laliga_endpoint(squad: ManualSquad) -> dict:
+    with FootballDataClient() as client:
+        squad_candidates, pool = laliga_service.build_squad_and_watchlist_pool(client, squad)
+    rec = recommend_laliga(squad_candidates, pool)
+    return {
+        "captain": asdict(rec.captain),
+        "transfer_flags": [
+            {
+                "out": asdict(f.player_out),
+                "in": asdict(f.player_in),
+                "xp_gain": f.xp_gain,
+                "price_delta": f.price_delta,
+            }
+            for f in rec.transfer_flags
+        ],
+    }
+
+
+# Registered last so it only catches paths none of the routes above matched (the browser UI).
+app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+httpx
+sqlalchemy
+pydantic
+numpy
+scipy
+pulp
+click
+python-dotenv
+pytest
