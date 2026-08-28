@@ -188,6 +188,8 @@ def _full_recommendation_dict(rec, unmatched_names: list[str] | None = None) -> 
         ),
         "transfer_horizon_gameweeks": rec.transfer_horizon_gameweeks,
         "chip_lifts": [asdict(c) for c in rec.chip_lifts],
+        "free_hit_squad": _squad_result_dict(rec.free_hit_squad),
+        "wildcard_squad": _squad_result_dict(rec.wildcard_squad),
         "unmatched_names": unmatched_names or [],
     }
 

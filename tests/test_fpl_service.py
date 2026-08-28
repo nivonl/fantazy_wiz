@@ -3,6 +3,8 @@ import pytest
 
 from fantasy_app.recommend.fpl import CandidatePlayer
 from fantasy_app.services.fpl_service import (
+    _is_backup_goalkeeper,
+    _max_gk_minutes_by_team,
     _player_rates,
     _risk_flags,
     entry_squad_and_starters,
@@ -77,6 +79,42 @@ def test_match_player_names_is_accent_insensitive():
     matched, unmatched = match_player_names(["Odegaard"], _pool())
     assert [p.name for p in matched] == ["Ødegaard"]
     assert unmatched == []
+
+
+def _gk(name, team, minutes, element_type=1):
+    return {"web_name": name, "team": team, "minutes": minutes, "element_type": element_type}
+
+
+def test_backup_goalkeeper_detected_from_relative_minutes():
+    # Regression, confirmed live: Ipswich's Walton (0 starts, 0 minutes) got the same 90%
+    # default start_prob as their actual starter, Scherpen (90 minutes) — because neither had
+    # an injury flag. Real relative playing time should catch this even though the flag can't.
+    bootstrap = {
+        "elements": [
+            _gk("Scherpen", team=12, minutes=90),
+            _gk("Walton", team=12, minutes=0),
+            _gk("Palmer", team=12, minutes=0),
+        ]
+    }
+    max_minutes = _max_gk_minutes_by_team(bootstrap)
+    assert max_minutes[12] == 90
+    assert _is_backup_goalkeeper(bootstrap["elements"][0], max_minutes) is False  # Scherpen: the starter
+    assert _is_backup_goalkeeper(bootstrap["elements"][1], max_minutes) is True  # Walton: clear backup
+    assert _is_backup_goalkeeper(bootstrap["elements"][2], max_minutes) is True  # Palmer: clear backup
+
+
+def test_backup_goalkeeper_no_signal_when_nobodys_played_yet():
+    # True preseason (everyone at 0 minutes) — no relative signal exists, so don't guess.
+    bootstrap = {"elements": [_gk("A", team=1, minutes=0), _gk("B", team=1, minutes=0)]}
+    max_minutes = _max_gk_minutes_by_team(bootstrap)
+    assert _is_backup_goalkeeper(bootstrap["elements"][0], max_minutes) is False
+    assert _is_backup_goalkeeper(bootstrap["elements"][1], max_minutes) is False
+
+
+def test_backup_goalkeeper_ignores_outfield_players():
+    bootstrap = {"elements": [_gk("Striker", team=1, minutes=90, element_type=4)]}
+    max_minutes = _max_gk_minutes_by_team(bootstrap)
+    assert _is_backup_goalkeeper(bootstrap["elements"][0], max_minutes) is False
 
 
 def test_match_player_names_reports_unmatched():

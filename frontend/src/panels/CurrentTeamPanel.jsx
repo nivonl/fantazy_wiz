@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { api } from "../api.js";
 import {
   Button,
@@ -12,6 +13,7 @@ import {
   useAsyncAction,
   usePersistentState,
 } from "../components/ui.jsx";
+import { SquadTable } from "../components/SquadTable.jsx";
 
 const CHIP_LABELS = {
   bench_boost: "Bench Boost",
@@ -19,6 +21,9 @@ const CHIP_LABELS = {
   free_hit: "Free Hit",
   wildcard: "Wildcard",
 };
+
+// Only these two chips rebuild the whole squad, so only these have a squad worth showing.
+const SQUAD_KEY_BY_CHIP = { free_hit: "free_hit_squad", wildcard: "wildcard_squad" };
 
 export function CurrentTeamPanel() {
   // Remembered on this device (localStorage) so you don't retype your team every visit —
@@ -30,6 +35,7 @@ export function CurrentTeamPanel() {
   const [bank, setBank] = usePersistentState("ct-bank", 0);
   const [manualFreeTransfers, setManualFreeTransfers] = usePersistentState("ct-manual-ft", 1);
   const [state, run] = useAsyncAction();
+  const [expandedChip, setExpandedChip] = useState(null);
 
   const submit = () => {
     run(async () => {
@@ -161,19 +167,51 @@ export function CurrentTeamPanel() {
 
             <p className="section-heading">Chip lifts</p>
             <div className="chip-grid">
-              {rec.chip_lifts.map((c) => (
-                <div className="chip-card" key={c.chip}>
-                  <span className="chip-name">{CHIP_LABELS[c.chip] || c.chip}</span>
-                  <span className="chip-horizon">
-                    {c.horizon_gameweeks} GW{c.horizon_gameweeks > 1 ? "s" : ""}
-                  </span>
-                  <div className="chip-lift">
-                    <SignedValue value={c.lift} />
+              {rec.chip_lifts.map((c) => {
+                const squadKey = SQUAD_KEY_BY_CHIP[c.chip];
+                const isOpen = expandedChip === c.chip;
+                return (
+                  <div className="chip-card" key={c.chip}>
+                    <span className="chip-name">{CHIP_LABELS[c.chip] || c.chip}</span>
+                    <span className="chip-horizon">
+                      {c.horizon_gameweeks} GW{c.horizon_gameweeks > 1 ? "s" : ""}
+                    </span>
+                    <div className="chip-lift">
+                      <SignedValue value={c.lift} />
+                    </div>
+                    <div className="chip-note">{c.note}</div>
+                    {squadKey && (
+                      <Button variant="ghost" onClick={() => setExpandedChip(isOpen ? null : c.chip)}>
+                        {isOpen ? "Hide squad" : "Show squad"}
+                      </Button>
+                    )}
                   </div>
-                  <div className="chip-note">{c.note}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
+
+            {expandedChip && SQUAD_KEY_BY_CHIP[expandedChip] && (
+              <Reveal revealKey={expandedChip}>
+                {(() => {
+                  const squad = rec[SQUAD_KEY_BY_CHIP[expandedChip]];
+                  return (
+                    <div style={{ marginTop: 16 }}>
+                      <p className="summary-line">
+                        {CHIP_LABELS[expandedChip]} squad · total <b>{squad.total_price}m</b> (100m budget) · Starting XI xP{" "}
+                        <b>{squad.starting_xp}</b>
+                      </p>
+                      <SquadTable
+                        title="Starting XI"
+                        players={[...squad.starters].sort((a, b) => b.xp - a.xp)}
+                        captainId={squad.captain.id}
+                        viceId={squad.vice_captain.id}
+                      />
+                      <SquadTable title="Bench" players={squad.bench} />
+                    </div>
+                  );
+                })()}
+              </Reveal>
+            )}
           </Reveal>
         )}
       </div>

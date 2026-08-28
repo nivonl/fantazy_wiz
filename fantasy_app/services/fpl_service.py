@@ -90,6 +90,10 @@ class FullRecommendation:
     best_transfer: TransferSuggestion | None
     transfer_horizon_gameweeks: int
     chip_lifts: list[ChipLift]
+    # The actual squads a "lift" number implies — not just the point differential, since
+    # "how much better" is only useful alongside "better how, and does it fit the budget."
+    free_hit_squad: SquadResult
+    wildcard_squad: SquadResult
 
 
 def _parse_kickoff(iso: str | None) -> datetime:
@@ -186,6 +190,10 @@ def predict_gameweek(client: FPLClient, event: int | None = None) -> list[NamedF
     ]
 
 
+BACKUP_GK_MINUTES_RATIO = 0.2  # below this fraction of their club's top GK's minutes = clear backup
+BACKUP_GK_START_PROB_CAP = 0.1
+
+
 def _player_rates(element: dict) -> tuple[float, float, float]:
     """
     (goals per start, assists per start, start_prob) from this season's totals.
@@ -196,6 +204,11 @@ def _player_rates(element: dict) -> tuple[float, float, float]:
     starts=0) into a wildly inflated rate; treating "no starts" as "no data" avoids that
     entirely, consistent with this project's rule of never fabricating an estimate over real
     absence of evidence.
+
+    `chance_of_playing_next_round is None` means "FPL has no injury doubt" — it does NOT mean
+    "likely to start." A completely unproven backup with a clean bill of health gets the same
+    0.9 here as an established starter; `_is_backup_goalkeeper` below corrects for that
+    specific, high-confidence case using real relative playing time, not a guess.
     """
     starts = element.get("starts", 0) or 0
     chance = element.get("chance_of_playing_next_round")
@@ -205,6 +218,34 @@ def _player_rates(element: dict) -> tuple[float, float, float]:
     goals = element.get("goals_scored", 0) or 0
     assists = element.get("assists", 0) or 0
     return goals / starts, assists / starts, start_prob
+
+
+def _max_gk_minutes_by_team(bootstrap: dict) -> dict[int, int]:
+    max_minutes: dict[int, int] = {}
+    for e in bootstrap["elements"]:
+        if POSITION_BY_ELEMENT_TYPE[e["element_type"]] != "GK":
+            continue
+        team_id = e["team"]
+        minutes = e.get("minutes", 0) or 0
+        max_minutes[team_id] = max(max_minutes.get(team_id, 0), minutes)
+    return max_minutes
+
+
+def _is_backup_goalkeeper(element: dict, max_gk_minutes: dict[int, int]) -> bool:
+    """
+    Real signal, not a guess: exactly one goalkeeper starts per match, so if another keeper
+    at the same club has clearly played most of the minutes this season, this one isn't
+    first-choice — regardless of what `chance_of_playing_next_round` says (which only flags
+    injury doubt, not squad status). Confirmed live: an Ipswich keeper with 0 starts/0
+    minutes got the same 90% default start_prob as their actual starter (90 minutes played),
+    solely because neither had an injury flag.
+    """
+    if POSITION_BY_ELEMENT_TYPE[element["element_type"]] != "GK":
+        return False
+    top_minutes = max_gk_minutes.get(element["team"], 0)
+    if top_minutes == 0:
+        return False  # nobody at this club has played yet — no relative signal either way
+    return (element.get("minutes", 0) or 0) < BACKUP_GK_MINUTES_RATIO * top_minutes
 
 
 def _gameweek_fixture_by_team(client: FPLClient, event: int) -> dict[int, dict]:
@@ -230,6 +271,7 @@ def _candidates_for_gameweek(
     call it once per gameweek in a window and sum, without duplicating the model."""
     team_name_by_id = {t["id"]: t["name"] for t in bootstrap["teams"]}
     fixture_by_team = _gameweek_fixture_by_team(client, event)
+    max_gk_minutes = _max_gk_minutes_by_team(bootstrap)
 
     candidates: dict[str, CandidatePlayer] = {}
     for element in bootstrap["elements"]:
@@ -247,6 +289,8 @@ def _candidates_for_gameweek(
 
         pos = POSITION_BY_ELEMENT_TYPE[element["element_type"]]
         goal_rate, assist_rate, start_prob = _player_rates(element)
+        if _is_backup_goalkeeper(element, max_gk_minutes):
+            start_prob = min(start_prob, BACKUP_GK_START_PROB_CAP)
         team_avg_goals = max(goal_avgs.get(norm_name_by_id[team_id], 1.0), 0.1)
         # A player can't be responsible for more than the whole team's average output — clamp
         # defensively in case any future data source has a rate/average mismatch like the
@@ -496,11 +540,19 @@ def full_recommendation(
         ),
         ChipLift(
             chip="free_hit", horizon_gameweeks=1, lift=free_hit_lift,
-            note=f"One-week-only optimal XI vs your current XI: {free_hit_lift:+} xP, reverts next gameweek",
+            note=(
+                f"One-week-only optimal XI vs your current XI: {free_hit_lift:+} xP, reverts next "
+                f"gameweek. Squad costs {optimal_1gw.total_price}m (100m budget, doesn't have to "
+                f"match what you actually paid for your real squad since it's rebuilt from scratch)."
+            ),
         ),
         ChipLift(
             chip="wildcard", horizon_gameweeks=wildcard_horizon, lift=wildcard_lift,
-            note=f"Optimal XI over the next {wildcard_horizon} gameweeks vs your current XI, permanent change: {wildcard_lift:+} cumulative xP",
+            note=(
+                f"Optimal XI over the next {wildcard_horizon} gameweeks vs your current XI, permanent "
+                f"change: {wildcard_lift:+} cumulative xP. Squad costs {optimal_wildcard.total_price}m "
+                f"(100m budget)."
+            ),
         ),
     ]
 
@@ -514,6 +566,8 @@ def full_recommendation(
         best_transfer=best_transfer,
         transfer_horizon_gameweeks=transfer_horizon,
         chip_lifts=chip_lifts,
+        free_hit_squad=optimal_1gw,
+        wildcard_squad=optimal_wildcard,
     )
 
 

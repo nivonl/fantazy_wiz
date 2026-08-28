@@ -374,6 +374,7 @@ ul.flags li {
 .chip-card .chip-horizon { color: var(--text-dim); font-size: 0.72rem; margin-left: 6px; }
 .chip-card .chip-lift { font-size: 1.4rem; margin: 4px 0; font-family: var(--display); }
 .chip-card .chip-note { color: var(--text-dim); font-size: 0.76rem; line-height: 1.4; }
+.chip-card .btn { margin-top: 10px; padding: 6px 12px; font-size: 0.78rem; }
 
 /* ---------- Responsive ---------- */
 
