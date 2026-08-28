@@ -1,10 +1,11 @@
 import { useState } from "react";
 import "./App.css";
+import { ThemeToggle, useMySquadIdentity, useTheme } from "./components/ui.jsx";
+import { BottomNav } from "./components/BottomNav.jsx";
+import { OverviewPanel } from "./panels/OverviewPanel.jsx";
 import { CurrentTeamPanel } from "./panels/CurrentTeamPanel.jsx";
-import { TeamBuilderPanel } from "./panels/TeamBuilderPanel.jsx";
-import { BuildSquadPanel } from "./panels/BuildSquadPanel.jsx";
-import { PredictionsPanel } from "./panels/PredictionsPanel.jsx";
-import { LaLigaPanel } from "./panels/LaLigaPanel.jsx";
+import { InsightsPanel } from "./panels/InsightsPanel.jsx";
+import { MorePanel } from "./panels/MorePanel.jsx";
 
 function BrandMark() {
   return (
@@ -18,44 +19,50 @@ function BrandMark() {
 }
 
 export default function App() {
-  const [tab, setTab] = useState("fpl");
+  const [tab, setTab] = useState("overview");
+  const squad = useMySquadIdentity();
+  useTheme(); // applies the persisted data-theme attribute on mount and whenever it changes
 
   return (
     <div className="app-shell">
       <header className="top">
-        <div className="brand">
-          <BrandMark />
-          <h1>
-            <span className="brand-pitch">Pitch</span>
-            <span className="brand-metric">Metric</span>
-          </h1>
+        <div className="brand-bar">
+          <div className="brand">
+            <BrandMark />
+            <h1>
+              <span className="brand-pitch">Pitch</span>
+              <span className="brand-metric">Metric</span>
+            </h1>
+          </div>
+          <ThemeToggle />
         </div>
         <p>FPL &amp; La Liga analytics — score predictions and squad recommendations backed by real data.</p>
-        <nav className="tabs">
-          <button className={tab === "fpl" ? "active" : ""} onClick={() => setTab("fpl")}>
-            Premier League (FPL)
-          </button>
-          <button className={tab === "laliga" ? "active" : ""} onClick={() => setTab("laliga")}>
-            La Liga
-          </button>
-        </nav>
       </header>
 
       <main>
-        {tab === "fpl" && (
-          <div className="panel-fade" key="fpl">
-            <CurrentTeamPanel />
-            <TeamBuilderPanel />
-            <BuildSquadPanel />
-            <PredictionsPanel />
+        {tab === "overview" && (
+          <div className="panel-fade" key="overview">
+            <OverviewPanel squad={squad} onGoToSquad={() => setTab("squad")} />
           </div>
         )}
-        {tab === "laliga" && (
-          <div className="panel-fade" key="laliga">
-            <LaLigaPanel />
+        {tab === "squad" && (
+          <div className="panel-fade" key="squad">
+            <CurrentTeamPanel squad={squad} />
+          </div>
+        )}
+        {tab === "insights" && (
+          <div className="panel-fade" key="insights">
+            <InsightsPanel />
+          </div>
+        )}
+        {tab === "more" && (
+          <div className="panel-fade" key="more">
+            <MorePanel />
           </div>
         )}
       </main>
+
+      <BottomNav active={tab} onChange={setTab} />
     </div>
   );
 }

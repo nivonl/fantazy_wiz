@@ -26,7 +26,7 @@ from fantasy_app.providers.fpl import POSITION_BY_ELEMENT_TYPE, FPLClient
 from fantasy_app.providers.football_data import FootballDataClient
 from fantasy_app.recommend.fpl import optimize_squad
 from fantasy_app.recommend.laliga import recommend_laliga
-from fantasy_app.services import fpl_service, laliga_service
+from fantasy_app.services import fpl_service, laliga_service, overview
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
@@ -194,6 +194,27 @@ def _full_recommendation_dict(rec, unmatched_names: list[str] | None = None) -> 
     }
 
 
+def _resolve_current_squad(client: FPLClient, pool: list, entry_id: int | None, players: str, bank: float):
+    """Shared by /recommend/fpl/full and /fpl/overview: entry_id (post-deadline) or a
+    comma-separated `players` string (pre-deadline) -> (current_squad, actual_starter_ids,
+    bank, entry_dict_or_None, unmatched_names)."""
+    if entry_id is not None:
+        current_squad, actual_starter_ids = fpl_service.entry_squad_and_starters(client, entry_id, pool)
+        entry = client.entry(entry_id)
+        bank = entry.get("last_deadline_bank", 0) / 10.0
+        return current_squad, actual_starter_ids, bank, entry, []
+
+    names = [n.strip() for n in players.split(",") if n.strip()]
+    current_squad, unmatched = fpl_service.match_player_names(names, pool)
+    if len(current_squad) < 11:
+        raise RuntimeError(
+            f"Only matched {len(current_squad)} of {len(names)} names to real FPL players — "
+            f"need at least 11 to pick a starting XI. "
+            f"{'Unmatched: ' + ', '.join(unmatched) if unmatched else ''}"
+        )
+    return current_squad, None, bank, None, unmatched
+
+
 @app.get("/recommend/fpl/full")
 def recommend_fpl_full(
     entry_id: int | None = None,
@@ -212,23 +233,11 @@ def recommend_fpl_full(
     Pass `entry_id` if this gameweek's deadline has passed (FPL 404s picks before that), or
     `players` (comma-separated names) to enter your current 15 manually otherwise.
     """
-    unmatched: list[str] = []
     with FPLClient() as client:
         pool = fpl_service.build_candidate_pool(client, event=event)
-        actual_starter_ids = None
-        if entry_id is not None:
-            current_squad, actual_starter_ids = fpl_service.entry_squad_and_starters(client, entry_id, pool)
-            entry = client.entry(entry_id)
-            bank = entry.get("last_deadline_bank", 0) / 10.0
-        else:
-            names = [n.strip() for n in players.split(",") if n.strip()]
-            current_squad, unmatched = fpl_service.match_player_names(names, pool)
-            if len(current_squad) < 11:
-                raise RuntimeError(
-                    f"Only matched {len(current_squad)} of {len(names)} names to real FPL "
-                    f"players — need at least 11 to pick a starting XI. "
-                    f"{'Unmatched: ' + ', '.join(unmatched) if unmatched else ''}"
-                )
+        current_squad, actual_starter_ids, bank, _entry, unmatched = _resolve_current_squad(
+            client, pool, entry_id, players, bank
+        )
         rec = fpl_service.full_recommendation(
             client,
             current_squad,
@@ -241,6 +250,47 @@ def recommend_fpl_full(
             actual_starter_ids=actual_starter_ids,
         )
     return _full_recommendation_dict(rec, unmatched_names=unmatched)
+
+
+@app.get("/fpl/overview")
+def fpl_overview(
+    entry_id: int | None = None,
+    players: str = "",
+    bank: float = 0.0,
+    event: int | None = None,
+) -> dict:
+    """
+    Quick-glance dashboard: season totals (entry_id mode only), the single best transfer at a
+    one-gameweek horizon, top candidates with a recent-points sparkline, and a fixture-
+    difficulty ticker for your captain's club. Deeper multi-horizon analysis (chips, the
+    multi-gameweek best transfer) lives in /recommend/fpl/full instead.
+    """
+    with FPLClient() as client:
+        pool = fpl_service.build_candidate_pool(client, event=event)
+        current_squad, _starters, bank, entry, unmatched = _resolve_current_squad(
+            client, pool, entry_id, players, bank
+        ) if (entry_id is not None or players.strip()) else ([], None, bank, None, [])
+        result = overview.build_overview(client, current_squad, pool, bank=bank, entry_totals=entry, event=event)
+
+    return {
+        "team_totals": asdict(result.team_totals) if result.team_totals else None,
+        "recommended_move": (
+            {
+                "out": asdict(result.recommended_move.player_out),
+                "in": asdict(result.recommended_move.player_in),
+                "xp_gain": result.recommended_move.xp_gain,
+                "is_hit": result.recommended_move.is_hit,
+            }
+            if result.recommended_move
+            else None
+        ),
+        "top_players": [
+            {"player": asdict(tp.player), "recent_points": tp.recent_points} for tp in result.top_players
+        ],
+        "fixture_run": [asdict(f) for f in result.fixture_run],
+        "fixture_run_team": result.fixture_run_team,
+        "unmatched_names": unmatched,
+    }
 
 
 @app.post("/recommend/laliga")

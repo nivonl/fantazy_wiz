@@ -11,7 +11,6 @@ import {
   Spinner,
   Tag,
   useAsyncAction,
-  usePersistentState,
 } from "../components/ui.jsx";
 import { SquadTable } from "../components/SquadTable.jsx";
 
@@ -25,33 +24,14 @@ const CHIP_LABELS = {
 // Only these two chips rebuild the whole squad, so only these have a squad worth showing.
 const SQUAD_KEY_BY_CHIP = { free_hit: "free_hit_squad", wildcard: "wildcard_squad" };
 
-export function CurrentTeamPanel() {
-  // Remembered on this device (localStorage) so you don't retype your team every visit —
-  // no account or backend involved, see usePersistentState.
-  const [mode, setMode] = usePersistentState("ct-mode", "entry");
-  const [entryId, setEntryId] = usePersistentState("ct-entry-id", "");
-  const [entryFreeTransfers, setEntryFreeTransfers] = usePersistentState("ct-entry-ft", 1);
-  const [players, setPlayers] = usePersistentState("ct-players", "");
-  const [bank, setBank] = usePersistentState("ct-bank", 0);
-  const [manualFreeTransfers, setManualFreeTransfers] = usePersistentState("ct-manual-ft", 1);
+// `squad` comes from useMySquadIdentity() in App.jsx — shared with the Overview tab so your
+// entry ID / manual squad is entered once, not duplicated per screen.
+export function CurrentTeamPanel({ squad }) {
   const [state, run] = useAsyncAction();
   const [expandedChip, setExpandedChip] = useState(null);
 
   const submit = () => {
-    run(async () => {
-      const params = new URLSearchParams();
-      if (mode === "entry") {
-        if (!entryId) throw new Error("Enter your FPL entry ID first.");
-        params.set("entry_id", entryId);
-        params.set("free_transfers", entryFreeTransfers);
-      } else {
-        if (!players.trim()) throw new Error("Enter your current 15 players first.");
-        params.set("players", players.trim());
-        params.set("bank", bank);
-        params.set("free_transfers", manualFreeTransfers);
-      }
-      return api.get(`/recommend/fpl/full?${params.toString()}`);
-    });
+    run(async () => api.get(`/recommend/fpl/full?${squad.toParams().toString()}`));
   };
 
   const rec = state.data;
@@ -62,22 +42,22 @@ export function CurrentTeamPanel() {
       hint="Five kinds of advice, each over the horizon it actually needs: live status flags on your squad right now, this gameweek's captain/vice/bench, the single best transfer (evaluated a few gameweeks ahead, since it sticks around), and a quantified lift for each chip — Free Hit judged over just this gameweek, Wildcard over several. Hover any player name for their scoring history against this week's opponent, over the last 5 PL seasons."
     >
       <div className="mode-toggle">
-        <button className={mode === "entry" ? "active" : ""} onClick={() => setMode("entry")}>
+        <button className={squad.mode === "entry" ? "active" : ""} onClick={() => squad.setMode("entry")}>
           From FPL entry ID
         </button>
-        <button className={mode === "manual" ? "active" : ""} onClick={() => setMode("manual")}>
+        <button className={squad.mode === "manual" ? "active" : ""} onClick={() => squad.setMode("manual")}>
           Enter manually
         </button>
       </div>
 
-      {mode === "entry" ? (
+      {squad.mode === "entry" ? (
         <>
           <div className="controls">
             <Field label="FPL entry ID">
-              <input type="number" placeholder="e.g. 1234567" value={entryId} onChange={(e) => setEntryId(e.target.value)} />
+              <input type="number" placeholder="e.g. 1234567" value={squad.entryId} onChange={(e) => squad.setEntryId(e.target.value)} />
             </Field>
             <Field label="Free transfers">
-              <input type="number" min="0" value={entryFreeTransfers} onChange={(e) => setEntryFreeTransfers(e.target.value)} />
+              <input type="number" min="0" value={squad.entryFreeTransfers} onChange={(e) => squad.setEntryFreeTransfers(e.target.value)} />
             </Field>
           </div>
           <p className="hint" style={{ marginTop: -8 }}>
@@ -90,16 +70,16 @@ export function CurrentTeamPanel() {
           <Field label="Your current 15, comma-separated">
             <textarea
               placeholder='e.g. Raya, Gabriel, Saliba, White, Saka, Haaland, ... (partial names like "Salah" work too)'
-              value={players}
-              onChange={(e) => setPlayers(e.target.value)}
+              value={squad.players}
+              onChange={(e) => squad.setPlayers(e.target.value)}
             />
           </Field>
           <div className="controls">
             <Field label="Bank (£m)">
-              <input type="number" step="0.1" value={bank} onChange={(e) => setBank(e.target.value)} />
+              <input type="number" step="0.1" value={squad.bank} onChange={(e) => squad.setBank(e.target.value)} />
             </Field>
             <Field label="Free transfers">
-              <input type="number" min="0" value={manualFreeTransfers} onChange={(e) => setManualFreeTransfers(e.target.value)} />
+              <input type="number" min="0" value={squad.manualFreeTransfers} onChange={(e) => squad.setManualFreeTransfers(e.target.value)} />
             </Field>
           </div>
         </>
