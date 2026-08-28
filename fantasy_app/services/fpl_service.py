@@ -193,6 +193,14 @@ def predict_gameweek(client: FPLClient, event: int | None = None) -> list[NamedF
 BACKUP_GK_MINUTES_RATIO = 0.2  # below this fraction of their club's top GK's minutes = clear backup
 BACKUP_GK_START_PROB_CAP = 0.1
 
+# A player with 0 minutes despite their OWN TEAM having already played is real evidence of
+# something (rotation, a tactical call, an off-pitch issue never flagged as an injury — see
+# Watkins/Gyökeres, confirmed live: both starts=0, minutes=0, chance_of_playing=None, i.e.
+# indistinguishable from a fit, undisputed starter by FPL's own fields). It's weaker evidence
+# than the goalkeeper case (we don't know WHO the alternative is, just that this player didn't
+# feature), so the cap is more conservative than the backup-GK one.
+UNPROVEN_PLAYER_START_PROB_CAP = 0.3
+
 
 def _player_rates(element: dict) -> tuple[float, float, float]:
     """
@@ -248,6 +256,29 @@ def _is_backup_goalkeeper(element: dict, max_gk_minutes: dict[int, int]) -> bool
     return (element.get("minutes", 0) or 0) < BACKUP_GK_MINUTES_RATIO * top_minutes
 
 
+def _team_games_played(client: FPLClient) -> dict[int, int]:
+    """How many fixtures each team has actually finished this season — the signal that
+    separates true preseason (nobody's played, 0 minutes means nothing) from a specific
+    player having 0 minutes despite their own team already taking the pitch (real evidence,
+    even with no injury flag to explain it)."""
+    games: dict[int, int] = {}
+    for f in client.fixtures():
+        if not f.get("finished"):
+            continue
+        games[f["team_h"]] = games.get(f["team_h"], 0) + 1
+        games[f["team_a"]] = games.get(f["team_a"], 0) + 1
+    return games
+
+
+def _is_unproven_this_season(element: dict, team_games_played: dict[int, int]) -> bool:
+    """Zero starts AND their team has already played at least once — any position, not just
+    goalkeepers. Weaker evidence than _is_backup_goalkeeper (no comparison to who else might
+    start instead, just that this player hasn't featured at all), so it gets a softer cap."""
+    if (element.get("starts", 0) or 0) > 0:
+        return False
+    return team_games_played.get(element["team"], 0) > 0
+
+
 def _gameweek_fixture_by_team(client: FPLClient, event: int) -> dict[int, dict]:
     gw_fixtures = client.fixtures(event=event)
     fixture_by_team: dict[int, dict] = {}
@@ -265,10 +296,16 @@ def _candidates_for_gameweek(
     norm_name_by_id: dict[int, str],
     history_index: dict[str, list],
     event: int,
+    team_games_played: dict[int, int],
 ) -> dict[str, CandidatePlayer]:
     """The single-gameweek xP model for every player with a fixture that week, keyed by
     element id. Factored out of build_candidate_pool so build_candidate_pool_multi_gw can
-    call it once per gameweek in a window and sum, without duplicating the model."""
+    call it once per gameweek in a window and sum, without duplicating the model.
+
+    `team_games_played` is computed once by the caller (it doesn't vary across which
+    gameweek we're predicting — only whether a match has already been played) and passed in
+    rather than recomputed here, since build_candidate_pool_multi_gw calls this once per
+    gameweek in its window."""
     team_name_by_id = {t["id"]: t["name"] for t in bootstrap["teams"]}
     fixture_by_team = _gameweek_fixture_by_team(client, event)
     max_gk_minutes = _max_gk_minutes_by_team(bootstrap)
@@ -289,6 +326,8 @@ def _candidates_for_gameweek(
 
         pos = POSITION_BY_ELEMENT_TYPE[element["element_type"]]
         goal_rate, assist_rate, start_prob = _player_rates(element)
+        if _is_unproven_this_season(element, team_games_played):
+            start_prob = min(start_prob, UNPROVEN_PLAYER_START_PROB_CAP)
         if _is_backup_goalkeeper(element, max_gk_minutes):
             start_prob = min(start_prob, BACKUP_GK_START_PROB_CAP)
         team_avg_goals = max(goal_avgs.get(norm_name_by_id[team_id], 1.0), 0.1)
@@ -335,8 +374,11 @@ def build_candidate_pool(
     ratings, goal_avgs, norm_name_by_id = fit_pl_ratings(client, bootstrap, fd_client=fd_client)
     event = event or client.current_event(bootstrap)
     history_index = fpl_history.index_by_player()
+    team_games_played = _team_games_played(client)
     return list(
-        _candidates_for_gameweek(client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event).values()
+        _candidates_for_gameweek(
+            client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event, team_games_played
+        ).values()
     )
 
 
@@ -360,13 +402,14 @@ def build_candidate_pool_multi_gw(
     ratings, goal_avgs, norm_name_by_id = fit_pl_ratings(client, bootstrap, fd_client=fd_client)
     start_event = start_event or client.current_event(bootstrap)
     history_index = fpl_history.index_by_player()
+    team_games_played = _team_games_played(client)
 
     template_by_id: dict[str, CandidatePlayer] = {}
     total_xp: dict[str, float] = {}
     for offset in range(num_gameweeks):
         event = start_event + offset
         gw_candidates = _candidates_for_gameweek(
-            client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event
+            client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event, team_games_played
         )
         for pid, c in gw_candidates.items():
             total_xp[pid] = total_xp.get(pid, 0.0) + c.xp

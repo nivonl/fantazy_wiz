@@ -4,9 +4,11 @@ import pytest
 from fantasy_app.recommend.fpl import CandidatePlayer
 from fantasy_app.services.fpl_service import (
     _is_backup_goalkeeper,
+    _is_unproven_this_season,
     _max_gk_minutes_by_team,
     _player_rates,
     _risk_flags,
+    _team_games_played,
     entry_squad_and_starters,
     match_player_names,
 )
@@ -115,6 +117,44 @@ def test_backup_goalkeeper_ignores_outfield_players():
     bootstrap = {"elements": [_gk("Striker", team=1, minutes=90, element_type=4)]}
     max_minutes = _max_gk_minutes_by_team(bootstrap)
     assert _is_backup_goalkeeper(bootstrap["elements"][0], max_minutes) is False
+
+
+class _FakeFixturesClient:
+    def __init__(self, fixtures):
+        self._fixtures = fixtures
+
+    def fixtures(self, event=None):
+        return self._fixtures
+
+
+def test_team_games_played_counts_only_finished_fixtures():
+    fixtures = [
+        {"team_h": 1, "team_a": 2, "finished": True},
+        {"team_h": 1, "team_a": 3, "finished": True},
+        {"team_h": 2, "team_a": 3, "finished": False},  # not played yet — shouldn't count
+    ]
+    games = _team_games_played(_FakeFixturesClient(fixtures))
+    assert games == {1: 2, 2: 1, 3: 1}
+
+
+def test_is_unproven_this_season_regression_watkins_gyokeres():
+    # Real case, confirmed live: both had starts=0, minutes=0, chance_of_playing_next_round=None
+    # — indistinguishable from a fit undisputed starter by FPL's own fields — but their teams
+    # had already played a fixture. That's the real signal FPL's fields miss.
+    element = {"team": 7, "starts": 0}
+    assert _is_unproven_this_season(element, {7: 1}) is True
+
+
+def test_is_unproven_this_season_false_in_true_preseason():
+    # Nobody's team has played yet — zero starts is uninformative, not evidence of anything.
+    element = {"team": 7, "starts": 0}
+    assert _is_unproven_this_season(element, {7: 0}) is False
+    assert _is_unproven_this_season(element, {}) is False
+
+
+def test_is_unproven_this_season_false_once_a_player_has_started():
+    element = {"team": 7, "starts": 2}
+    assert _is_unproven_this_season(element, {7: 3}) is False
 
 
 def test_match_player_names_reports_unmatched():
