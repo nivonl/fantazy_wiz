@@ -8,9 +8,10 @@ import {
   PlayerTip,
   Reveal,
   SignedValue,
+  SnapshotHint,
   Spinner,
   Tag,
-  useAsyncAction,
+  useCachedAsyncAction,
 } from "../components/ui.jsx";
 import { SquadTable } from "../components/SquadTable.jsx";
 
@@ -28,11 +29,20 @@ const SQUAD_KEY_BY_CHIP = { free_hit: "free_hit_squad", wildcard: "wildcard_squa
 // entry ID / manual squad is entered once, not duplicated per screen.
 const POSITION_ORDER = ["GK", "DEF", "MID", "FWD"];
 
+function safeCacheKey(squad) {
+  try {
+    return squad.toParams().toString();
+  } catch {
+    return "unconfigured";
+  }
+}
+
 export function CurrentTeamPanel({ squad }) {
-  const [state, run] = useAsyncAction();
+  const squadCacheKey = safeCacheKey(squad);
+  const [state, run] = useCachedAsyncAction("squad-full", squadCacheKey);
   const [expandedChip, setExpandedChip] = useState(null);
   const [budget, setBudget] = useState(8.0);
-  const [targetsState, runTargets] = useAsyncAction();
+  const [targetsState, runTargets] = useCachedAsyncAction("squad-targets", `${squadCacheKey}|budget=${budget}`);
 
   const submit = () => {
     run(async () => api.get(`/recommend/fpl/full?${squad.toParams().toString()}`));
@@ -102,6 +112,7 @@ export function CurrentTeamPanel({ squad }) {
         <Button onClick={submit} disabled={state.loading}>
           {state.loading ? "Working…" : "Get top recommendations"}
         </Button>
+        <SnapshotHint savedAt={state.savedAt} />
       </div>
 
       <div className="output">
@@ -166,6 +177,7 @@ export function CurrentTeamPanel({ squad }) {
               <Button variant="ghost" onClick={findTargets} disabled={targetsState.loading}>
                 {targetsState.loading ? "Searching…" : "Find targets"}
               </Button>
+              <SnapshotHint savedAt={targetsState.savedAt} />
             </div>
             {targetsState.loading && <Spinner label="Scoring the market…" />}
             <ErrorBanner error={targetsState.error} />

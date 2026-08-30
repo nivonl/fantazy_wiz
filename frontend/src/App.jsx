@@ -39,27 +39,25 @@ export default function App() {
         <p>FPL &amp; La Liga analytics — score predictions and squad recommendations backed by real data.</p>
       </header>
 
+      {/*
+        Every panel stays mounted all the time (visibility is toggled with a CSS class, not
+        conditional rendering) so switching tabs never unmounts a panel's React state — without
+        this, coming back to a tab replayed its whole fetch (rating fit + ILP solve) from
+        scratch every time, even though nothing about your squad or the gameweek had changed.
+      */}
       <main>
-        {tab === "overview" && (
-          <div className="panel-fade" key="overview">
-            <OverviewPanel squad={squad} onGoToSquad={() => setTab("squad")} />
-          </div>
-        )}
-        {tab === "squad" && (
-          <div className="panel-fade" key="squad">
-            <CurrentTeamPanel squad={squad} />
-          </div>
-        )}
-        {tab === "insights" && (
-          <div className="panel-fade" key="insights">
-            <InsightsPanel />
-          </div>
-        )}
-        {tab === "more" && (
-          <div className="panel-fade" key="more">
-            <MorePanel />
-          </div>
-        )}
+        <div className={`panel-fade${tab === "overview" ? "" : " panel-hidden"}`}>
+          <OverviewPanel squad={squad} onGoToSquad={() => setTab("squad")} />
+        </div>
+        <div className={`panel-fade${tab === "squad" ? "" : " panel-hidden"}`}>
+          <CurrentTeamPanel squad={squad} />
+        </div>
+        <div className={`panel-fade${tab === "insights" ? "" : " panel-hidden"}`}>
+          <InsightsPanel />
+        </div>
+        <div className={`panel-fade${tab === "more" ? "" : " panel-hidden"}`}>
+          <MorePanel />
+        </div>
       </main>
 
       <BottomNav active={tab} onChange={setTab} />

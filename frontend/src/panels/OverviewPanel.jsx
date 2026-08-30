@@ -1,13 +1,24 @@
 import { useEffect } from "react";
 import { api } from "../api.js";
-import { Button, Card, ErrorBanner, PlayerTip, Reveal, SignedValue, Spinner, useAsyncAction } from "../components/ui.jsx";
+import {
+  Button,
+  Card,
+  ErrorBanner,
+  PlayerTip,
+  Reveal,
+  SignedValue,
+  SnapshotHint,
+  Spinner,
+  useCachedAsyncAction,
+} from "../components/ui.jsx";
 import { Sparkline } from "../components/Sparkline.jsx";
 import { FixtureDifficultyTicker } from "../components/FixtureDifficultyTicker.jsx";
 
 // `squad` is the shared identity from useMySquadIdentity() (App.jsx) — entered once on the
 // Squad tab, reused here so Overview reflects the same team without asking again.
 export function OverviewPanel({ squad, onGoToSquad }) {
-  const [state, run] = useAsyncAction();
+  const cacheKey = squad.isConfigured ? squad.toParams().toString() : "unconfigured";
+  const [state, run, hasSnapshot] = useCachedAsyncAction("overview", cacheKey);
 
   const load = () => {
     run(async () => {
@@ -16,10 +27,11 @@ export function OverviewPanel({ squad, onGoToSquad }) {
     });
   };
 
-  // Load once on mount, and again whenever the squad identity actually changes (e.g. you just
-  // set your entry ID on the Squad tab and come back here).
+  // Only fetch if there's no snapshot on file for this exact squad already — otherwise this
+  // effect would re-run the whole ratings-fit-and-score pipeline every time the panel becomes
+  // visible again, even though nothing about the squad actually changed since last time.
   useEffect(() => {
-    load();
+    if (!hasSnapshot()) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [squad.mode, squad.entryId, squad.players]);
 
@@ -38,6 +50,7 @@ export function OverviewPanel({ squad, onGoToSquad }) {
           <Button onClick={load} disabled={state.loading} variant="ghost">
             {state.loading ? "Refreshing…" : "Refresh"}
           </Button>
+          <SnapshotHint savedAt={state.savedAt} />
         </div>
 
         {state.loading && <Spinner label="Fitting ratings, scoring candidates…" />}

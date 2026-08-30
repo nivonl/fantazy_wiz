@@ -128,6 +128,13 @@ header.top > p {
   animation: fadeSlideUp 0.25s ease both;
 }
 
+/* Inactive tabs stay mounted (state-preserving) but out of the layout and off the animation
+   timeline — display:none resets a CSS animation, so it replays fadeSlideUp each time a panel
+   becomes visible again, same as when it used to actually mount. */
+.panel-hidden {
+  display: none;
+}
+
 /* ---------- Card ---------- */
 
 .card {
@@ -155,6 +162,12 @@ header.top > p {
   font-size: 0.83rem;
   line-height: 1.5;
   margin: 0 0 16px;
+}
+
+.snapshot-hint {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  align-self: center;
 }
 
 /* ---------- Form controls ---------- */
@@ -375,13 +388,12 @@ ul.flags li {
 .tip-wrap {
   position: relative;
   border-bottom: 1px dotted var(--text-dim);
-  cursor: help;
+  cursor: pointer;
 }
 
 .tip-bubble {
-  position: absolute;
-  bottom: 130%;
-  left: 0;
+  /* position/top/bottom/left are set inline (components/ui.jsx) from the trigger's real
+     on-screen coordinates — this is portaled to <body>, not a normal absolute child. */
   z-index: 30;
   background: var(--input-bg);
   border: 1px solid var(--panel-border);
@@ -407,6 +419,66 @@ ul.flags li {
 .tip-xp { display: block; color: var(--text-dim); }
 
 .tip-divider { border: none; border-top: 1px solid var(--panel-border); margin: 7px 0; }
+
+/* ---------- Player breakdown modal ---------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal-card {
+  background: linear-gradient(160deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+  animation: fadeSlideUp 0.18s ease both;
+}
+
+.modal-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.modal-subhead {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin-left: 6px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  color: var(--text);
+}
 
 /* ---------- Chip lift bars ---------- */
 

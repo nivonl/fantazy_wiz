@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { api } from "../api.js";
 
 // Remembers a value in this browser (localStorage) across visits — e.g. your FPL entry ID or
 // current squad, so you don't retype it every time you open the site on your phone. No
@@ -159,56 +161,198 @@ export function Tag({ children, variant = "default" }) {
   return <span className={`tag tag-${variant}`}>{children}</span>;
 }
 
-// Player name with a hover/focus tooltip: price/position/predicted xP for this fixture
-// always, plus 5-season history vs this week's opponent when the API included it.
+const TIP_BUBBLE_WIDTH = 235;
+const TIP_MARGIN = 8;
+
+// Player name with a hover/focus tooltip (price/position/predicted xP, plus 5-season history
+// vs this week's opponent when the API included it) AND a click-to-open modal with their
+// actual gameweek-by-gameweek points breakdown — fetched fresh every time it's opened (see
+// PlayerBreakdownModal), never cached, so it always reflects the latest confirmed result.
+//
+// The tooltip bubble is rendered through a portal, positioned from the trigger's real
+// on-screen coordinates, rather than as a normal `position: absolute` child. A plain absolute
+// child gets silently clipped by any scrollable ancestor (e.g. a wide table's `.table-wrap`,
+// which needs `overflow-x: auto` and — per the CSS spec — that forces `overflow-y` to clip too)
+// — for a player in one of a table's top rows, that hid the bubble entirely when it tried to
+// open upward. Portaling to <body> and positioning with `position: fixed` sidesteps every
+// ancestor's overflow/stacking context, and flips to open downward when there isn't enough
+// room above.
 export function PlayerTip({ player }) {
   const [open, setOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [bubblePos, setBubblePos] = useState(null);
   const ref = useRef(null);
   const stats = player.opponent_stats;
 
+  const showTooltip = () => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return;
+    const openUpward = rect.top > 180; // enough room above for a roughly ~150px-tall bubble
+    const left = Math.min(Math.max(rect.left, TIP_MARGIN), window.innerWidth - TIP_BUBBLE_WIDTH - TIP_MARGIN);
+    setBubblePos(
+      openUpward
+        ? { left, bottom: window.innerHeight - rect.top + TIP_MARGIN }
+        : { left, top: rect.bottom + TIP_MARGIN }
+    );
+    setOpen(true);
+  };
+  const hideTooltip = () => setOpen(false);
+
   return (
-    <span
-      className="tip-wrap"
-      tabIndex={0}
-      ref={ref}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-      onFocus={() => setOpen(true)}
-      onBlur={() => setOpen(false)}
-    >
-      {player.name}
-      {open && (
-        <span className="tip-bubble">
-          <span className="tip-header">
-            {player.pos} · {player.team} · {player.price.toFixed(1)}m
+    <>
+      <span
+        className="tip-wrap"
+        tabIndex={0}
+        role="button"
+        aria-haspopup="dialog"
+        ref={ref}
+        onMouseEnter={showTooltip}
+        onMouseLeave={hideTooltip}
+        onFocus={showTooltip}
+        onBlur={hideTooltip}
+        onClick={() => setModalOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setModalOpen(true);
+          }
+        }}
+      >
+        {player.name}
+      </span>
+      {open &&
+        bubblePos &&
+        createPortal(
+          <span className="tip-bubble" style={{ position: "fixed", ...bubblePos }}>
+            <span className="tip-header">
+              {player.pos} · {player.team} · {player.price.toFixed(1)}m
+            </span>
+            <span className="tip-xp">
+              Predicted {player.xp.toFixed(2)} pts{stats ? ` vs ${stats.opponent}` : ""}
+            </span>
+            {stats && (
+              <>
+                <hr className="tip-divider" />
+                {stats.games_overall === 0 ? (
+                  <>No PL history vs {stats.opponent} in the last 5 seasons.</>
+                ) : (
+                  <>
+                    Overall: {stats.games_overall} apps, avg {stats.avg_points_overall} pts, {stats.goals_overall}G/
+                    {stats.assists_overall}A
+                    <br />
+                    {stats.games_current_team ? (
+                      <>
+                        At current club: {stats.games_current_team} apps, avg {stats.avg_points_current_team} pts
+                      </>
+                    ) : (
+                      <>No appearances vs {stats.opponent} yet at their current club.</>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+            <hr className="tip-divider" />
+            Click for their points breakdown
+          </span>,
+          document.body
+        )}
+      {modalOpen && <PlayerBreakdownModal player={player} onClose={() => setModalOpen(false)} />}
+    </>
+  );
+}
+
+const CARD_COLUMNS = [
+  { key: "goals_scored", label: "G" },
+  { key: "assists", label: "A" },
+  { key: "clean_sheets", label: "CS" },
+  { key: "bonus", label: "Bns" },
+];
+
+// Fetched fresh every time it opens (plain useAsyncAction, not the localStorage-cached hook
+// used elsewhere) — a stale points breakdown would defeat the entire point of showing it.
+function PlayerBreakdownModal({ player, onClose }) {
+  const [state, run] = useAsyncAction();
+
+  useEffect(() => {
+    run(async () => api.get(`/fpl/player/${player.id}/breakdown`));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [player.id]);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
+  const rows = state.data?.recent ?? [];
+  const hasDetailedStats = rows.some((r) => r.clean_sheets !== null || r.bonus !== null);
+
+  return createPortal(
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-card" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <span>
+            {player.name} <span className="modal-subhead">points breakdown</span>
           </span>
-          <span className="tip-xp">
-            Predicted {player.xp.toFixed(2)} pts{stats ? ` vs ${stats.opponent}` : ""}
-          </span>
-          {stats && (
-            <>
-              <hr className="tip-divider" />
-              {stats.games_overall === 0 ? (
-                <>No PL history vs {stats.opponent} in the last 5 seasons.</>
-              ) : (
-                <>
-                  Overall: {stats.games_overall} apps, avg {stats.avg_points_overall} pts, {stats.goals_overall}G/
-                  {stats.assists_overall}A
-                  <br />
-                  {stats.games_current_team ? (
-                    <>
-                      At current club: {stats.games_current_team} apps, avg {stats.avg_points_current_team} pts
-                    </>
-                  ) : (
-                    <>No appearances vs {stats.opponent} yet at their current club.</>
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </span>
-      )}
-    </span>
+          <button className="modal-close" onClick={onClose} aria-label="Close">
+            ×
+          </button>
+        </div>
+
+        {state.loading && <Spinner label="Fetching the latest gameweek data…" />}
+        <ErrorBanner error={state.error} />
+
+        {state.data && (
+          <>
+            {state.data.note && (
+              <p className="hint" style={{ marginTop: 0 }}>
+                {state.data.note}
+              </p>
+            )}
+            {rows.length === 0 ? (
+              <p className="empty">No gameweek history available yet.</p>
+            ) : (
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Season</th>
+                      <th>GW</th>
+                      <th>Opponent</th>
+                      <th>Min</th>
+                      {hasDetailedStats && CARD_COLUMNS.map((c) => <th key={c.key}>{c.label}</th>)}
+                      <th>Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((r, i) => (
+                      <tr key={i}>
+                        <td>{r.season}</td>
+                        <td>{r.gameweek}</td>
+                        <td>
+                          {r.opponent ? (r.was_home ? r.opponent : `@ ${r.opponent}`) : "—"}
+                        </td>
+                        <td>{r.minutes}</td>
+                        {hasDetailedStats &&
+                          CARD_COLUMNS.map((c) => (
+                            <td key={c.key}>{r[c.key] ?? "—"}</td>
+                          ))}
+                        <td>
+                          <b>{r.total_points}</b>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>,
+    document.body
   );
 }
 
@@ -237,4 +381,79 @@ export function useAsyncAction() {
     }
   };
   return [state, run];
+}
+
+function cacheStorageKey(slot) {
+  return STORAGE_PREFIX + "snapshot:" + slot;
+}
+
+function readCachedSnapshot(slot, cacheKey) {
+  try {
+    const stored = window.localStorage.getItem(cacheStorageKey(slot));
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+    return parsed.cacheKey === cacheKey ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+// Same shape as useAsyncAction, but the last successful result is kept as a "snapshot" in
+// localStorage under `slot`, tagged with `cacheKey` (e.g. the exact query params used) so a
+// mismatched key (a different squad, a different budget) never shows someone else's stale
+// result. On mount — and whenever `cacheKey` changes — this immediately shows whatever
+// snapshot is on file for that exact key, with no loading spinner and no network call, until
+// the caller explicitly calls `run()` again (a button click, or an effect that only fires
+// when `hasSnapshot()` says there's nothing to show yet). Solves two things: switching tabs
+// no longer re-triggers an expensive rebuild (ratings fit + ILP solve) just to redraw the
+// same result, and a full page reload restores the last view instead of going in blank.
+export function useCachedAsyncAction(slot, cacheKey) {
+  const [state, setState] = useState(() => {
+    const cached = readCachedSnapshot(slot, cacheKey);
+    return cached
+      ? { loading: false, error: null, data: cached.data, savedAt: cached.savedAt }
+      : { loading: false, error: null, data: null, savedAt: null };
+  });
+
+  useEffect(() => {
+    const cached = readCachedSnapshot(slot, cacheKey);
+    setState(
+      cached
+        ? { loading: false, error: null, data: cached.data, savedAt: cached.savedAt }
+        : { loading: false, error: null, data: null, savedAt: null }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slot, cacheKey]);
+
+  const run = async (fn) => {
+    setState((prev) => ({ ...prev, loading: true, error: null }));
+    try {
+      const data = await fn();
+      const savedAt = Date.now();
+      setState({ loading: false, error: null, data, savedAt });
+      try {
+        window.localStorage.setItem(cacheStorageKey(slot), JSON.stringify({ cacheKey, data, savedAt }));
+      } catch {
+        // localStorage unavailable (private browsing, quota) — snapshot just won't persist
+      }
+      return data;
+    } catch (err) {
+      setState((prev) => ({ ...prev, loading: false, error: err.message || String(err) }));
+      return null;
+    }
+  };
+
+  // Synchronous, direct-from-storage check (deliberately not derived from `state`, which only
+  // updates on the next render) — safe to call from an effect reacting to the same key change
+  // that also drives this hook's own cache-sync effect above, with no ordering race.
+  const hasSnapshot = (key = cacheKey) => readCachedSnapshot(slot, key) !== null;
+
+  return [state, run, hasSnapshot];
+}
+
+// Renders nothing until a snapshot exists, then a small "as of HH:MM:SS" hint — the visible
+// cue that what's on screen might not be freshly fetched.
+export function SnapshotHint({ savedAt }) {
+  if (!savedAt) return null;
+  return <span className="snapshot-hint">Snapshot from {new Date(savedAt).toLocaleTimeString()}</span>;
 }

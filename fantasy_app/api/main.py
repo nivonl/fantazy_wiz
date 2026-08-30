@@ -26,7 +26,7 @@ from fantasy_app.providers.fpl import POSITION_BY_ELEMENT_TYPE, FPLClient
 from fantasy_app.providers.football_data import FootballDataClient
 from fantasy_app.recommend.fpl import optimize_squad
 from fantasy_app.recommend.laliga import recommend_laliga
-from fantasy_app.services import fpl_service, laliga_service, overview
+from fantasy_app.services import fpl_service, laliga_service, overview, player_breakdown
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
@@ -279,6 +279,19 @@ def recommend_fpl_targets(
         "targets": {pos: (asdict(p) if p else None) for pos, p in targets.items()},
         "unmatched_names": unmatched,
     }
+
+
+@app.get("/fpl/player/{element_id}/breakdown")
+def fpl_player_breakdown(element_id: int, n: int = player_breakdown.RECENT_GAMEWEEKS) -> dict:
+    """
+    Gameweek-by-gameweek points breakdown for one player — the last `n` gameweeks this season
+    (goals, assists, clean sheets, bonus, cards, etc.), falling back to previous-season
+    gameweeks from the historical archive when this season doesn't have `n` played yet.
+    Always a live fetch from FPL — nothing here is cached, so it's never stale.
+    """
+    with FPLClient() as client:
+        result = player_breakdown.build_player_breakdown(client, element_id, n=n)
+    return {"recent": [asdict(r) for r in result.recent], "note": result.note}
 
 
 @app.get("/fpl/overview")

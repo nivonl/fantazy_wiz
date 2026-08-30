@@ -1,0 +1,123 @@
+"""
+Per-player gameweek-by-gameweek points breakdown, for the "click a player's name" popup.
+
+Always fetched live from FPL's element-summary endpoint (no caching anywhere in this module,
+unlike the ratings/candidate-pool pipeline elsewhere), so it reflects whatever the most
+recently confirmed gameweek result is the moment it's confirmed.
+
+Falls back to the historical archive (providers/fpl_history.py) for PREVIOUS-season
+gameweeks, but only to fill in what this season doesn't have enough of yet (a new signing, or
+gameweek 1-2 of the season). That fallback carries a smaller field set — goals/assists/minutes/
+total only, all that source's CSV schema records — so each row is tagged with its own season
+and only the fields that source actually has are ever populated, never guessed at.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from fantasy_app.providers import fpl_history
+from fantasy_app.providers.fpl import FPLClient
+from fantasy_app.services.common import current_season_start_year
+
+RECENT_GAMEWEEKS = 3
+
+
+@dataclass(frozen=True)
+class GameweekPoints:
+    season: str
+    gameweek: int
+    total_points: int
+    minutes: int
+    opponent: str | None = None
+    was_home: bool | None = None
+    goals_scored: int | None = None
+    assists: int | None = None
+    clean_sheets: int | None = None
+    goals_conceded: int | None = None
+    own_goals: int | None = None
+    penalties_saved: int | None = None
+    penalties_missed: int | None = None
+    yellow_cards: int | None = None
+    red_cards: int | None = None
+    saves: int | None = None
+    bonus: int | None = None
+
+
+@dataclass(frozen=True)
+class PlayerBreakdown:
+    recent: list[GameweekPoints]  # chronological order, oldest to most recent
+    note: str | None  # explains a previous-season fallback, when one happened
+
+
+def current_season_label(today=None) -> str:
+    start = current_season_start_year(today)
+    return f"{start}-{str(start + 1)[2:]}"
+
+
+def build_player_breakdown(client: FPLClient, element_id: int, n: int = RECENT_GAMEWEEKS) -> PlayerBreakdown:
+    bootstrap = client.bootstrap()
+    team_name_by_id = {t["id"]: t["name"] for t in bootstrap["teams"]}
+    element = next((e for e in bootstrap["elements"] if e["id"] == element_id), None)
+    if element is None:
+        raise RuntimeError(f"No FPL player with id {element_id}.")
+
+    season = current_season_label()
+    summary = client.element_summary(element_id)
+    this_season = sorted(
+        (
+            GameweekPoints(
+                season=season,
+                gameweek=h["round"],
+                total_points=h["total_points"],
+                minutes=h["minutes"],
+                opponent=team_name_by_id.get(h.get("opponent_team")),
+                was_home=h.get("was_home"),
+                goals_scored=h.get("goals_scored"),
+                assists=h.get("assists"),
+                clean_sheets=h.get("clean_sheets"),
+                goals_conceded=h.get("goals_conceded"),
+                own_goals=h.get("own_goals"),
+                penalties_saved=h.get("penalties_saved"),
+                penalties_missed=h.get("penalties_missed"),
+                yellow_cards=h.get("yellow_cards"),
+                red_cards=h.get("red_cards"),
+                saves=h.get("saves"),
+                bonus=h.get("bonus"),
+            )
+            for h in summary.get("history", [])
+        ),
+        key=lambda r: r.gameweek,
+    )
+    recent = this_season[-n:]
+    played_this_season = len(recent)
+
+    note = None
+    missing = n - played_this_season
+    if missing > 0:
+        full_name = fpl_history.normalize_person_name(f"{element['first_name']} {element['second_name']}")
+        past_rows = [r for r in fpl_history.index_by_player().get(full_name, []) if r.season != season]
+        past_rows.sort(key=lambda r: (r.season, r.round), reverse=True)
+        fallback_rows = past_rows[:missing]
+        if fallback_rows:
+            fallback = [
+                GameweekPoints(
+                    season=r.season,
+                    gameweek=r.round,
+                    total_points=r.total_points,
+                    minutes=r.minutes,
+                    opponent=r.opponent,
+                    was_home=r.was_home,
+                    goals_scored=r.goals_scored,
+                    assists=r.assists,
+                )
+                for r in reversed(fallback_rows)  # chronological within the fallback subset
+            ]
+            recent = fallback + recent
+            fallback_seasons = sorted({r.season for r in fallback}, reverse=True)
+            note = (
+                f"Only {played_this_season} gameweek(s) played this season ({season}) — "
+                f"showing {len(fallback)} more from {', '.join(fallback_seasons)}."
+            )
+
+    return PlayerBreakdown(recent=recent, note=note)
