@@ -252,6 +252,35 @@ def recommend_fpl_full(
     return _full_recommendation_dict(rec, unmatched_names=unmatched)
 
 
+@app.get("/recommend/fpl/targets")
+def recommend_fpl_targets(
+    budget: float,
+    entry_id: int | None = None,
+    players: str = "",
+    bank: float = 0.0,
+    event: int | None = None,
+    horizon: int = fpl_service.DEFAULT_TARGET_HORIZON,
+) -> dict:
+    """
+    Per-position best affordable transfer target (not already in your squad), ranked by
+    predicted points summed over `horizon` gameweeks (default 5). Pass `budget` as the most
+    you'd spend on a single incoming player (e.g. bank + an outgoing player's sale price) —
+    this doesn't assume any particular player is leaving, it's a standalone "who's best in
+    each position at this price" lookup.
+    """
+    with FPLClient() as client:
+        pool_1gw = fpl_service.build_candidate_pool(client, event=event)
+        current_squad, _starters, _bank, _entry, unmatched = _resolve_current_squad(
+            client, pool_1gw, entry_id, players, bank
+        )
+        targets = fpl_service.build_transfer_targets(client, current_squad, budget, event=event, horizon=horizon)
+    return {
+        "horizon_gameweeks": horizon,
+        "targets": {pos: (asdict(p) if p else None) for pos, p in targets.items()},
+        "unmatched_names": unmatched,
+    }
+
+
 @app.get("/fpl/overview")
 def fpl_overview(
     entry_id: int | None = None,

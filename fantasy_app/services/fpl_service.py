@@ -26,6 +26,7 @@ from fantasy_app.recommend.fpl import (
     CandidatePlayer,
     SquadResult,
     TransferSuggestion,
+    best_transfer_targets_by_position,
     optimize_squad,
     pick_starting_xi,
     suggest_transfers,
@@ -41,6 +42,7 @@ SHORTLIST_PER_POSITION = {"GK": 8, "DEF": 20, "MID": 20, "FWD": 15}
 
 DEFAULT_TRANSFER_HORIZON = 3  # gameweeks a transfer's benefit is evaluated over — it sticks around
 DEFAULT_WILDCARD_HORIZON = 5  # wildcard is permanent, so its lift is judged over a longer run
+DEFAULT_TARGET_HORIZON = 5  # per-position "best affordable target" horizon
 
 
 @dataclass(frozen=True)
@@ -422,6 +424,21 @@ def build_candidate_pool_multi_gw(
         )
         for pid, t in template_by_id.items()
     ]
+
+
+def build_transfer_targets(
+    client: FPLClient,
+    current_squad: list[CandidatePlayer],
+    budget: float,
+    event: int | None = None,
+    fd_client: FootballDataClient | None = None,
+    horizon: int = DEFAULT_TARGET_HORIZON,
+) -> dict[str, CandidatePlayer | None]:
+    """Per-position best affordable transfer target (not already owned), ranked by xp summed
+    over `horizon` gameweeks (default 5) — see best_transfer_targets_by_position for the pure
+    selection logic this just wires a real multi-gameweek pool into."""
+    pool = build_candidate_pool_multi_gw(client, fd_client=fd_client, start_event=event, num_gameweeks=horizon)
+    return best_transfer_targets_by_position(pool, current_squad, budget)
 
 
 def match_player_names(names: list[str], pool: list[CandidatePlayer]) -> tuple[list[CandidatePlayer], list[str]]:

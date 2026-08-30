@@ -154,6 +154,27 @@ def optimize_squad(
     )
 
 
+def best_transfer_targets_by_position(
+    pool: list[CandidatePlayer], current_squad: list[CandidatePlayer], budget: float
+) -> dict[str, CandidatePlayer | None]:
+    """
+    For each position, the single best player NOT already in the squad, priced at or below
+    `budget`, ranked by the pool's xp — a standalone "if I have this much to spend, who's best
+    in each position" lookup, independent of any specific outgoing player. The caller decides
+    what `xp` and `budget` mean (e.g. a 5-gameweek-summed pool and bank + an outgoing player's
+    sale price). None for a position with no affordable candidate.
+    """
+    squad_ids = {p.id for p in current_squad}
+    return {
+        pos: max(
+            (p for p in pool if p.pos == pos and p.id not in squad_ids and p.price <= budget),
+            key=lambda p: p.xp,
+            default=None,
+        )
+        for pos in SQUAD_SHAPE
+    }
+
+
 def suggest_transfers(
     current_squad: list[CandidatePlayer],
     pool: list[CandidatePlayer],

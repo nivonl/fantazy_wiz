@@ -5,7 +5,13 @@ from __future__ import annotations
 
 import pytest
 
-from fantasy_app.recommend.fpl import CandidatePlayer, CLUB_CAP, optimize_squad, suggest_transfers
+from fantasy_app.recommend.fpl import (
+    CandidatePlayer,
+    CLUB_CAP,
+    best_transfer_targets_by_position,
+    optimize_squad,
+    suggest_transfers,
+)
 from fantasy_app.recommend.laliga import recommend_laliga
 
 
@@ -100,6 +106,35 @@ def test_suggest_transfers_respects_budget():
     pool = [weak, too_expensive]
     suggestions = suggest_transfers(squad, pool, bank=0.0, free_transfers=1)
     assert suggestions == []  # can't afford it, no transfer suggested
+
+
+def test_best_transfer_targets_picks_highest_xp_per_position_within_budget():
+    squad = [CandidatePlayer(id="owned_mid", name="Owned", pos="MID", team="Alpha", price=6.0, xp=5.0)]
+    pool = squad + [
+        CandidatePlayer(id="cheap_mid", name="CheapMid", pos="MID", team="Beta", price=5.0, xp=3.0),
+        CandidatePlayer(id="best_mid", name="BestMid", pos="MID", team="Gamma", price=6.5, xp=9.0),
+        CandidatePlayer(id="too_pricey_mid", name="Pricey", pos="MID", team="Delta", price=15.0, xp=20.0),
+        CandidatePlayer(id="only_fwd", name="OnlyFwd", pos="FWD", team="Epsilon", price=7.0, xp=4.0),
+    ]
+    targets = best_transfer_targets_by_position(pool, squad, budget=10.0)
+    assert targets["MID"].id == "best_mid"  # highest xp of the affordable, unowned MIDs
+    assert targets["FWD"].id == "only_fwd"
+    assert targets["GK"] is None  # no GK candidates in the pool at all
+
+
+def test_best_transfer_targets_never_returns_an_owned_player():
+    owned = CandidatePlayer(id="owned_fwd", name="Owned", pos="FWD", team="Alpha", price=5.0, xp=99.0)
+    squad = [owned]
+    pool = [owned, CandidatePlayer(id="rival_fwd", name="Rival", pos="FWD", team="Beta", price=5.0, xp=1.0)]
+    targets = best_transfer_targets_by_position(pool, squad, budget=100.0)
+    assert targets["FWD"].id == "rival_fwd"
+
+
+def test_best_transfer_targets_none_when_nothing_affordable():
+    squad: list[CandidatePlayer] = []
+    pool = [CandidatePlayer(id="rich_gk", name="Rich", pos="GK", team="Alpha", price=6.0, xp=5.0)]
+    targets = best_transfer_targets_by_position(pool, squad, budget=4.0)
+    assert targets["GK"] is None
 
 
 def test_recommend_laliga_picks_top_xp_captain_and_flags_upgrades():
