@@ -17,6 +17,11 @@ import { warmUpBackend, fetchJson, mapWithConcurrency } from "./lib/fetch-api.mj
 import { buildSlugMap } from "./lib/slugify.mjs";
 import { renderPage, SITE_URL } from "./lib/render-page.mjs";
 import { renderPointsBarChart, renderPriceLineChart } from "./lib/chart.mjs";
+import { teamColor } from "../src/team-colors.js";
+
+function teamDot(teamName) {
+  return `<span aria-hidden="true" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${teamColor(teamName)};margin-right:6px;"></span>`;
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FRONTEND_DIR = join(__dirname, "..");
@@ -53,7 +58,7 @@ function renderPlayerTable(players) {
 ${players
   .map(
     (p) =>
-      `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.team)}</td><td>${p.pos}</td><td>${p.price.toFixed(1)}m</td><td>${p.xp.toFixed(2)}</td></tr>`
+      `<tr><td>${escapeHtml(p.name)}</td><td>${teamDot(p.team)}${escapeHtml(p.team)}</td><td>${p.pos}</td><td>${p.price.toFixed(1)}m</td><td>${p.xp.toFixed(2)}</td></tr>`
   )
   .join("\n")}
 </tbody></table></div>`;
@@ -84,7 +89,7 @@ function renderPlayerBody(player, breakdown, priceHistory) {
   const priceChart = priceHistory?.length ? renderPriceLineChart(priceHistory) : "";
   return `
     <h2>${escapeHtml(player.name)} — FPL Price, Predicted Points &amp; Fixtures</h2>
-    <p class="summary-line">${player.pos} &middot; ${escapeHtml(player.team)} &middot; ${player.price.toFixed(1)}m</p>
+    <p class="summary-line">${player.pos} &middot; ${teamDot(player.team)}${escapeHtml(player.team)} &middot; ${player.price.toFixed(1)}m</p>
     <p class="summary-line">Predicted <b>${player.xp.toFixed(2)}</b> points this gameweek${stats ? ` vs ${escapeHtml(stats.opponent)}` : ""}.</p>
     ${
       stats && stats.games_overall > 0
@@ -121,7 +126,7 @@ function renderPlayersIndexBody(players, slugById) {
     <ul>${byPos[pos]
       .map(
         (p) =>
-          `<li><a href="/fpl/player/${slugById.get(p.id)}">${escapeHtml(p.name)}</a> &mdash; ${escapeHtml(p.team)}, ${p.price.toFixed(1)}m, predicted ${p.xp.toFixed(2)} pts</li>`
+          `<li><a href="/fpl/player/${slugById.get(p.id)}">${escapeHtml(p.name)}</a> &mdash; ${teamDot(p.team)}${escapeHtml(p.team)}, ${p.price.toFixed(1)}m, predicted ${p.xp.toFixed(2)} pts</li>`
       )
       .join("")}</ul>`
     ).join("\n")}

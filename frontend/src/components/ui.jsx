@@ -1,6 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../api.js";
+import { teamColor } from "../team-colors.js";
+
+// Small colored dot for a club — plain color only, no crest/logo (see team-colors.js for why).
+export function TeamDot({ team }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display: "inline-block",
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        background: teamColor(team),
+        marginRight: 6,
+        flexShrink: 0,
+      }}
+    />
+  );
+}
 
 // Remembers a value in this browser (localStorage) across visits — e.g. your FPL entry ID or
 // current squad, so you don't retype it every time you open the site on your phone. No
@@ -225,7 +244,8 @@ export function PlayerTip({ player }) {
         createPortal(
           <span className="tip-bubble" style={{ position: "fixed", ...bubblePos }}>
             <span className="tip-header">
-              {player.pos} · {player.team} · {player.price.toFixed(1)}m
+              {player.pos} · <TeamDot team={player.team} />
+              {player.team} · {player.price.toFixed(1)}m
             </span>
             <span className="tip-xp">
               Predicted {player.xp.toFixed(2)} pts{stats ? ` vs ${stats.opponent}` : ""}
@@ -321,6 +341,7 @@ function PlayerBreakdownModal({ player, onClose }) {
       <div className="modal-card" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <span>
+            <TeamDot team={player.team} />
             {player.name} <span className="modal-subhead">points breakdown</span>
           </span>
           <button className="modal-close" onClick={onClose} aria-label="Close">
