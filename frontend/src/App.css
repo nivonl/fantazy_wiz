@@ -11,7 +11,11 @@ header.top {
   position: sticky;
   top: 0;
   z-index: 5;
-  background: linear-gradient(var(--bg) 70%, transparent);
+  /* Solid, not the old fade-to-transparent — the header now contains the nav links (not just
+     the brand bar), so page content scrolling underneath needs a fully opaque backdrop to stay
+     legible/clickable, not a soft gradient blending into whatever's passing behind it. */
+  background: var(--bg);
+  border-bottom: 1px solid var(--panel-border);
   backdrop-filter: blur(6px);
 }
 

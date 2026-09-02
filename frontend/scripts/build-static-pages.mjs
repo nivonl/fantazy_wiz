@@ -19,8 +19,17 @@ import { renderPage, SITE_URL } from "./lib/render-page.mjs";
 import { renderPointsBarChart, renderPriceLineChart } from "./lib/chart.mjs";
 import { teamColor } from "../src/team-colors.js";
 
-function teamDot(teamName) {
-  return `<span aria-hidden="true" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${teamColor(teamName)};margin-right:6px;"></span>`;
+// A player's own page gets a subtle background wash of their club's color (see
+// team-colors.js) -- deliberately not a dot scattered on every team mention across every
+// table/listing, just this one accent on the page that's actually about that one player.
+function hexToRgb(hex) {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+  return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [138, 127, 153];
+}
+
+function teamAccentStyle(teamName) {
+  const [r, g, b] = hexToRgb(teamColor(teamName));
+  return `background: linear-gradient(160deg, rgba(${r},${g},${b},0.28), var(--panel) 60%, var(--panel-2));`;
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -58,7 +67,7 @@ function renderPlayerTable(players) {
 ${players
   .map(
     (p) =>
-      `<tr><td>${escapeHtml(p.name)}</td><td>${teamDot(p.team)}${escapeHtml(p.team)}</td><td>${p.pos}</td><td>${p.price.toFixed(1)}m</td><td>${p.xp.toFixed(2)}</td></tr>`
+      `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.team)}</td><td>${p.pos}</td><td>${p.price.toFixed(1)}m</td><td>${p.xp.toFixed(2)}</td></tr>`
   )
   .join("\n")}
 </tbody></table></div>`;
@@ -89,7 +98,7 @@ function renderPlayerBody(player, breakdown, priceHistory) {
   const priceChart = priceHistory?.length ? renderPriceLineChart(priceHistory) : "";
   return `
     <h2>${escapeHtml(player.name)} — FPL Price, Predicted Points &amp; Fixtures</h2>
-    <p class="summary-line">${player.pos} &middot; ${teamDot(player.team)}${escapeHtml(player.team)} &middot; ${player.price.toFixed(1)}m</p>
+    <p class="summary-line">${player.pos} &middot; ${escapeHtml(player.team)} &middot; ${player.price.toFixed(1)}m</p>
     <p class="summary-line">Predicted <b>${player.xp.toFixed(2)}</b> points this gameweek${stats ? ` vs ${escapeHtml(stats.opponent)}` : ""}.</p>
     ${
       stats && stats.games_overall > 0
@@ -102,8 +111,7 @@ function renderPlayerBody(player, breakdown, priceHistory) {
     ${renderBreakdownTable(breakdown?.recent ?? [])}
     ${
       priceChart
-        ? `<h3>Price history</h3>
-    <p class="hint">${escapeHtml(player.name)}'s real FPL price this season, plus last season where available.</p>
+        ? `<h3>Fantasy price history</h3>
     ${priceChart}`
         : ""
     }
@@ -126,7 +134,7 @@ function renderPlayersIndexBody(players, slugById) {
     <ul>${byPos[pos]
       .map(
         (p) =>
-          `<li><a href="/fpl/player/${slugById.get(p.id)}">${escapeHtml(p.name)}</a> &mdash; ${teamDot(p.team)}${escapeHtml(p.team)}, ${p.price.toFixed(1)}m, predicted ${p.xp.toFixed(2)} pts</li>`
+          `<li><a href="/fpl/player/${slugById.get(p.id)}">${escapeHtml(p.name)}</a> &mdash; ${escapeHtml(p.team)}, ${p.price.toFixed(1)}m, predicted ${p.xp.toFixed(2)} pts</li>`
       )
       .join("")}</ul>`
     ).join("\n")}
@@ -199,6 +207,7 @@ async function main() {
         { name: player.name, path },
       ],
       bodyHtml: renderPlayerBody(player, breakdownById.get(player.id), priceHistoryById.get(player.id)),
+      cardStyle: teamAccentStyle(player.team),
     });
     generatedPaths.push(writePage(path, html));
   }

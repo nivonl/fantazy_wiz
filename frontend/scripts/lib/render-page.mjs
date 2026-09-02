@@ -30,7 +30,7 @@ function escapeJsonForScriptTag(json) {
  * not JS-only navigation), and whatever `bodyHtml` the caller built for the actual content.
  * No JS/hydration required to see any of it.
  */
-export function renderPage({ title, description, path, bodyHtml, cssHref, breadcrumbs }) {
+export function renderPage({ title, description, path, bodyHtml, cssHref, breadcrumbs, cardStyle }) {
   const fullTitle = `${title} | PitchMetric`;
   const canonical = `${SITE_URL}${path}`;
   const jsonLd = [
@@ -92,13 +92,13 @@ export function renderPage({ title, description, path, bodyHtml, cssHref, breadc
           <a href="/" style="color:var(--text-dim); font-size:0.8rem;">Home</a>
         </div>
         <p>FPL &amp; La Liga analytics — score predictions and squad recommendations backed by real data.</p>
+        <nav class="tools-nav">
+          ${NAV_LINKS.map((l) => `<a href="${l.href}">${escapeHtml(l.label)}</a>`).join("\n          ")}
+        </nav>
       </header>
-      <nav class="tools-nav">
-        ${NAV_LINKS.map((l) => `<a href="${l.href}">${escapeHtml(l.label)}</a>`).join("\n        ")}
-      </nav>
       <main>
         <div class="panel-fade">
-          <section class="card">
+          <section class="card"${cardStyle ? ` style="${cardStyle}"` : ""}>
             ${bodyHtml}
           </section>
         </div>

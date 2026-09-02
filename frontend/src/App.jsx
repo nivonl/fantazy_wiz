@@ -79,6 +79,9 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      {/* The nav links live inside the sticky header (not as a separate block below it) so the
+          whole thing -- logo, theme toggle, and page links -- stays reachable while scrolling
+          down a long page, on desktop where it acts as the primary navigation. */}
       <header className="top">
         <div className="brand-bar">
           <Link to="/" className="brand">
@@ -91,9 +94,8 @@ export default function App() {
           <ThemeToggle />
         </div>
         <p>FPL &amp; La Liga analytics — score predictions and squad recommendations backed by real data.</p>
+        <ToolsNav />
       </header>
-
-      <ToolsNav />
 
       {/*
         Every panel stays mounted all the time (visibility is toggled with a CSS class, not

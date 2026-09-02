@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { PlayerTip, Tag, TeamDot } from "./ui.jsx";
+import { PlayerTip, Tag } from "./ui.jsx";
 
 export function SquadTable({ title, players, captainId, viceId, injuryNotes }) {
   return (
@@ -29,10 +29,7 @@ export function SquadTable({ title, players, captainId, viceId, injuryNotes }) {
                       {p.id === viceId && <Tag variant="vice">VC</Tag>}
                       {note && <Tag variant="hit">{note.status.toUpperCase()}</Tag>}
                     </td>
-                    <td>
-                      <TeamDot team={p.team} />
-                      {p.team}
-                    </td>
+                    <td>{p.team}</td>
                     <td>{p.price.toFixed(1)}m</td>
                     <td>{p.xp.toFixed(2)}</td>
                   </tr>
