@@ -266,19 +266,39 @@ def recommend_fpl_targets(
     predicted points summed over `horizon` gameweeks (default 5). Pass `budget` as the most
     you'd spend on a single incoming player (e.g. bank + an outgoing player's sale price) —
     this doesn't assume any particular player is leaving, it's a standalone "who's best in
-    each position at this price" lookup.
+    each position at this price" lookup. Works with no squad at all (omit `entry_id` and
+    `players`) — a plain "who's best at this price" market lookup with nothing excluded.
     """
     with FPLClient() as client:
-        pool_1gw = fpl_service.build_candidate_pool(client, event=event)
-        current_squad, _starters, _bank, _entry, unmatched = _resolve_current_squad(
-            client, pool_1gw, entry_id, players, bank
-        )
+        if entry_id is None and not players.strip():
+            current_squad, unmatched = [], []
+        else:
+            pool_1gw = fpl_service.build_candidate_pool(client, event=event)
+            current_squad, _starters, _bank, _entry, unmatched = _resolve_current_squad(
+                client, pool_1gw, entry_id, players, bank
+            )
         targets = fpl_service.build_transfer_targets(client, current_squad, budget, event=event, horizon=horizon)
     return {
         "horizon_gameweeks": horizon,
         "targets": {pos: (asdict(p) if p else None) for pos, p in targets.items()},
         "unmatched_names": unmatched,
     }
+
+
+@app.get("/fpl/players/predicted")
+def fpl_players_predicted(event: int | None = None) -> dict:
+    """
+    Every player with a fixture this gameweek, priced and scored (id/name/pos/team/price/xp/
+    opponent_stats) — the raw candidate pool other endpoints build squads from, exposed
+    directly, tagged with which gameweek it's for. Used by the static-page generator to build
+    player pages, the players index, and gameweek prediction pages in one call each, rather
+    than one request per player.
+    """
+    with FPLClient() as client:
+        bootstrap = client.bootstrap()
+        resolved_event = event or client.current_event(bootstrap)
+        pool = fpl_service.build_candidate_pool(client, event=resolved_event)
+    return {"event": resolved_event, "players": [asdict(p) for p in pool]}
 
 
 @app.get("/fpl/player/{element_id}/breakdown")

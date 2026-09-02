@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../api.js";
 import {
   Button,
@@ -27,7 +28,6 @@ const SQUAD_KEY_BY_CHIP = { free_hit: "free_hit_squad", wildcard: "wildcard_squa
 
 // `squad` comes from useMySquadIdentity() in App.jsx — shared with the Overview tab so your
 // entry ID / manual squad is entered once, not duplicated per screen.
-const POSITION_ORDER = ["GK", "DEF", "MID", "FWD"];
 
 function safeCacheKey(squad) {
   try {
@@ -41,21 +41,11 @@ export function CurrentTeamPanel({ squad }) {
   const squadCacheKey = safeCacheKey(squad);
   const [state, run] = useCachedAsyncAction("squad-full", squadCacheKey);
   const [expandedChip, setExpandedChip] = useState(null);
-  const [budget, setBudget] = useState(8.0);
-  const [targetsState, runTargets] = useCachedAsyncAction("squad-targets", `${squadCacheKey}|budget=${budget}`);
   const [tradeTarget, setTradeTarget] = useState("");
   const [tradeState, runTrade] = useCachedAsyncAction("squad-trade-for", `${squadCacheKey}|target=${tradeTarget}`);
 
   const submit = () => {
     run(async () => api.get(`/recommend/fpl/full?${squad.toParams().toString()}`));
-  };
-
-  const findTargets = () => {
-    runTargets(async () => {
-      const params = squad.toParams();
-      params.set("budget", budget);
-      return api.get(`/recommend/fpl/targets?${params.toString()}`);
-    });
   };
 
   const findTradeCombos = () => {
@@ -67,7 +57,6 @@ export function CurrentTeamPanel({ squad }) {
   };
 
   const rec = state.data;
-  const targets = targetsState.data;
   const trade = tradeState.data;
 
   return (
@@ -178,59 +167,10 @@ export function CurrentTeamPanel({ squad }) {
 
             <p className="section-heading">Best trade target by position</p>
             <p className="hint" style={{ marginTop: -4 }}>
-              For a given spend on a single incoming player, the best player NOT already in your squad at each
-              position, ranked by predicted points summed over the next few gameweeks.
+              Want the best affordable player at each position for a given budget? That's now its
+              own tool: <Link to="/fpl-transfer-finder">Transfer Finder</Link> — it automatically
+              excludes whoever's already in the squad you've entered here.
             </p>
-            <div className="controls">
-              <Field label="Budget for the incoming player (£m)">
-                <input type="number" step="0.1" min="0" value={budget} onChange={(e) => setBudget(e.target.value)} />
-              </Field>
-              <Button variant="ghost" onClick={findTargets} disabled={targetsState.loading}>
-                {targetsState.loading ? "Searching…" : "Find targets"}
-              </Button>
-              <SnapshotHint savedAt={targetsState.savedAt} />
-            </div>
-            {targetsState.loading && <Spinner label="Scoring the market…" />}
-            <ErrorBanner error={targetsState.error} />
-            {targets && (
-              <Reveal revealKey={JSON.stringify(targets.targets)}>
-                <div className="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Pos</th>
-                        <th>Best target</th>
-                        <th>Team</th>
-                        <th>Price</th>
-                        <th>Predicted pts ({targets.horizon_gameweeks} GWs)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {POSITION_ORDER.map((pos) => {
-                        const p = targets.targets[pos];
-                        return (
-                          <tr key={pos}>
-                            <td>{pos}</td>
-                            {p ? (
-                              <>
-                                <td><PlayerTip player={p} /></td>
-                                <td>{p.team}</td>
-                                <td>{p.price.toFixed(1)}m</td>
-                                <td>{p.xp.toFixed(2)}</td>
-                              </>
-                            ) : (
-                              <td colSpan={4} className="empty">
-                                Nothing affordable at £{Number(budget).toFixed(1)}m
-                              </td>
-                            )}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </Reveal>
-            )}
 
             <p className="section-heading">Trade for a specific player</p>
             <p className="hint" style={{ marginTop: -4 }}>

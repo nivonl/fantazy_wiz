@@ -1,0 +1,41 @@
+name: Snapshot current gameweek
+
+# Captures the current gameweek's real-time predictions once, early in its cycle, so gameweek
+# prediction pages stay an honest historical record forever instead of being silently re-derived
+# with hindsight after the fact. See frontend/scripts/snapshot-current-gameweek.mjs.
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily, 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Snapshot current gameweek
+        working-directory: frontend
+        env:
+          VITE_API_BASE_URL: https://fantazywiz.up.railway.app
+        run: node scripts/snapshot-current-gameweek.mjs
+
+      - name: Commit snapshot if one was written
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/data/gameweeks/
+          if git diff --cached --quiet; then
+            echo "No new snapshot -- nothing to commit."
+          else
+            git commit -m "Snapshot gameweek predictions [skip ci]"
+            git push
+          fi

@@ -1,3 +1,5 @@
+import { Link, useLocation } from "react-router-dom";
+
 const ICONS = {
   overview: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -31,24 +33,24 @@ const ICONS = {
 };
 
 const TABS = [
-  { key: "overview", label: "Overview" },
-  { key: "squad", label: "Squad" },
-  { key: "insights", label: "Insights" },
-  { key: "more", label: "More" },
+  { key: "overview", label: "Overview", path: "/" },
+  { key: "squad", label: "Squad", path: "/fpl-team-analyzer" },
+  { key: "insights", label: "Insights", path: "/fpl-squad-builder" },
+  { key: "more", label: "More", path: "/more" },
 ];
 
-export function BottomNav({ active, onChange }) {
+// Real <a href> navigation (via react-router's Link), not click handlers over local state — the
+// active tab is derived from the URL itself, driven by useLocation, so it stays in sync
+// regardless of how a page was reached (a Link click, browser back/forward, or a bookmark).
+export function BottomNav() {
+  const { pathname } = useLocation();
   return (
     <nav className="bottom-nav">
       {TABS.map((t) => (
-        <button
-          key={t.key}
-          className={`bottom-nav-item ${active === t.key ? "active" : ""}`}
-          onClick={() => onChange(t.key)}
-        >
+        <Link key={t.key} to={t.path} className={`bottom-nav-item ${pathname === t.path ? "active" : ""}`}>
           {ICONS[t.key]}
           <span>{t.label}</span>
-        </button>
+        </Link>
       ))}
     </nav>
   );

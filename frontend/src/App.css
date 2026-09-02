@@ -83,6 +83,26 @@ header.top > p {
   max-width: 640px;
 }
 
+/* ---------- Tools nav (internal linking strip, present on every page) ---------- */
+
+.tools-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0 0 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.tools-nav a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.tools-nav a:hover { color: var(--analytics); }
+
 /* ---------- Bottom nav ---------- */
 
 .bottom-nav {
@@ -104,6 +124,7 @@ header.top > p {
   background: none;
   border: none;
   color: var(--text-dim);
+  text-decoration: none;
   display: flex;
   flex-direction: column;
   align-items: center;
