@@ -70,6 +70,16 @@ class TransferSuggestion:
     is_hit: bool  # True if this transfer costs -4 (beyond the free allowance)
 
 
+@dataclass(frozen=True)
+class TradeCombo:
+    players_out: list[CandidatePlayer]
+    players_in: list[CandidatePlayer]  # always includes the wanted player
+    hits: int
+    hit_cost: float
+    xp_gain: float  # net xp change vs the current squad, over whatever horizon `pool` prices in, hits already subtracted
+    new_bank: float
+
+
 def pick_starting_xi(squad: list[CandidatePlayer]) -> tuple[list[CandidatePlayer], list[CandidatePlayer]]:
     """Best valid starting XI (by xp) from a fixed 15; returns (starters, bench_best_first)."""
     prob = pulp.LpProblem("starting_xi", pulp.LpMaximize)
@@ -173,6 +183,108 @@ def best_transfer_targets_by_position(
         )
         for pos in SQUAD_SHAPE
     }
+
+
+_POSITION_ORDER = {"GK": 0, "DEF": 1, "MID": 2, "FWD": 3}
+
+
+def find_trade_combos_for_target(
+    current_squad: list[CandidatePlayer],
+    wanted_player: CandidatePlayer,
+    pool: list[CandidatePlayer],
+    bank: float,
+    free_transfers: int,
+    club_cap: int = CLUB_CAP,
+    hit_cost: float = TRANSFER_HIT_COST,
+    top_k: int = 3,
+) -> list[TradeCombo]:
+    """
+    The best (and 2nd/3rd-best) ways to reshuffle `current_squad` -- without a chip -- to end up
+    owning `wanted_player`, ranked by projected xp net of any transfer hits. One ILP per combo
+    (the same maximize-xp-under-budget/shape/club-cap pattern as optimize_squad), using a
+    standard "no-good cut" to force each re-solve toward a genuinely different combination of
+    trades, rather than a bespoke search algorithm.
+
+    Not artificially restricted to the minimum trades needed to afford the target: any transfer
+    beyond what's free always costs `hit_cost` in the shared objective, so the solver only makes
+    an extra swap when it's independently worth that cost -- exactly the trade-off a manager
+    actually faces when taking a hit, not scope creep.
+    """
+    squad_ids = {p.id for p in current_squad}
+    if wanted_player.id in squad_ids:
+        raise RuntimeError(f"{wanted_player.name} is already in this squad.")
+
+    pool_by_id = {p.id: p for p in pool}
+    for p in current_squad:
+        if p.id not in pool_by_id:
+            raise RuntimeError(f"'{p.name}' isn't in the candidate pool for this horizon (no fixture?).")
+    if wanted_player.id not in pool_by_id:
+        raise RuntimeError(f"'{wanted_player.name}' isn't in the candidate pool for this horizon.")
+
+    old_total_xp = sum(pool_by_id[p.id].xp for p in current_squad)
+    total_budget = round(bank + sum(pool_by_id[p.id].price for p in current_squad), 2)
+
+    combos: list[TradeCombo] = []
+    excluded_solutions: list[tuple[frozenset[str], frozenset[str]]] = []
+
+    for attempt in range(top_k):
+        prob = pulp.LpProblem("trade_combo", pulp.LpMaximize)
+        x = {p.id: pulp.LpVariable(f"pick_{p.id}", cat="Binary") for p in pool}
+        hits = pulp.LpVariable("hits", lowBound=0)
+
+        prob += pulp.lpSum(p.xp * x[p.id] for p in pool) - hit_cost * hits
+        prob += pulp.lpSum(p.price * x[p.id] for p in pool) <= total_budget
+
+        for pos, count in SQUAD_SHAPE.items():
+            prob += pulp.lpSum(x[p.id] for p in pool if p.pos == pos) == count
+
+        for team in {p.team for p in pool}:
+            prob += pulp.lpSum(x[p.id] for p in pool if p.team == team) <= club_cap
+
+        prob += x[wanted_player.id] == 1
+
+        transfers_out = pulp.lpSum(1 - x[p.id] for p in current_squad)
+        prob += hits >= transfers_out - free_transfers
+
+        for out_ids, in_ids in excluded_solutions:
+            prob += pulp.lpSum(x[pid] for pid in out_ids) + pulp.lpSum(1 - x[pid] for pid in in_ids) >= 1
+
+        prob.solve(pulp.PULP_CBC_CMD(msg=False))
+        if pulp.LpStatus[prob.status] != "Optimal":
+            if attempt == 0:
+                raise RuntimeError(
+                    f"No legal way to fit {wanted_player.name} into this squad even liquidating "
+                    f"everything ({pulp.LpStatus[prob.status]}) -- they may be unaffordable, or "
+                    f"push a club over the {club_cap}-per-club cap no matter who's dropped."
+                )
+            break  # no further genuinely distinct combo exists -- return what we have
+
+        new_squad_ids = {p.id for p in pool if x[p.id].value() == 1}
+        players_out = sorted(
+            (p for p in current_squad if p.id not in new_squad_ids),
+            key=lambda p: _POSITION_ORDER[p.pos],
+        )
+        players_in = sorted(
+            (pool_by_id[pid] for pid in new_squad_ids if pid not in squad_ids),
+            key=lambda p: _POSITION_ORDER[p.pos],
+        )
+        hits_value = round(hits.value())
+        new_bank = round(total_budget - sum(pool_by_id[pid].price for pid in new_squad_ids), 2)
+
+        combos.append(
+            TradeCombo(
+                players_out=players_out,
+                players_in=players_in,
+                hits=hits_value,
+                hit_cost=hits_value * hit_cost,
+                xp_gain=round(pulp.value(prob.objective) - old_total_xp, 2),
+                new_bank=new_bank,
+            )
+        )
+        excluded_solutions.append((frozenset(p.id for p in players_out), frozenset(p.id for p in players_in)))
+
+    combos.sort(key=lambda c: c.xp_gain, reverse=True)
+    return combos
 
 
 def suggest_transfers(

@@ -294,6 +294,47 @@ def fpl_player_breakdown(element_id: int, n: int = player_breakdown.RECENT_GAMEW
     return {"recent": [asdict(r) for r in result.recent], "note": result.note}
 
 
+@app.get("/recommend/fpl/trade-for")
+def recommend_fpl_trade_for(
+    target: str,
+    entry_id: int | None = None,
+    players: str = "",
+    bank: float = 0.0,
+    free_transfers: int = 1,
+    event: int | None = None,
+    horizon: int = fpl_service.DEFAULT_TRADE_HORIZON,
+) -> dict:
+    """
+    "I want THIS player" — the top-3 legal ways (no chip) to reshuffle your squad to afford
+    and fit `target` in, ranked by projected points over `horizon` gameweeks net of any
+    transfer hits. The first result is the recommended one.
+    """
+    with FPLClient() as client:
+        pool_1gw = fpl_service.build_candidate_pool(client, event=event)
+        current_squad, _starters, bank, _entry, unmatched = _resolve_current_squad(
+            client, pool_1gw, entry_id, players, bank
+        )
+        combos = fpl_service.build_trade_combos(
+            client, current_squad, target, bank=bank, free_transfers=free_transfers, event=event, horizon=horizon
+        )
+    return {
+        "horizon_gameweeks": horizon,
+        "combos": [
+            {
+                "players_out": [asdict(p) for p in c.players_out],
+                "players_in": [asdict(p) for p in c.players_in],
+                "hits": c.hits,
+                "hit_cost": c.hit_cost,
+                "xp_gain": c.xp_gain,
+                "new_bank": c.new_bank,
+                "recommended": i == 0,
+            }
+            for i, c in enumerate(combos)
+        ],
+        "unmatched_names": unmatched,
+    }
+
+
 @app.get("/fpl/overview")
 def fpl_overview(
     entry_id: int | None = None,

@@ -9,6 +9,7 @@ from fantasy_app.recommend.fpl import (
     CandidatePlayer,
     CLUB_CAP,
     best_transfer_targets_by_position,
+    find_trade_combos_for_target,
     optimize_squad,
     suggest_transfers,
 )
@@ -135,6 +136,115 @@ def test_best_transfer_targets_none_when_nothing_affordable():
     pool = [CandidatePlayer(id="rich_gk", name="Rich", pos="GK", team="Alpha", price=6.0, xp=5.0)]
     targets = best_transfer_targets_by_position(pool, squad, budget=4.0)
     assert targets["GK"] is None
+
+
+def _base_squad():
+    """15 players, exactly 2/5/5/3, each on its own distinct team (no incidental club-cap
+    interactions unless a test deliberately introduces one) — a plain, affordable starting
+    point for the trade-combo tests below."""
+    squad = []
+    squad.append(CandidatePlayer(id="gk0", name="GK0", pos="GK", team="GK-A", price=4.0, xp=3.0))
+    squad.append(CandidatePlayer(id="gk1", name="GK1", pos="GK", team="GK-B", price=4.0, xp=3.0))
+    for i in range(5):
+        squad.append(CandidatePlayer(id=f"def{i}", name=f"Def{i}", pos="DEF", team=f"DEF-{i}", price=4.5, xp=3.0))
+    for i in range(5):
+        squad.append(CandidatePlayer(id=f"mid{i}", name=f"Mid{i}", pos="MID", team=f"MID-{i}", price=6.0, xp=4.0))
+    for i in range(3):
+        squad.append(CandidatePlayer(id=f"fwd{i}", name=f"Fwd{i}", pos="FWD", team=f"FWD-{i}", price=7.0, xp=5.0))
+    return squad
+
+
+def _new_squad_after(current_squad, combo):
+    out_ids = {p.id for p in combo.players_out}
+    return [p for p in current_squad if p.id not in out_ids] + combo.players_in
+
+
+def test_find_trade_combos_single_swap_when_affordable():
+    squad = _base_squad()
+    wanted = CandidatePlayer(id="wanted_mid", name="WantedMid", pos="MID", team="NewTeam", price=8.0, xp=9.0)
+    pool = squad + [wanted]
+
+    combos = find_trade_combos_for_target(squad, wanted, pool, bank=2.0, free_transfers=1, top_k=1)
+
+    best = combos[0]
+    assert best.hits == 0
+    assert len(best.players_out) == 1
+    assert best.players_out[0].pos == "MID"
+    assert best.players_in == [wanted]
+    new_squad = _new_squad_after(squad, best)
+    assert sum(p.price for p in new_squad) <= 2.0 + sum(p.price for p in squad) + 1e-6
+
+
+def test_find_trade_combos_needs_secondary_downgrade_to_close_budget_gap():
+    squad = _base_squad()
+    # Priced well beyond what selling any single MID (6.0) plus a 2.0 bank can cover (8.0).
+    wanted = CandidatePlayer(id="wanted_mid", name="WantedMid", pos="MID", team="NewTeam", price=13.0, xp=9.0)
+    # The only way to free the remaining 5.0m: downgrade one FWD (7.0 each) to this cheaper one.
+    cheap_fwd = CandidatePlayer(id="cheap_fwd", name="CheapFwd", pos="FWD", team="CheapTeam", price=2.0, xp=3.0)
+    pool = squad + [wanted, cheap_fwd]
+
+    combos = find_trade_combos_for_target(squad, wanted, pool, bank=2.0, free_transfers=2)
+
+    best = combos[0]
+    assert wanted in best.players_in
+    assert cheap_fwd in best.players_in
+    assert len(best.players_out) == 2
+    assert any(p.pos == "FWD" for p in best.players_out)
+    new_squad = _new_squad_after(squad, best)
+    assert sum(p.price for p in new_squad) <= 2.0 + sum(p.price for p in squad) + 1e-6
+
+
+def test_find_trade_combos_never_breaks_club_cap():
+    squad = _base_squad()
+    # Stack 3 non-MID players on "Stack" (at the cap already) plus one of the MIDs.
+    squad = [
+        p if p.id not in {"def0", "fwd0", "mid0"} else CandidatePlayer(p.id, p.name, p.pos, "Stack", p.price, p.xp)
+        for p in squad
+    ]
+    wanted = CandidatePlayer(id="wanted_mid", name="WantedMid", pos="MID", team="Stack", price=8.0, xp=9.0)
+    pool = squad + [wanted]
+
+    combos = find_trade_combos_for_target(squad, wanted, pool, bank=2.0, free_transfers=2, top_k=3)
+
+    assert combos  # at least one legal combo exists
+    for combo in combos:
+        new_squad = _new_squad_after(squad, combo)
+        team_counts: dict[str, int] = {}
+        for p in new_squad:
+            team_counts[p.team] = team_counts.get(p.team, 0) + 1
+        assert all(count <= CLUB_CAP for count in team_counts.values())
+
+
+def test_find_trade_combos_hit_cost_suppresses_an_unaffordable_extra_swap():
+    squad = _base_squad()
+    wanted = CandidatePlayer(id="wanted_mid", name="WantedMid", pos="MID", team="NewTeam", price=8.0, xp=9.0)
+    # Same price as fwd2 (no budget impact), a modest +1.5 xp upgrade -- worth taking for free,
+    # not worth an extra -4 hit.
+    small_upgrade = CandidatePlayer(id="small_upgrade_fwd", name="SmallUpgrade", pos="FWD", team="UpTeam", price=7.0, xp=6.5)
+    pool = squad + [wanted, small_upgrade]
+
+    with_one_free = find_trade_combos_for_target(squad, wanted, pool, bank=2.0, free_transfers=1)[0]
+    assert with_one_free.hits == 0
+    assert small_upgrade not in with_one_free.players_in  # not worth a 2nd hit for +1.5 xp
+
+    with_two_free = find_trade_combos_for_target(squad, wanted, pool, bank=2.0, free_transfers=2)[0]
+    assert with_two_free.hits == 0
+    assert small_upgrade in with_two_free.players_in  # free to take now, so take it
+
+
+def test_find_trade_combos_already_owned_raises():
+    squad = _base_squad()
+    owned = next(p for p in squad if p.id == "mid0")
+    with pytest.raises(RuntimeError, match="already in this squad"):
+        find_trade_combos_for_target(squad, owned, squad, bank=0.0, free_transfers=1)
+
+
+def test_find_trade_combos_unaffordable_even_liquidating_everything_raises():
+    squad = _base_squad()
+    wanted = CandidatePlayer(id="wanted_mid", name="WantedMid", pos="MID", team="NewTeam", price=999.0, xp=9.0)
+    pool = squad + [wanted]
+    with pytest.raises(RuntimeError, match="No legal way to fit"):
+        find_trade_combos_for_target(squad, wanted, pool, bank=0.0, free_transfers=1)
 
 
 def test_recommend_laliga_picks_top_xp_captain_and_flags_upgrades():

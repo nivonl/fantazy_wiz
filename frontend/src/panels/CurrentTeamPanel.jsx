@@ -43,6 +43,8 @@ export function CurrentTeamPanel({ squad }) {
   const [expandedChip, setExpandedChip] = useState(null);
   const [budget, setBudget] = useState(8.0);
   const [targetsState, runTargets] = useCachedAsyncAction("squad-targets", `${squadCacheKey}|budget=${budget}`);
+  const [tradeTarget, setTradeTarget] = useState("");
+  const [tradeState, runTrade] = useCachedAsyncAction("squad-trade-for", `${squadCacheKey}|target=${tradeTarget}`);
 
   const submit = () => {
     run(async () => api.get(`/recommend/fpl/full?${squad.toParams().toString()}`));
@@ -56,8 +58,17 @@ export function CurrentTeamPanel({ squad }) {
     });
   };
 
+  const findTradeCombos = () => {
+    runTrade(async () => {
+      const params = squad.toParams();
+      params.set("target", tradeTarget);
+      return api.get(`/recommend/fpl/trade-for?${params.toString()}`);
+    });
+  };
+
   const rec = state.data;
   const targets = targetsState.data;
+  const trade = tradeState.data;
 
   return (
     <Card
@@ -218,6 +229,74 @@ export function CurrentTeamPanel({ squad }) {
                     </tbody>
                   </table>
                 </div>
+              </Reveal>
+            )}
+
+            <p className="section-heading">Trade for a specific player</p>
+            <p className="hint" style={{ marginTop: -4 }}>
+              Want one particular player? The top 3 legal ways to reshuffle your squad (no chip)
+              to afford and fit them in — including a second downgrade elsewhere if their price
+              needs it — ranked by projected points over the next few gameweeks, net of any
+              transfer hits.
+            </p>
+            <div className="controls">
+              <Field label="Player you want">
+                <input
+                  type="text"
+                  placeholder="e.g. Haaland"
+                  value={tradeTarget}
+                  onChange={(e) => setTradeTarget(e.target.value)}
+                />
+              </Field>
+              <Button variant="ghost" onClick={findTradeCombos} disabled={tradeState.loading || !tradeTarget.trim()}>
+                {tradeState.loading ? "Solving…" : "Find trade combos"}
+              </Button>
+              <SnapshotHint savedAt={tradeState.savedAt} />
+            </div>
+            {tradeState.loading && <Spinner label="Solving the best way to fit them in…" />}
+            <ErrorBanner error={tradeState.error} />
+            {trade && (
+              <Reveal revealKey={JSON.stringify(trade.combos)}>
+                {trade.combos.length === 0 ? (
+                  <p className="empty">No legal combo found.</p>
+                ) : (
+                  <div className="chip-grid">
+                    {trade.combos.map((c, i) => (
+                      <div className="chip-card" key={i}>
+                        {c.recommended && <Tag variant="captain">Recommended</Tag>}
+                        <p className="summary-line" style={{ marginTop: 6 }}>
+                          OUT{" "}
+                          {c.players_out.map((p, j) => (
+                            <span key={p.id}>
+                              {j > 0 && ", "}
+                              <PlayerTip player={p} />
+                            </span>
+                          ))}
+                          {" "}&rarr; IN{" "}
+                          {c.players_in.map((p, j) => (
+                            <span key={p.id}>
+                              {j > 0 && ", "}
+                              <PlayerTip player={p} />
+                            </span>
+                          ))}
+                        </p>
+                        <div className="chip-lift">
+                          <SignedValue value={c.xp_gain} suffix=" xP" />
+                        </div>
+                        <div className="chip-note">
+                          {c.hits > 0 ? (
+                            <Tag variant="hit">
+                              {c.hits} hit{c.hits > 1 ? "s" : ""} (-{c.hit_cost})
+                            </Tag>
+                          ) : (
+                            "No hit — within free transfers"
+                          )}{" "}
+                          · Bank after: {c.new_bank}m
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </Reveal>
             )}
 

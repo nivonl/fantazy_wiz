@@ -25,8 +25,10 @@ from fantasy_app.providers.fpl import POSITION_BY_ELEMENT_TYPE, FPLClient
 from fantasy_app.recommend.fpl import (
     CandidatePlayer,
     SquadResult,
+    TradeCombo,
     TransferSuggestion,
     best_transfer_targets_by_position,
+    find_trade_combos_for_target,
     optimize_squad,
     pick_starting_xi,
     suggest_transfers,
@@ -43,6 +45,7 @@ SHORTLIST_PER_POSITION = {"GK": 8, "DEF": 20, "MID": 20, "FWD": 15}
 DEFAULT_TRANSFER_HORIZON = 3  # gameweeks a transfer's benefit is evaluated over — it sticks around
 DEFAULT_WILDCARD_HORIZON = 5  # wildcard is permanent, so its lift is judged over a longer run
 DEFAULT_TARGET_HORIZON = 5  # per-position "best affordable target" horizon
+DEFAULT_TRADE_HORIZON = 5  # "trade for this player" combo horizon
 
 
 @dataclass(frozen=True)
@@ -439,6 +442,27 @@ def build_transfer_targets(
     selection logic this just wires a real multi-gameweek pool into."""
     pool = build_candidate_pool_multi_gw(client, fd_client=fd_client, start_event=event, num_gameweeks=horizon)
     return best_transfer_targets_by_position(pool, current_squad, budget)
+
+
+def build_trade_combos(
+    client: FPLClient,
+    current_squad: list[CandidatePlayer],
+    target_name: str,
+    bank: float,
+    free_transfers: int,
+    event: int | None = None,
+    fd_client: FootballDataClient | None = None,
+    horizon: int = DEFAULT_TRADE_HORIZON,
+    top_k: int = 3,
+) -> list[TradeCombo]:
+    """Top-`top_k` ways to reshuffle `current_squad` (no chip) to end up owning the player
+    named `target_name`, ranked by projected points over `horizon` gameweeks net of any
+    transfer hits. See find_trade_combos_for_target for the actual optimization."""
+    pool = build_candidate_pool_multi_gw(client, fd_client=fd_client, start_event=event, num_gameweeks=horizon)
+    matched, unmatched = match_player_names([target_name], pool)
+    if not matched:
+        raise RuntimeError(f"Couldn't match '{target_name}' to a real FPL player.")
+    return find_trade_combos_for_target(current_squad, matched[0], pool, bank, free_transfers, top_k=top_k)
 
 
 def match_player_names(names: list[str], pool: list[CandidatePlayer]) -> tuple[list[CandidatePlayer], list[str]]:
