@@ -314,6 +314,18 @@ def fpl_player_breakdown(element_id: int, n: int = player_breakdown.RECENT_GAMEW
     return {"recent": [asdict(r) for r in result.recent], "note": result.note}
 
 
+@app.get("/fpl/player/{element_id}/price-history")
+def fpl_player_price_history(element_id: int) -> list[dict]:
+    """
+    Every gameweek's real price this season plus the immediately preceding season — a proper
+    price-over-time view (used by the static player-page generator's price chart), distinct
+    from /breakdown's short "recent form" window.
+    """
+    with FPLClient() as client:
+        points = player_breakdown.build_price_history(client, element_id)
+    return [asdict(p) for p in points]
+
+
 @app.get("/recommend/fpl/trade-for")
 def recommend_fpl_trade_for(
     target: str,

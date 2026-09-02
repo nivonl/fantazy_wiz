@@ -13,6 +13,7 @@ def _row(season, team, opponent, points, goals=0, assists=0, minutes=90):
     return HistoryRow(
         season=season, player="test player", team=team, opponent=opponent, round=1,
         total_points=points, minutes=minutes, goals_scored=goals, assists=assists, was_home=True,
+        price=6.0,
     )
 
 

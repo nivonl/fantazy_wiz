@@ -58,6 +58,7 @@ class HistoryRow:
     goals_scored: int
     assists: int
     was_home: bool
+    price: float  # £m, this gameweek's actual price (archive's "value" column, /10)
 
 
 def _cached_get(url: str, cache_path: Path) -> str:
@@ -101,6 +102,7 @@ def _load_season_rows(season: str) -> list[HistoryRow]:
                     goals_scored=int(r["goals_scored"] or 0),
                     assists=int(r["assists"] or 0),
                     was_home=(r["was_home"] or "").strip().lower() == "true",
+                    price=int(r["value"] or 0) / 10.0,
                 )
             )
         except (KeyError, ValueError):

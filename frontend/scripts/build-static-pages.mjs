@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 import { warmUpBackend, fetchJson, mapWithConcurrency } from "./lib/fetch-api.mjs";
 import { buildSlugMap } from "./lib/slugify.mjs";
 import { renderPage, SITE_URL } from "./lib/render-page.mjs";
-import { renderPointsBarChart } from "./lib/chart.mjs";
+import { renderPointsBarChart, renderPriceLineChart } from "./lib/chart.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FRONTEND_DIR = join(__dirname, "..");
@@ -62,22 +62,26 @@ ${players
 function renderBreakdownTable(rows) {
   if (!rows.length) return `<p class="empty">No gameweek history available yet.</p>`;
   const hasDetail = rows.some((r) => r.clean_sheets !== null || r.bonus !== null);
+  const hasPrice = rows.some((r) => r.price != null);
   const extraCols = hasDetail ? "<th>G</th><th>A</th><th>CS</th><th>Bns</th>" : "";
-  return `<div class="table-wrap"><table><thead><tr><th>Season</th><th>GW</th><th>Opponent</th><th>Min</th>${extraCols}<th>Pts</th></tr></thead><tbody>
+  const priceCol = hasPrice ? "<th>Price</th>" : "";
+  return `<div class="table-wrap"><table><thead><tr><th>Season</th><th>GW</th><th>Opponent</th><th>Min</th>${priceCol}${extraCols}<th>Pts</th></tr></thead><tbody>
 ${rows
   .map((r) => {
     const opp = r.opponent ? (r.was_home ? escapeHtml(r.opponent) : `@ ${escapeHtml(r.opponent)}`) : "&mdash;";
+    const price = hasPrice ? `<td>${r.price != null ? `${r.price.toFixed(1)}m` : "&mdash;"}</td>` : "";
     const extra = hasDetail
       ? `<td>${r.goals_scored ?? "&mdash;"}</td><td>${r.assists ?? "&mdash;"}</td><td>${r.clean_sheets ?? "&mdash;"}</td><td>${r.bonus ?? "&mdash;"}</td>`
       : "";
-    return `<tr><td>${r.season}</td><td>${r.gameweek}</td><td>${opp}</td><td>${r.minutes}</td>${extra}<td><b>${r.total_points}</b></td></tr>`;
+    return `<tr><td>${r.season}</td><td>${r.gameweek}</td><td>${opp}</td><td>${r.minutes}</td>${price}${extra}<td><b>${r.total_points}</b></td></tr>`;
   })
   .join("\n")}
 </tbody></table></div>`;
 }
 
-function renderPlayerBody(player, breakdown) {
+function renderPlayerBody(player, breakdown, priceHistory) {
   const stats = player.opponent_stats;
+  const priceChart = priceHistory?.length ? renderPriceLineChart(priceHistory) : "";
   return `
     <h2>${escapeHtml(player.name)} — FPL Price, Predicted Points &amp; Fixtures</h2>
     <p class="summary-line">${player.pos} &middot; ${escapeHtml(player.team)} &middot; ${player.price.toFixed(1)}m</p>
@@ -91,6 +95,13 @@ function renderPlayerBody(player, breakdown) {
     ${breakdown?.note ? `<p class="hint">${escapeHtml(breakdown.note)}</p>` : ""}
     ${breakdown?.recent?.length ? renderPointsBarChart(breakdown.recent) : ""}
     ${renderBreakdownTable(breakdown?.recent ?? [])}
+    ${
+      priceChart
+        ? `<h3>Price history</h3>
+    <p class="hint">${escapeHtml(player.name)}'s real FPL price this season, plus last season where available.</p>
+    ${priceChart}`
+        : ""
+    }
     <p class="hint">Predicted points are from a statistical model (Poisson-fit team ratings + the official FPL scoring
     table) -- see the <a href="/methodology">methodology</a> for exactly how. Want to trade for
     ${escapeHtml(player.name)}? Try the <a href="/fpl-transfer-finder">Transfer Finder</a>.</p>
@@ -156,6 +167,19 @@ async function main() {
   }
   if (breakdownFailures > 0) console.log(`${breakdownFailures} player breakdown(s) failed to fetch -- those pages omit that section.`);
 
+  console.log("Fetching per-player price histories...");
+  const priceHistoryResults = await mapWithConcurrency(players, BREAKDOWN_CONCURRENCY, (p) => fetchJson(`/fpl/player/${p.id}/price-history`));
+  const priceHistoryById = new Map();
+  let priceHistoryFailures = 0;
+  for (const { item, result, error } of priceHistoryResults) {
+    if (error) {
+      priceHistoryFailures++;
+      continue; // degrade gracefully -- the page just omits the price chart
+    }
+    priceHistoryById.set(item.id, result);
+  }
+  if (priceHistoryFailures > 0) console.log(`${priceHistoryFailures} player price-history fetch(es) failed -- those pages omit the price chart.`);
+
   for (const player of players) {
     const slug = slugById.get(player.id);
     const path = `/fpl/player/${slug}`;
@@ -169,7 +193,7 @@ async function main() {
         { name: "Players", path: "/fpl/players" },
         { name: player.name, path },
       ],
-      bodyHtml: renderPlayerBody(player, breakdownById.get(player.id)),
+      bodyHtml: renderPlayerBody(player, breakdownById.get(player.id), priceHistoryById.get(player.id)),
     });
     generatedPaths.push(writePage(path, html));
   }
