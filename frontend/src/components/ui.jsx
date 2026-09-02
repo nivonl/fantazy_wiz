@@ -268,10 +268,37 @@ const CARD_COLUMNS = [
   { key: "bonus", label: "Bns" },
 ];
 
+// The static-page generator (scripts/build-static-pages.mjs) publishes this alongside every
+// build — a plain { playerId: slug } map so the popup can link to a player's real static page
+// without trying to re-derive the slug client-side (which would need the whole player list
+// anyway, just to detect the same rare name collisions the generator already resolved).
+// Fetched once per session and cached in memory; in local dev (`vite dev`, no static build run
+// yet) this 404s and the link just doesn't render — a graceful no-op, not an error.
+let slugManifestPromise = null;
+function fetchSlugManifest() {
+  if (!slugManifestPromise) {
+    slugManifestPromise = fetch("/fpl/players/slugs.json")
+      .then((res) => (res.ok ? res.json() : {}))
+      .catch(() => ({}));
+  }
+  return slugManifestPromise;
+}
+
 // Fetched fresh every time it opens (plain useAsyncAction, not the localStorage-cached hook
 // used elsewhere) — a stale points breakdown would defeat the entire point of showing it.
 function PlayerBreakdownModal({ player, onClose }) {
   const [state, run] = useAsyncAction();
+  const [profileSlug, setProfileSlug] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchSlugManifest().then((manifest) => {
+      if (!cancelled) setProfileSlug(manifest[player.id] || null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [player.id]);
 
   useEffect(() => {
     run(async () => api.get(`/fpl/player/${player.id}/breakdown`));
@@ -347,6 +374,11 @@ function PlayerBreakdownModal({ player, onClose }) {
                   </tbody>
                 </table>
               </div>
+            )}
+            {profileSlug && (
+              <p style={{ marginTop: 12, marginBottom: 0 }}>
+                <a href={`/fpl/player/${profileSlug}`}>View {player.name}'s full profile &amp; stats chart &rarr;</a>
+              </p>
             )}
           </>
         )}

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Card, ThemeToggle, useTheme } from "../components/ui.jsx";
 import { LaLigaPanel } from "./LaLigaPanel.jsx";
 
@@ -13,6 +14,12 @@ export function MorePanel() {
             <ThemeToggle />
           </div>
         </div>
+      </Card>
+      <Card title="More on PitchMetric">
+        <p className="summary-line" style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
+          <Link to="/fpl-predictions">Score predictions</Link>
+          <Link to="/methodology">How the model works</Link>
+        </p>
       </Card>
       <p className="section-heading" style={{ margin: "4px 0 -8px 4px" }}>
         La Liga — same engine, lighter feature set (via 9cat.co.il)

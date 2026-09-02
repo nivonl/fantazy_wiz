@@ -28,6 +28,7 @@ header.top {
   align-items: center;
   gap: 10px;
   margin: 0;
+  text-decoration: none;
 }
 
 .theme-toggle {
@@ -83,12 +84,12 @@ header.top > p {
   max-width: 640px;
 }
 
-/* ---------- Tools nav (internal linking strip, present on every page) ---------- */
+/* ---------- Tools nav: the desktop-primary top nav (mobile uses the bottom nav instead) ---------- */
 
 .tools-nav {
-  display: flex;
+  display: none; /* shown from 768px up — see the min-width block below */
   flex-wrap: wrap;
-  gap: 4px 14px;
+  gap: 4px 18px;
   margin: 0 0 18px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--panel-border);
@@ -97,13 +98,16 @@ header.top > p {
 .tools-nav a {
   color: var(--text-dim);
   text-decoration: none;
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   font-weight: 600;
+  padding: 4px 2px;
+  border-bottom: 2px solid transparent;
 }
 
-.tools-nav a:hover { color: var(--analytics); }
+.tools-nav a:hover { color: var(--text); }
+.tools-nav a.active { color: var(--analytics); border-bottom-color: var(--analytics); }
 
-/* ---------- Bottom nav ---------- */
+/* ---------- Bottom nav (mobile-primary — hidden from 768px up, see below) ---------- */
 
 .bottom-nav {
   position: fixed;
@@ -142,6 +146,16 @@ header.top > p {
 .bottom-nav-item svg { width: 21px; height: 21px; }
 .bottom-nav-item:hover { color: var(--text); }
 .bottom-nav-item.active { color: var(--analytics); background: var(--tint-analytics); }
+
+/* Desktop gets the top tools-nav as primary; mobile keeps the fixed bottom nav. Placed after
+   both navs' base rules so it reliably wins the cascade at this width regardless of source
+   order elsewhere — a min-width override declared earlier in the file was previously being
+   beaten by the unconditional .bottom-nav{display:flex} rule that came after it. */
+@media (min-width: 768px) {
+  .tools-nav { display: flex; }
+  .bottom-nav { display: none; }
+  .app-shell { padding-bottom: 32px; }
+}
 
 /* ---------- Panels ---------- */
 

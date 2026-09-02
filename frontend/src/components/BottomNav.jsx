@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { NAV_ITEMS, BOTTOM_NAV_KEYS } from "../nav-items.js";
 
 const ICONS = {
   overview: (
@@ -9,7 +10,7 @@ const ICONS = {
       <rect x="3" y="16" width="7" height="5" rx="1.5" />
     </svg>
   ),
-  squad: (
+  analyzer: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="9" cy="8" r="3.2" />
       <path d="M3.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5" />
@@ -17,7 +18,15 @@ const ICONS = {
       <path d="M15.5 14.6c2.7 0.3 4.5 2.2 4.9 5.4" opacity="0.7" />
     </svg>
   ),
-  insights: (
+  transfer: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 3l4 4-4 4" />
+      <path d="M21 7H9" />
+      <path d="M7 21l-4-4 4-4" />
+      <path d="M3 17h12" />
+    </svg>
+  ),
+  builder: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 3a6.5 6.5 0 0 0-3.6 11.9c.4.3.6.8.6 1.3V17h6v-.8c0-.5.2-1 .6-1.3A6.5 6.5 0 0 0 12 3Z" />
       <path d="M9.5 21h5" />
@@ -32,16 +41,10 @@ const ICONS = {
   ),
 };
 
-const TABS = [
-  { key: "overview", label: "Overview", path: "/" },
-  { key: "squad", label: "Squad", path: "/fpl-team-analyzer" },
-  { key: "insights", label: "Insights", path: "/fpl-squad-builder" },
-  { key: "more", label: "More", path: "/more" },
-];
+const TABS = BOTTOM_NAV_KEYS.map((key) => NAV_ITEMS.find((item) => item.key === key));
 
-// Real <a href> navigation (via react-router's Link), not click handlers over local state — the
-// active tab is derived from the URL itself, driven by useLocation, so it stays in sync
-// regardless of how a page was reached (a Link click, browser back/forward, or a bookmark).
+// Mobile-only (hidden on desktop via CSS, see App.css) — a curated subset of NAV_ITEMS, real
+// <a href> navigation via react-router's Link, active state derived from the URL itself.
 export function BottomNav() {
   const { pathname } = useLocation();
   return (

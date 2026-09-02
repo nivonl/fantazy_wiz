@@ -16,6 +16,7 @@ import { fileURLToPath } from "node:url";
 import { warmUpBackend, fetchJson, mapWithConcurrency } from "./lib/fetch-api.mjs";
 import { buildSlugMap } from "./lib/slugify.mjs";
 import { renderPage, SITE_URL } from "./lib/render-page.mjs";
+import { renderPointsBarChart } from "./lib/chart.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FRONTEND_DIR = join(__dirname, "..");
@@ -88,6 +89,7 @@ function renderPlayerBody(player, breakdown) {
     }
     <h3>Recent gameweeks</h3>
     ${breakdown?.note ? `<p class="hint">${escapeHtml(breakdown.note)}</p>` : ""}
+    ${breakdown?.recent?.length ? renderPointsBarChart(breakdown.recent) : ""}
     ${renderBreakdownTable(breakdown?.recent ?? [])}
     <p class="hint">Predicted points are from a statistical model (Poisson-fit team ratings + the official FPL scoring
     table) -- see the <a href="/methodology">methodology</a> for exactly how. Want to trade for
@@ -184,6 +186,13 @@ async function main() {
     bodyHtml: renderPlayersIndexBody(players, slugById),
   });
   generatedPaths.push(writePage("/fpl/players", playersIndexHtml));
+
+  // Small id -> slug lookup the SPA fetches once, so the interactive player popup (which only
+  // knows a numeric player id) can link out to that player's real static page without trying
+  // to re-derive the slug client-side (which would need the whole player list anyway, just to
+  // detect the same rare name collisions the generator already resolved here).
+  const slugManifestPath = join(DIST_DIR, "fpl", "players", "slugs.json");
+  writeFileSync(slugManifestPath, JSON.stringify(Object.fromEntries(slugById)), "utf-8");
 
   // --- Gameweek pages: committed history (never re-derived) + the live current one ---
   let pastGameweeks = [];

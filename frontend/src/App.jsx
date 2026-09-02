@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./App.css";
 import { ThemeToggle, useMySquadIdentity, useTheme } from "./components/ui.jsx";
 import { BottomNav } from "./components/BottomNav.jsx";
@@ -81,13 +81,13 @@ export default function App() {
     <div className="app-shell">
       <header className="top">
         <div className="brand-bar">
-          <div className="brand">
+          <Link to="/" className="brand">
             <BrandMark />
             <h1>
               <span className="brand-pitch">Pitch</span>
               <span className="brand-metric">Metric</span>
             </h1>
-          </div>
+          </Link>
           <ThemeToggle />
         </div>
         <p>FPL &amp; La Liga analytics — score predictions and squad recommendations backed by real data.</p>
