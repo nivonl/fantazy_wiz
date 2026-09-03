@@ -16,6 +16,13 @@ export function ToolsNav() {
           {l.label}
         </Link>
       ))}
+      {/* Plain <a>, not <Link>: /blog is a real static page (scripts/build-static-pages.mjs),
+          not one of App.jsx's always-mounted SPA panels — same reasoning as the player-profile
+          links in components/ui.jsx. A real navigation loads the actual static HTML instead of
+          leaving the SPA shell showing no matching panel. */}
+      <a href="/blog" className={pathname.startsWith("/blog") ? "active" : ""}>
+        Blog
+      </a>
     </nav>
   );
 }

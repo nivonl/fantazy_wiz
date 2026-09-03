@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../api.js";
+import { renderRadarChart } from "../charts/radarChart.js";
 
 // Remembers a value in this browser (localStorage) across visits — e.g. your FPL entry ID or
 // current squad, so you don't retype it every time you open the site on your phone. No
@@ -284,16 +285,82 @@ function fetchSlugManifest() {
   return slugManifestPromise;
 }
 
+// Same manifest-fetched-once precedent as fetchSlugManifest above, publishing
+// scripts/build-static-pages.mjs's own /fpl/players/radar.json so the popup shows the exact
+// same percentile radar as that player's static page, without the browser ever hitting the
+// (comparatively heavy) live /fpl/players/radar endpoint itself.
+let radarManifestPromise = null;
+function fetchRadarManifest() {
+  if (!radarManifestPromise) {
+    radarManifestPromise = fetch("/fpl/players/radar.json")
+      .then((res) => (res.ok ? res.json() : {}))
+      .catch(() => ({}));
+  }
+  return radarManifestPromise;
+}
+
+const RADAR_WINDOW_LABELS = { last3: "Last 3 GWs", previous_season: "Previous Season", career: "Career" };
+const RADAR_WINDOW_ORDER = ["last3", "previous_season", "career"];
+const RADAR_POS_LABEL = { GK: "Goalkeepers", DEF: "Defenders", MID: "Midfielders", FWD: "Forwards" };
+
+// renderRadarChart returns an SVG string (the same generator scripts/build-static-pages.mjs
+// uses for the static pages) -- rendered here via dangerouslySetInnerHTML rather than ported to
+// JSX, so the popup's radar can never quietly drift from what the static page shows.
+function PlayerRadarSection({ radar, pos }) {
+  if (!radar?.categoryLabels) return null;
+  const keys = Object.keys(radar.categoryLabels);
+  const labels = keys.map((k) => radar.categoryLabels[k]);
+  const posLabel = `vs ${RADAR_POS_LABEL[pos] || pos}`;
+
+  const charts = RADAR_WINDOW_ORDER.map((window) => {
+    const entry = radar[window];
+    if (!entry) return null;
+    const allSeries = entry.all ? keys.map((k) => entry.all[k] ?? null) : null;
+    const positionSeries = entry.position ? keys.map((k) => entry.position[k] ?? null) : null;
+    const svg = renderRadarChart(labels, allSeries, positionSeries, { labelAll: "vs all players", labelPosition: posLabel });
+    return svg ? { window, svg } : null;
+  }).filter(Boolean);
+
+  if (!charts.length) return null;
+
+  return (
+    <>
+      <p className="section-heading" style={{ marginTop: 16 }}>
+        Stat radar
+      </p>
+      <div className="radar-row">
+        {charts.map(({ window, svg }) => (
+          <figure className="radar-chart" key={window}>
+            <figcaption>{RADAR_WINDOW_LABELS[window]}</figcaption>
+            <div dangerouslySetInnerHTML={{ __html: svg }} />
+          </figure>
+        ))}
+      </div>
+    </>
+  );
+}
+
 // Fetched fresh every time it opens (plain useAsyncAction, not the localStorage-cached hook
 // used elsewhere) — a stale points breakdown would defeat the entire point of showing it.
 function PlayerBreakdownModal({ player, onClose }) {
   const [state, run] = useAsyncAction();
   const [profileSlug, setProfileSlug] = useState(null);
+  const [radar, setRadar] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     fetchSlugManifest().then((manifest) => {
       if (!cancelled) setProfileSlug(manifest[player.id] || null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [player.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchRadarManifest().then((manifest) => {
+      if (!cancelled) setRadar(manifest[player.id] || null);
     });
     return () => {
       cancelled = true;
@@ -380,6 +447,7 @@ function PlayerBreakdownModal({ player, onClose }) {
                 <a href={`/fpl/player/${profileSlug}`}>View {player.name}'s full profile &amp; stats chart &rarr;</a>
               </p>
             )}
+            <PlayerRadarSection radar={radar} pos={player.pos} />
           </>
         )}
       </div>

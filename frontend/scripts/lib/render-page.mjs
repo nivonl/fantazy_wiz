@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { href: "/fpl-transfer-finder", label: "Transfer Finder" },
   { href: "/fpl-squad-builder", label: "Squad Builder" },
   { href: "/fpl-predictions", label: "Predictions" },
+  { href: "/blog", label: "Blog" },
   { href: "/methodology", label: "Methodology" },
 ];
 
@@ -30,7 +31,7 @@ function escapeJsonForScriptTag(json) {
  * not JS-only navigation), and whatever `bodyHtml` the caller built for the actual content.
  * No JS/hydration required to see any of it.
  */
-export function renderPage({ title, description, path, bodyHtml, cssHref, breadcrumbs, cardStyle }) {
+export function renderPage({ title, description, path, bodyHtml, cssHref, breadcrumbs, cardStyle, ogType = "website", extraJsonLd = [] }) {
   const fullTitle = `${title} | PitchMetric`;
   const canonical = `${SITE_URL}${path}`;
   const jsonLd = [
@@ -46,6 +47,7 @@ export function renderPage({ title, description, path, bodyHtml, cssHref, breadc
       name: "PitchMetric",
       url: SITE_URL,
     },
+    ...extraJsonLd,
   ];
   if (breadcrumbs?.length) {
     jsonLd.push({
@@ -72,7 +74,7 @@ export function renderPage({ title, description, path, bodyHtml, cssHref, breadc
     <meta property="og:title" content="${escapeHtml(fullTitle)}" />
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:url" content="${canonical}" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="${ogType}" />
     <link rel="stylesheet" crossorigin href="${cssHref}" />
     <script type="application/ld+json">${escapeJsonForScriptTag(JSON.stringify(jsonLd))}</script>
   </head>

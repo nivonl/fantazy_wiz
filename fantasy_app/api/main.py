@@ -26,7 +26,7 @@ from fantasy_app.providers.fpl import POSITION_BY_ELEMENT_TYPE, FPLClient
 from fantasy_app.providers.football_data import FootballDataClient
 from fantasy_app.recommend.fpl import optimize_squad
 from fantasy_app.recommend.laliga import recommend_laliga
-from fantasy_app.services import fpl_service, laliga_service, overview, player_breakdown
+from fantasy_app.services import fpl_service, laliga_service, overview, player_breakdown, player_radar
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
@@ -299,6 +299,21 @@ def fpl_players_predicted(event: int | None = None) -> dict:
         resolved_event = event or client.current_event(bootstrap)
         pool = fpl_service.build_candidate_pool(client, event=resolved_event)
     return {"event": resolved_event, "players": [asdict(p) for p in pool]}
+
+
+@app.get("/fpl/players/radar")
+def fpl_players_radar() -> dict:
+    """
+    Every player's percentile stat radar: how their per-90 rate stats compare to peers across
+    3 windows (last3 / previous_season / career) and, for outfield players, 2 comparison pools
+    (all / position) -- see services/player_radar.py for the category definitions and the
+    reasoning behind them. Keyed by element id, matching every other per-player endpoint. Used
+    by the static-page generator to build each player page's radar charts in one call.
+    """
+    with FPLClient() as client:
+        bootstrap = client.bootstrap()
+        table = player_radar.build_player_radar_table(bootstrap)
+    return table
 
 
 @app.get("/fpl/player/{element_id}/breakdown")

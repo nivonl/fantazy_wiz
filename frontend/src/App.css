@@ -412,6 +412,37 @@ tbody tr:hover { background: var(--tint-accent); }
 }
 .section-heading:first-child { margin-top: 0; }
 
+/* ---------- Stat radar ---------- */
+
+.radar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 4px 0 16px;
+}
+
+.radar-chart {
+  flex: 1 1 220px;
+  min-width: 200px;
+  max-width: 280px;
+  margin: 0;
+  text-align: center;
+}
+
+.radar-chart figcaption {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+/* The modal stays capped at 480px regardless of screen size, so 3 radars can never fit side by
+   side the way they can on the static page's much wider card -- always stack there. */
+.modal-card .radar-row { flex-direction: column; align-items: center; }
+.modal-card .radar-chart { width: 100%; max-width: 260px; }
+
 ul.flags { margin: 0; padding-left: 0; list-style: none; }
 ul.flags li {
   padding: 8px 10px;
@@ -668,6 +699,95 @@ ul.flags li {
   border-bottom: 1px solid var(--panel-border);
 }
 .settings-row:last-child { border-bottom: none; }
+
+/* ---------- Blog ---------- */
+
+.blog-index-grid { display: flex; flex-direction: column; gap: 16px; }
+
+.blog-index-card {
+  display: block;
+  background: linear-gradient(160deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease;
+}
+.blog-index-card:hover { border-color: var(--accent-dim); }
+.blog-index-card .blog-index-meta { color: var(--text-dim); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+.blog-index-card h3 { margin: 0 0 6px; font-family: var(--display); font-size: 1.15rem; color: var(--analytics); }
+.blog-index-card p { margin: 0; color: var(--text-dim); font-size: 0.88rem; line-height: 1.55; }
+
+.blog-post-meta { color: var(--text-dim); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 6px; }
+.blog-dek { color: var(--text-dim); font-size: 0.95rem; line-height: 1.6; margin: 0 0 18px; }
+
+.blog-player-card {
+  display: flex;
+  gap: 16px;
+  background: var(--input-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 18px;
+}
+
+.blog-player-photo-wrap { flex: 0 0 96px; }
+.blog-player-photo {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--panel-border);
+  display: block;
+}
+.blog-player-photo-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 2px solid var(--panel-border);
+  background: var(--tint-accent);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+.blog-photo-credit { color: var(--text-dim); font-size: 0.62rem; margin-top: 6px; text-align: center; line-height: 1.4; }
+.blog-photo-credit a { color: var(--text-dim); }
+
+.blog-player-body { flex: 1; min-width: 0; }
+.blog-player-name-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 2px; }
+.blog-player-rank { font-family: var(--display); font-weight: 800; color: var(--accent); font-size: 0.95rem; }
+.blog-player-name { font-family: var(--display); font-weight: 700; font-size: 1.05rem; }
+.blog-player-meta { color: var(--text-dim); font-size: 0.8rem; margin-bottom: 10px; }
+
+.blog-stat-row { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 10px; }
+.blog-stat-row .blog-stat-label { color: var(--text-dim); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.blog-stat-row .blog-stat-value { font-family: var(--display); font-weight: 700; font-size: 1.1rem; }
+
+.blog-boxscore { color: var(--text-dim); font-size: 0.8rem; margin-bottom: 10px; }
+.blog-boxscore b { color: var(--text); }
+
+.blog-player-analysis { font-size: 0.87rem; line-height: 1.6; margin: 0; }
+
+.blog-rarity-tag {
+  display: inline-block;
+  background: var(--tint-good);
+  color: var(--good);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 999px;
+  margin-left: 6px;
+}
+
+@media (max-width: 560px) {
+  .blog-player-card { flex-direction: column; }
+  .blog-player-photo-wrap { display: flex; flex-direction: column; align-items: center; }
+}
 
 /* ---------- Responsive ---------- */
 

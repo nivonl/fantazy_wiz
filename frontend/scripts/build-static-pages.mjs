@@ -17,6 +17,7 @@ import { warmUpBackend, fetchJson, mapWithConcurrency } from "./lib/fetch-api.mj
 import { buildSlugMap } from "./lib/slugify.mjs";
 import { renderPage, SITE_URL } from "./lib/render-page.mjs";
 import { renderPointsBarChart, renderPriceLineChart } from "./lib/chart.mjs";
+import { renderRadarChart } from "../src/charts/radarChart.js";
 import { teamColor } from "../src/team-colors.js";
 
 // A player's own page gets a subtle background wash of their club's color (see
@@ -36,10 +37,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const FRONTEND_DIR = join(__dirname, "..");
 const DIST_DIR = join(FRONTEND_DIR, "dist");
 const GAMEWEEKS_DIR = join(FRONTEND_DIR, "data", "gameweeks");
+const BLOG_POSTS_PATH = join(FRONTEND_DIR, "data", "blog", "posts.json");
 const BREAKDOWN_CONCURRENCY = 6;
 
 const POS_LABEL = { GK: "Goalkeepers", DEF: "Defenders", MID: "Midfielders", FWD: "Forwards" };
 const POS_ORDER = ["GK", "DEF", "MID", "FWD"];
+const RADAR_WINDOW_LABELS = { last3: "Last 3 GWs", previous_season: "Previous Season", career: "Career" };
+const RADAR_WINDOW_ORDER = ["last3", "previous_season", "career"];
 
 function escapeHtml(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -93,7 +97,29 @@ ${rows
 </tbody></table></div>`;
 }
 
-function renderPlayerBody(player, breakdown, priceHistory) {
+// One radar chart per window that actually has data, each showing the "vs all players" and "vs
+// position" polygons together (see radarChart.js) -- a goalkeeper's `all` series is always null
+// (services/player_radar.py), which renderRadarChart already handles by drawing only the
+// position polygon and its own legend entry.
+function renderRadarSection(radar, pos) {
+  if (!radar?.categoryLabels) return "";
+  const keys = Object.keys(radar.categoryLabels);
+  const labels = keys.map((k) => radar.categoryLabels[k]);
+  const posLabel = `vs ${POS_LABEL[pos] || pos}`;
+
+  const charts = RADAR_WINDOW_ORDER.map((window) => {
+    const entry = radar[window];
+    if (!entry) return "";
+    const allSeries = entry.all ? keys.map((k) => entry.all[k] ?? null) : null;
+    const positionSeries = entry.position ? keys.map((k) => entry.position[k] ?? null) : null;
+    const svg = renderRadarChart(labels, allSeries, positionSeries, { labelAll: "vs all players", labelPosition: posLabel });
+    return svg ? `<figure class="radar-chart"><figcaption>${RADAR_WINDOW_LABELS[window]}</figcaption>${svg}</figure>` : "";
+  }).join("");
+
+  return charts ? `<h3>Stat radar</h3><div class="radar-row">${charts}</div>` : "";
+}
+
+function renderPlayerBody(player, breakdown, priceHistory, radar) {
   const stats = player.opponent_stats;
   const priceChart = priceHistory?.length ? renderPriceLineChart(priceHistory) : "";
   return `
@@ -115,6 +141,7 @@ function renderPlayerBody(player, breakdown, priceHistory) {
     ${priceChart}`
         : ""
     }
+    ${renderRadarSection(radar, player.pos)}
     <p class="hint">Predicted points are from a statistical model (Poisson-fit team ratings + the official FPL scoring
     table) -- see the <a href="/methodology">methodology</a> for exactly how. Want to trade for
     ${escapeHtml(player.name)}? Try the <a href="/fpl-transfer-finder">Transfer Finder</a>.</p>
@@ -156,6 +183,97 @@ function renderGameweekBody(event, players, { isCurrent }) {
   `;
 }
 
+// --- Blog ---
+// Committed data (frontend/data/blog/posts.json), never re-derived at build time — same
+// precedent as the committed gameweek snapshots above: the underlying "actual vs predicted"
+// numbers were computed once, offline, against a real gameweek that's already in the past, so
+// there's nothing to re-fetch from a live API on every build.
+
+const POS_LABEL_LONG = { GK: "Goalkeeper", DEF: "Defender", MID: "Midfielder", FWD: "Forward" };
+
+function fmtSigned(n) {
+  const r = Math.round(n * 100) / 100;
+  return `${r >= 0 ? "+" : ""}${r.toFixed(2)}`;
+}
+
+function rarityLabel(percentile) {
+  if (percentile >= 99.5) return "Rarest of the gameweek";
+  if (percentile >= 97) return "Top 1-in-40 surprise";
+  if (percentile >= 90) return "Top-decile surprise";
+  return "Notable surprise";
+}
+
+function renderBlogPlayerCard(p) {
+  const photoBlock = p.photo
+    ? `<img class="blog-player-photo" src="/blog/players/${p.photo}" alt="${escapeHtml(p.name)}" loading="lazy" width="96" height="96" />
+       <p class="blog-photo-credit">Photo: ${escapeHtml(p.photo_credit.name)}, <a href="${p.photo_credit.license_url}">${escapeHtml(p.photo_credit.license)}</a>, via <a href="${p.photo_credit.source_url}">Wikimedia Commons</a></p>`
+    : `<div class="blog-player-photo-placeholder">${escapeHtml(p.name.split(" ").map((w) => w[0]).join("").slice(0, 2))}</div>
+       <p class="blog-photo-credit">No free photo available yet</p>`;
+
+  const fixtureLine = `${p.was_home ? "vs" : "@"} ${escapeHtml(p.opponent)}`;
+  const boxscoreParts = [];
+  if (p.goals) boxscoreParts.push(`${p.goals} goal${p.goals > 1 ? "s" : ""}`);
+  if (p.assists) boxscoreParts.push(`${p.assists} assist${p.assists > 1 ? "s" : ""}`);
+  if (p.clean_sheets) boxscoreParts.push("clean sheet");
+  if (p.bonus) boxscoreParts.push(`${p.bonus} bonus`);
+
+  return `
+    <div class="blog-player-card">
+      <div class="blog-player-photo-wrap">${photoBlock}</div>
+      <div class="blog-player-body">
+        <div class="blog-player-name-row">
+          <span class="blog-player-rank">#${p.rank}</span>
+          <span class="blog-player-name">${escapeHtml(p.name)}</span>
+          <span class="blog-rarity-tag">${rarityLabel(p.percentile)}</span>
+        </div>
+        <p class="blog-player-meta">${POS_LABEL_LONG[p.position] || p.position} &middot; ${escapeHtml(p.team)} &middot; ${p.value.toFixed(1)}m &middot; ${fixtureLine} &middot; ${p.minutes}&prime;</p>
+        <div class="blog-stat-row">
+          <div><div class="blog-stat-label">Predicted</div><div class="blog-stat-value">${p.predicted_xp.toFixed(2)}</div></div>
+          <div><div class="blog-stat-label">Actual</div><div class="blog-stat-value">${p.actual_points}</div></div>
+          <div><div class="blog-stat-label">Surprise</div><div class="blog-stat-value" style="color:var(--good)">${fmtSigned(p.surprise)}</div></div>
+          <div><div class="blog-stat-label">Percentile</div><div class="blog-stat-value">${p.percentile.toFixed(1)}</div></div>
+        </div>
+        <p class="blog-boxscore"><b>Box score:</b> ${boxscoreParts.length ? escapeHtml(boxscoreParts.join(", ")) : "&mdash;"} &middot; xG ${p.expected_goals.toFixed(2)}, xA ${p.expected_assists.toFixed(2)} &middot; ICT ${p.ict_index.toFixed(1)}</p>
+        <p class="blog-player-analysis">${p.analysis}</p>
+      </div>
+    </div>`;
+}
+
+function renderBlogPostBody(post) {
+  const dateLabel = new Date(post.published + "T00:00:00Z").toLocaleDateString("en-GB", {
+    year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
+  });
+  return `
+    <p class="blog-post-meta">Gameweek ${post.gameweek} &middot; ${dateLabel}</p>
+    <h2>${escapeHtml(post.title)}</h2>
+    <p class="blog-dek">${escapeHtml(post.dek)}</p>
+    <p class="summary-line">${post.intro}</p>
+    <p class="hint">Ranked among ${post.qualifying_player_count} players who played at least ${post.min_minutes} minutes in gameweek ${post.gameweek}, by actual points minus predicted xP. Average surprise across that pool: ${fmtSigned(post.mean_surprise)} (std. dev. ${post.stdev_surprise.toFixed(2)}).</p>
+    ${post.players.map(renderBlogPlayerCard).join("\n")}
+    <p class="summary-line">${post.closing}</p>
+    <p><a href="/blog">&larr; All posts</a> &middot; <a href="/methodology">How predictions work</a></p>
+  `;
+}
+
+function renderBlogIndexBody(posts) {
+  return `
+    <h2>PitchMetric Blog</h2>
+    <p class="summary-line">Every gameweek, the five biggest gaps between what PitchMetric predicted and what actually happened — for players who played at least 30 minutes — with the underlying stats (xG, xA, ICT and more) behind each one, and how rare a surprise of that size really was.</p>
+    <div class="blog-index-grid">
+      ${posts
+        .map(
+          (post) => `
+      <a class="blog-index-card" href="/blog/${post.slug}">
+        <p class="blog-index-meta">Gameweek ${post.gameweek}</p>
+        <h3>${escapeHtml(post.title)}</h3>
+        <p>${escapeHtml(post.dek)}</p>
+      </a>`
+        )
+        .join("\n")}
+    </div>
+  `;
+}
+
 async function main() {
   console.log(`Generating static pages against ${process.env.VITE_API_BASE_URL || "(default backend URL)"}...`);
   await warmUpBackend();
@@ -193,6 +311,14 @@ async function main() {
   }
   if (priceHistoryFailures > 0) console.log(`${priceHistoryFailures} player price-history fetch(es) failed -- those pages omit the price chart.`);
 
+  console.log("Fetching player stat-radar table...");
+  let radarTable = {};
+  try {
+    radarTable = await fetchJson("/fpl/players/radar", { timeoutMs: 60000 });
+  } catch (err) {
+    console.log(`Radar table fetch failed (${err.message}) -- pages will omit the stat radar section.`);
+  }
+
   for (const player of players) {
     const slug = slugById.get(player.id);
     const path = `/fpl/player/${slug}`;
@@ -206,7 +332,7 @@ async function main() {
         { name: "Players", path: "/fpl/players" },
         { name: player.name, path },
       ],
-      bodyHtml: renderPlayerBody(player, breakdownById.get(player.id), priceHistoryById.get(player.id)),
+      bodyHtml: renderPlayerBody(player, breakdownById.get(player.id), priceHistoryById.get(player.id), radarTable[player.id]),
       cardStyle: teamAccentStyle(player.team),
     });
     generatedPaths.push(writePage(path, html));
@@ -231,6 +357,12 @@ async function main() {
   // detect the same rare name collisions the generator already resolved here).
   const slugManifestPath = join(DIST_DIR, "fpl", "players", "slugs.json");
   writeFileSync(slugManifestPath, JSON.stringify(Object.fromEntries(slugById)), "utf-8");
+
+  // Same "publish a small manifest, fetch it once client-side" precedent as slugs.json above --
+  // lets the SPA's player popup render the exact same radar charts without the browser ever
+  // hitting the (comparatively heavy, ~650-player) live /fpl/players/radar endpoint itself.
+  const radarManifestPath = join(DIST_DIR, "fpl", "players", "radar.json");
+  writeFileSync(radarManifestPath, JSON.stringify(radarTable), "utf-8");
 
   // --- Gameweek pages: committed history (never re-derived) + the live current one ---
   let pastGameweeks = [];
@@ -265,6 +397,57 @@ async function main() {
       bodyHtml: renderGameweekBody(gw.event, gw.players, { isCurrent: gw.isCurrent }),
     });
     generatedPaths.push(writePage(path, html));
+  }
+
+  // --- Blog: committed posts, rendered as real static pages (same pattern as gameweek
+  // snapshots above -- read from disk, never re-derived at build time). ---
+  if (existsSync(BLOG_POSTS_PATH)) {
+    const posts = JSON.parse(readFileSync(BLOG_POSTS_PATH, "utf-8"));
+    console.log(`Found ${posts.length} committed blog post(s).`);
+
+    const blogIndexHtml = renderPage({
+      title: "Blog — Fantasy Gameweek Surprises",
+      description: "Every gameweek's five biggest gaps between predicted and actual fantasy points, with the underlying stats behind each surprise.",
+      path: "/blog",
+      cssHref,
+      breadcrumbs: [
+        { name: "Home", path: "/" },
+        { name: "Blog", path: "/blog" },
+      ],
+      bodyHtml: renderBlogIndexBody(posts),
+    });
+    generatedPaths.push(writePage("/blog", blogIndexHtml));
+
+    for (const post of posts) {
+      const path = `/blog/${post.slug}`;
+      const html = renderPage({
+        title: post.title,
+        description: post.dek,
+        path,
+        cssHref,
+        ogType: "article",
+        breadcrumbs: [
+          { name: "Home", path: "/" },
+          { name: "Blog", path: "/blog" },
+          { name: post.title, path },
+        ],
+        extraJsonLd: [
+          {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            headline: post.title,
+            description: post.dek,
+            datePublished: post.published,
+            url: `${SITE_URL}${path}`,
+            author: { "@type": "Organization", name: "PitchMetric" },
+          },
+        ],
+        bodyHtml: renderBlogPostBody(post),
+      });
+      generatedPaths.push(writePage(path, html));
+    }
+  } else {
+    console.log("No committed blog posts found at data/blog/posts.json -- skipping /blog.");
   }
 
   // --- sitemap.xml + robots.txt ---
