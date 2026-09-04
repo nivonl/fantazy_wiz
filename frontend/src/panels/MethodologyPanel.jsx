@@ -55,14 +55,6 @@ export function MethodologyPanel() {
           whenever it actually exists — this only steps in when it doesn't yet.)
         </p>
 
-        <p className="section-heading">Recent form: momentum</p>
-        <p className="summary-line">
-          Every prediction also gets a recency nudge from FPL's own "form" figure (points per
-          match over the last 30 days) compared against a player's season-long average — trending
-          up recently pushes the prediction up a little, trending down pulls it back, both capped
-          so a hot or cold run over a couple of matches can't swing things too far on its own.
-        </p>
-
         <p className="section-heading">Opponent-specific history</p>
         <p className="summary-line">
           Each predicted-points number is nudged by how that specific player has actually

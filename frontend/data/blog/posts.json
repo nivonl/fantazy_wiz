@@ -3059,5 +3059,133 @@
         "html": "If you want the numbers behind your own squad, head to <a href=\"/fpl-transfer-finder\">Transfer Finder</a> or <a href=\"/fpl-predictions\">Predictions</a> &mdash; both are built on the same &ldquo;trust the underlying output&rdquo; philosophy this research validated."
       }
     ]
+  },
+  {
+    "type": "deep_research",
+    "slug": "testing-the-price-and-squad-depth-update",
+    "category": "Deep Research",
+    "title": "Does Blending In Price and Squad Depth Actually Improve Our Predictions?",
+    "dek": "We shipped an update that leans on a player’s price and squad standing when their own track record is thin. Then we backtested it against a full season, gameweek by gameweek, and held players out entirely to check we weren’t just fitting noise. One idea didn’t survive contact with the data — here’s what we found, and what we reverted before it really shipped.",
+    "published": "2026-09-05",
+    "lede": "A few days ago we described, in plain terms, an update to how PitchMetric prices players who don’t have much of a current-season track record yet — leaning more on what their price and squad standing already imply, fading out as real form takes over. That’s a reasonable-sounding story. It’s also exactly the kind of claim that should be tested against real results before anyone trusts it, so that’s what this post is: a proper backtest, not a victory lap.",
+    "blocks": [
+      {
+        "type": "heading",
+        "text": "How we tested it"
+      },
+      {
+        "type": "paragraph",
+        "html": "We reran the update, gameweek by gameweek, across the entire 2025-26 Premier League season — 37 separate tests, each one predicting a gameweek using only the information that would genuinely have been available before it (no hindsight, no rerunning history with the benefit of knowing what actually happened). Alongside that walk-forward test, we ran a second, stricter check: for several gameweeks, we split the players who inform the price-based part of the model into groups, rebuilt that part of the model with entire groups of players excluded, and scored predictions only for the players who’d been excluded — the closest thing to testing on players the model has genuinely never seen."
+      },
+      {
+        "type": "heading",
+        "text": "The headline number"
+      },
+      {
+        "type": "paragraph",
+        "html": "Averaged across the full season, the updated model’s prediction error came down by about <b>3%</b> against the version it replaced. Not enormous — but real, and worth digging into where it actually came from, because the average hides a much more interesting pattern."
+      },
+      {
+        "type": "chart",
+        "chartType": "diverging_hbar",
+        "valueFmt": "percent",
+        "data": [
+          {
+            "label": "Brand new (no current-season minutes)",
+            "value": 15.1
+          },
+          {
+            "label": "1–2 matches of history",
+            "value": 9.0
+          },
+          {
+            "label": "3–5 matches of history",
+            "value": 4.4
+          },
+          {
+            "label": "6+ matches (well established)",
+            "value": 0.6
+          }
+        ],
+        "caption": "Prediction-error reduction (lower error is better), grouped by how much current-season history a player actually had going into that prediction."
+      },
+      {
+        "type": "paragraph",
+        "html": "The gain is concentrated almost exactly where it was designed to be, and fades out to almost nothing everywhere else. A player with no current-season track record yet saw the single biggest error reduction of the season — about 15%. By the time a player has six or more matches of real evidence behind them, the improvement shrinks to under 1%. That fade is the point, not a disappointment: if the price-based estimate were still moving the needle for well-established players, that would be a sign it was fighting a player’s actual form for influence, not filling in for its absence."
+      },
+      {
+        "type": "heading",
+        "text": "The honest part: one piece of this didn’t survive testing"
+      },
+      {
+        "type": "paragraph",
+        "html": "The update we tested here originally had a third component too: a short-term “momentum” adjustment, nudging a prediction up or down based on whether a player’s recent form was running hotter or colder than their season average. It’s an intuitive idea. It’s also exactly the kind of idea that’s easy to talk yourself into without checking — so we checked."
+      },
+      {
+        "type": "chart",
+        "chartType": "diverging_hbar",
+        "valueFmt": "percent",
+        "data": [
+          {
+            "label": "Price-based estimate alone",
+            "value": 2.11
+          },
+          {
+            "label": "Price-based estimate + momentum",
+            "value": -2.66
+          }
+        ],
+        "caption": "Prediction-error reduction for established players only (6+ matches of history) — negative means the error got worse, not better."
+      },
+      {
+        "type": "paragraph",
+        "html": "For players with little history, momentum barely moved anything either way — there isn’t enough recent form yet for a “recent vs. average” comparison to mean much. But across the roughly 90% of a season where most players already have a real track record, adding momentum made predictions measurably <i>worse</i>, not better — enough to wipe out more than the gain everything else in the update was providing on its own. Short-term hot and cold streaks in football are famously noisy, and a model that reacts to them mostly ends up reacting to the noise, not the signal. We pulled it before it shipped in anything but this test."
+      },
+      {
+        "type": "callout",
+        "heading": "The same lesson, twice now",
+        "html": "<p>This is close to the exact same lesson our first Deep Research post landed on, with a completely different question: an intuitive-sounding idea that doesn’t survive being tested honestly is worth more to know about than one that quietly ships because nobody checked.</p>"
+      },
+      {
+        "type": "heading",
+        "text": "Does it generalize, or did it just memorize its own training data?"
+      },
+      {
+        "type": "paragraph",
+        "html": "A model that only works well on the exact players used to build it isn’t actually learning a general relationship — it’s just curve-fitting. So for several gameweeks across the season, we rebuilt the price-based part of the model multiple times per gameweek, each time with a different slice of players entirely removed from what it was allowed to learn from, and then scored it only on the players it had just been denied."
+      },
+      {
+        "type": "chart",
+        "chartType": "hbar",
+        "sort": true,
+        "data": [
+          {
+            "label": "Old model",
+            "value": 2.36
+          },
+          {
+            "label": "New model (ordinary fit)",
+            "value": 2.33
+          },
+          {
+            "label": "New model (players it never saw)",
+            "value": 2.33
+          }
+        ],
+        "caption": "Mean absolute prediction error (fantasy points), same population of players in all three bars — only which players informed the price-based estimate differs."
+      },
+      {
+        "type": "paragraph",
+        "html": "The gap between “players used to inform the price-based estimate” and “players it had never seen at all” is small enough to be noise. That’s the result we wanted: it means the price-based estimate is learning something genuinely general about how price relates to output, not memorizing the specific players who happened to train it."
+      },
+      {
+        "type": "heading",
+        "text": "What’s next"
+      },
+      {
+        "type": "paragraph",
+        "html": "Momentum as a short-term recency multiplier didn’t hold up — that doesn’t mean recent form is worthless, only that our first attempt at capturing it wasn’t. A more careful, properly-lagged version of the same idea is worth another look before we write it off entirely. We’re also keeping an eye on whether the price-based estimate’s benefit holds up the same way once a second season of results exists to test it against — one season, however thoroughly tested, is still one season. If you want to see the current model in action, <a href=\"/fpl-predictions\">Predictions</a> and <a href=\"/fpl-transfer-finder\">Transfer Finder</a> are both running on exactly what’s described here — and see <a href=\"/methodology\">Methodology</a> for the plain-language version of how it all fits together."
+      }
+    ]
   }
 ]

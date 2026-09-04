@@ -1,10 +1,45 @@
 # Model improvement notes (from the blog's Gameweek 1 & 2 "surprise" posts)
 
-**Status: implemented.** See `fantasy_app/services/fpl_service.py` — `_fit_price_rate_priors` /
-`_player_rates` (price prior + minutes-weighted shrinkage, replacing the old starts-only rate),
-`_momentum_factor` (FPL's own `form` vs `points_per_game`), and `_squad_depth_price_threshold` /
-`_is_priced_like_backup` (price-implied rotation risk). Tests in `tests/test_fpl_service.py`.
-Documented for users on `/methodology`. Internal only below — not linked from the site.
+**Status: implemented and backtested.** See `fantasy_app/services/fpl_service.py` —
+`_fit_price_rate_priors` / `_player_rates` (price prior + minutes-weighted shrinkage, replacing
+the old starts-only rate) and `_squad_depth_price_threshold` / `_is_priced_like_backup`
+(price-implied rotation risk). Tests in `tests/test_fpl_service.py`. Documented for users on
+`/methodology`. Internal only below — not linked from the site.
+
+**Momentum was removed** after a full-season backtest (see "Backtest results" below) showed it
+net-hurt accuracy for established players badly enough to erase most of the price prior's own
+gain — a public, honest writeup of the whole backtest (including this) is the
+`testing-the-price-and-squad-depth-update` Deep Research post. `_momentum_factor` no longer
+exists in the codebase; don't reintroduce a `form`-vs-`points_per_game` multiplier without
+re-testing it properly first.
+
+## Backtest results (2025-26 season, full walk-forward + player-holdout cross-section)
+
+Script: one-off, not committed (was in a scratchpad) — reran the real production functions
+(`_fit_price_rate_priors`, `_player_rates`, the start-prob caps, `player_xp`) against every
+gameweek of the completed 2025-26 season, predicting each from only the data available before it.
+
+- **Overall**: ~3% lower mean absolute error than the old (starts-only, no price prior, no
+  squad-depth) model, across all 37 testable gameweeks (~8,600 player-gameweek predictions,
+  players with 30+ minutes).
+- **By how much current-season history a player had**: monotonic and exactly where it should
+  be — brand new (0 matches): ~15% error reduction. 1-2 matches: ~9%. 3-5 matches: ~4%. 6+
+  matches (established): ~0.6%. The fade to near-zero for established players is the price
+  prior correctly getting out of the way once real form exists, not a weakness.
+- **Momentum ablation, established players only (6+ matches)**: price prior alone: ~2.1% error
+  reduction. Price prior + momentum: **-2.7%** (error got *worse*). Momentum only barely
+  mattered for cold-start players (not enough recent history for "recent vs. average" to mean
+  anything yet) but was net-harmful for the ~90% of a season where most players are established
+  — enough to flip the shipped model's established-player number from a gain to a loss before
+  it was removed.
+- **Player-holdout cross-section** (5-fold, players entirely excluded from fitting the price
+  prior, scored only on the excluded fold, across 7 representative gameweeks): held-out-player
+  MAE (2.329) was statistically indistinguishable from in-sample MAE (2.330) — the price prior
+  generalizes to players it's never seen, not just the ones that happened to train it.
+
+If this needs rerunning (a second season becomes available, or squad-depth/price-prior get
+retuned), rebuild the same harness: walk-forward per gameweek using only prior-gameweek
+cumulative stats, plus a k-fold player holdout on whichever population feeds a fitted prior.
 
 Originally written while building the blog's gameweek-surprise posts (see
 `frontend/data/blog/posts.json`), which required re-running the real prediction pipeline

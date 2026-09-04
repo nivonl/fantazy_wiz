@@ -331,34 +331,6 @@ def _player_rates(element: dict, price_priors: dict[str, PriceRatePrior]) -> tup
     return goal_rate, assist_rate, start_prob
 
 
-# --- Momentum ---------------------------------------------------------------------------------
-
-MOMENTUM_MIN_FACTOR = 0.7
-MOMENTUM_MAX_FACTOR = 1.4
-
-
-def _momentum_factor(element: dict) -> float:
-    """
-    A recency signal FPL already computes for every player, reused rather than rebuilt: `form`
-    is their average points over the last 30 days, `points_per_game` their season-long average.
-    The ratio is a clean "trending up or down relative to their own baseline" read, with no need
-    to fetch or weight a per-gameweek history ourselves — and critically, no lag: both fields
-    update the moment FPL's live data does, unlike the community archive this app otherwise
-    relies on for per-gameweek history (providers/fpl_history.py), which can trail the real
-    current gameweek by one or more matches.
-
-    Capped both ways so a thin early-season sample can't swing a prediction too far on its own.
-    Neutral (1.0) with no season history yet — filling that gap is the price prior's job above,
-    not momentum's; a player with points_per_game == 0 has nothing for "trending" to mean yet.
-    """
-    points_per_game = float(element.get("points_per_game") or 0.0)
-    if points_per_game <= 0:
-        return 1.0
-    form = float(element.get("form") or 0.0)
-    ratio = form / points_per_game
-    return max(MOMENTUM_MIN_FACTOR, min(MOMENTUM_MAX_FACTOR, ratio))
-
-
 # --- Squad depth (price-implied rotation risk) -------------------------------------------------
 
 # A rough "how many starters at this position" shape, used only to pick which price rank counts
@@ -541,7 +513,6 @@ def _candidates_for_gameweek(
         opponent_name = team_name_by_id[fixture["team_a"] if is_home else fixture["team_h"]]
         current_team_name = team_name_by_id[team_id]
         opponent_factor = shrinkage_factor(history_rows, opponent_name)
-        momentum = _momentum_factor(element)
         stats = compute_opponent_stats(history_rows, opponent_name, current_team_name)
 
         candidates[str(element["id"])] = CandidatePlayer(
@@ -550,7 +521,7 @@ def _candidates_for_gameweek(
             pos=pos,
             team=current_team_name,
             price=element["now_cost"] / 10.0,
-            xp=round(base_xp * opponent_factor * momentum, 3),
+            xp=round(base_xp * opponent_factor, 3),
             opponent_stats=stats,
         )
     return candidates

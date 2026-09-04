@@ -9,7 +9,6 @@ from fantasy_app.services.fpl_service import (
     _is_priced_like_backup,
     _is_unproven_this_season,
     _max_gk_minutes_by_team,
-    _momentum_factor,
     _player_rates,
     _risk_flags,
     _squad_depth_price_threshold,
@@ -85,25 +84,6 @@ def test_fit_price_rate_priors_falls_back_when_a_position_has_too_few_establishe
     for pos in ("GK", "DEF", "MID", "FWD"):
         assert priors[pos].goal_slope == 0.0
         assert priors[pos].goal_intercept == 0.0
-
-
-def test_momentum_factor_neutral_with_no_season_history():
-    assert _momentum_factor({"points_per_game": "0.0", "form": "0.0"}) == 1.0
-    assert _momentum_factor({}) == 1.0
-
-
-def test_momentum_factor_reflects_trending_up_or_down():
-    trending_up = _momentum_factor({"points_per_game": "4.0", "form": "8.0"})
-    trending_down = _momentum_factor({"points_per_game": "8.0", "form": "4.0"})
-    assert trending_up > 1.0
-    assert trending_down < 1.0
-
-
-def test_momentum_factor_is_capped_both_ways():
-    wild_up = _momentum_factor({"points_per_game": "1.0", "form": "20.0"})
-    wild_down = _momentum_factor({"points_per_game": "20.0", "form": "0.1"})
-    assert wild_up == pytest.approx(1.4)
-    assert wild_down == pytest.approx(0.7)
 
 
 def _squad(team, pos, prices):
