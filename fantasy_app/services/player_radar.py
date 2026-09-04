@@ -212,7 +212,23 @@ def build_player_radar_table(bootstrap: dict) -> dict[str, dict]:
             if all_score is None and position_score is None:
                 continue  # no field had enough data at all for this window -- omit, don't show nulls
 
-            entry = result.setdefault(pw.element_id, {"categoryLabels": {k: v[0] for k, v in categories.items()}})
-            entry[window] = {GROUP_ALL: all_score, GROUP_POSITION: position_score}
+            entry = result.setdefault(
+                pw.element_id,
+                {
+                    "categoryLabels": {k: v[0] for k, v in categories.items()},
+                    # Which raw fields feed each category -- fixed by position, same shape as
+                    # categoryLabels -- so the frontend tooltip can show "what this percentile is
+                    # based on" without duplicating the category definitions client-side.
+                    "categoryFields": {k: [f for f, _ in fields] for k, (_, fields) in categories.items()},
+                },
+            )
+            # The player's own per-90 rates, independent of which pool they're being compared
+            # against (that only changes the *percentile*, not the underlying number) -- exposed
+            # so a tooltip can show e.g. "Goals: 0.85/90" alongside "92.6th percentile".
+            entry[window] = {
+                GROUP_ALL: all_score,
+                GROUP_POSITION: position_score,
+                "stats": {k: round(v, 2) for k, v in pw.rates.items()},
+            }
 
     return result

@@ -15,11 +15,44 @@
 // more honest reading, than *inventing* a spot, of a chart the viewer already knows is
 // percentile-based (0 being the bottom, not a real "worst in the league" claim, is implicit
 // context here).
+// Short display names for the raw per-90 rate fields a category is built from (see
+// services/player_radar.py's RADAR_CATEGORIES_OUTFIELD/GK) -- kept here rather than shipped in
+// every player's JSON entry, since it's a fixed ~15-entry lookup table, not per-player data.
+export const RADAR_FIELD_LABELS = {
+  goals_scored: "Goals",
+  expected_goals: "xG",
+  threat: "Threat",
+  assists: "Assists",
+  expected_assists: "xA",
+  creativity: "Creativity",
+  influence: "Influence",
+  bps: "BPS",
+  tackles: "Tackles",
+  clearances_blocks_interceptions: "CBI",
+  recoveries: "Recoveries",
+  defensive_contribution: "Def. actions",
+  clean_sheets: "Clean sheets",
+  goals_conceded: "Goals conceded",
+  saves: "Saves",
+};
+
+// "what this percentile is based on" -- the actual per-90 numbers behind one category, e.g.
+// "Goals: 0.85/90, xG: 0.72/90, Threat: 45.2/90". A field with no data for this player/window
+// (see fpl_history.py -- a stat that didn't exist yet in an older season) is simply omitted
+// rather than shown as a misleading 0.
+export function formatCategoryDetail(fieldKeys, stats) {
+  if (!fieldKeys || !stats) return "";
+  return fieldKeys
+    .filter((f) => stats[f] != null)
+    .map((f) => `${RADAR_FIELD_LABELS[f] || f}: ${stats[f].toFixed(2)}/90`)
+    .join(", ");
+}
+
 export function renderRadarChart(categoryLabels, seriesAll, seriesPosition, options = {}) {
   const n = categoryLabels.length;
   if (!n || (!seriesAll && !seriesPosition)) return "";
 
-  const { width = 320, height = 300, labelAll = "All players", labelPosition = "Position" } = options;
+  const { width = 320, height = 300, labelAll = "All players", labelPosition = "Position", categoryDetails = [] } = options;
   const cx = width / 2;
   const cy = 130;
   // maxRadius + the label offset below must leave enough horizontal room on both sides for the
@@ -75,6 +108,12 @@ export function renderRadarChart(categoryLabels, seriesAll, seriesPosition, opti
   // this exact same string via dangerouslySetInnerHTML rather than a parallel implementation), so
   // a real interactive tooltip component isn't an option here without duplicating the chart in
   // JSX. A titled dot per data point needs none of that and behaves identically in both places.
+  //
+  // Two circles per vertex: the small one (r=3) is the visible dot; a second, invisible one
+  // (r=9, fill="transparent") sits on top purely as a bigger hover/tap target and carries the
+  // actual <title> -- the visible dot alone renders at ~5px on screen once the chart is scaled
+  // down to its CSS width, which is too small to reliably hover (confirmed: real-world reports
+  // of "hover isn't working" traced to exactly this).
   const seriesMarkup = (series, color, dashed, groupLabel) => {
     if (!series) return { polygon: "", markers: "" };
     const pts = series
@@ -91,10 +130,16 @@ export function renderRadarChart(categoryLabels, seriesAll, seriesPosition, opti
         const hasValue = v != null;
         const clamped = Math.max(0, Math.min(100, v ?? 0));
         const [x, y] = axisPoint(i, maxRadius * (clamped / 100));
+        const detail = categoryDetails[i];
         const tooltip = hasValue
-          ? `${escapeXml(categoryLabels[i])}: ${v.toFixed(1)}th percentile (${escapeXml(groupLabel)})`
+          ? `${escapeXml(categoryLabels[i])}: ${v.toFixed(1)}th percentile (${escapeXml(groupLabel)})${detail ? ` — ${escapeXml(detail)}` : ""}`
           : `${escapeXml(categoryLabels[i])}: no data (${escapeXml(groupLabel)})`;
-        return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${color}" fill-opacity="${hasValue ? 1 : 0.35}"><title>${tooltip}</title></circle>`;
+        const cx2 = x.toFixed(1);
+        const cy2 = y.toFixed(1);
+        return (
+          `<circle cx="${cx2}" cy="${cy2}" r="9" fill="transparent"><title>${tooltip}</title></circle>` +
+          `<circle cx="${cx2}" cy="${cy2}" r="3" fill="${color}" fill-opacity="${hasValue ? 1 : 0.35}" style="pointer-events:none" />`
+        );
       })
       .join("");
 

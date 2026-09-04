@@ -17,7 +17,7 @@ import { warmUpBackend, fetchJson, mapWithConcurrency } from "./lib/fetch-api.mj
 import { buildSlugMap } from "./lib/slugify.mjs";
 import { renderPage, SITE_URL } from "./lib/render-page.mjs";
 import { renderPointsBarChart, renderPriceLineChart } from "./lib/chart.mjs";
-import { renderRadarChart } from "../src/charts/radarChart.js";
+import { renderRadarChart, formatCategoryDetail } from "../src/charts/radarChart.js";
 import { teamColor } from "../src/team-colors.js";
 
 // A player's own page gets a subtle background wash of their club's color (see
@@ -112,7 +112,12 @@ function renderRadarSection(radar, pos) {
     if (!entry) return "";
     const allSeries = entry.all ? keys.map((k) => entry.all[k] ?? null) : null;
     const positionSeries = entry.position ? keys.map((k) => entry.position[k] ?? null) : null;
-    const svg = renderRadarChart(labels, allSeries, positionSeries, { labelAll: "vs all players", labelPosition: posLabel });
+    const categoryDetails = keys.map((k) => formatCategoryDetail(radar.categoryFields?.[k], entry.stats));
+    const svg = renderRadarChart(labels, allSeries, positionSeries, {
+      labelAll: "vs all players",
+      labelPosition: posLabel,
+      categoryDetails,
+    });
     return svg ? `<figure class="radar-chart"><figcaption>${RADAR_WINDOW_LABELS[window]}</figcaption>${svg}</figure>` : "";
   }).join("");
 

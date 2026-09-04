@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../api.js";
-import { renderRadarChart } from "../charts/radarChart.js";
+import { renderRadarChart, formatCategoryDetail } from "../charts/radarChart.js";
 
 // Remembers a value in this browser (localStorage) across visits — e.g. your FPL entry ID or
 // current squad, so you don't retype it every time you open the site on your phone. No
@@ -317,7 +317,12 @@ function PlayerRadarSection({ radar, pos }) {
     if (!entry) return null;
     const allSeries = entry.all ? keys.map((k) => entry.all[k] ?? null) : null;
     const positionSeries = entry.position ? keys.map((k) => entry.position[k] ?? null) : null;
-    const svg = renderRadarChart(labels, allSeries, positionSeries, { labelAll: "vs all players", labelPosition: posLabel });
+    const categoryDetails = keys.map((k) => formatCategoryDetail(radar.categoryFields?.[k], entry.stats));
+    const svg = renderRadarChart(labels, allSeries, positionSeries, {
+      labelAll: "vs all players",
+      labelPosition: posLabel,
+      categoryDetails,
+    });
     return svg ? { window, svg } : null;
   }).filter(Boolean);
 

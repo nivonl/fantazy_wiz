@@ -145,3 +145,10 @@ def test_build_player_radar_table_end_to_end(monkeypatch):
     }
     assert gk["previous_season"][GROUP_ALL] is None
     assert gk["previous_season"][GROUP_POSITION] is not None
+
+    # categoryFields exposes which raw stats feed each category (position-fixed, like
+    # categoryLabels), and each window's "stats" carries the player's own raw per-90 rates --
+    # both needed so a tooltip can show "what this percentile is based on".
+    assert gk["categoryFields"]["shot_stopping"] == ["saves"]
+    assert gk["categoryFields"]["clean_sheets"] == ["clean_sheets"]
+    assert gk["previous_season"]["stats"]["saves"] == pytest.approx((5 + 2 + 4) / 270 * 90, abs=1e-2)
