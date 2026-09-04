@@ -18,6 +18,7 @@ import { buildSlugMap } from "./lib/slugify.mjs";
 import { renderPage, SITE_URL } from "./lib/render-page.mjs";
 import { renderPointsBarChart, renderPriceLineChart } from "./lib/chart.mjs";
 import { renderRadarChart, formatCategoryDetail } from "../src/charts/radarChart.js";
+import { renderHBarChart, renderDivergingBarChart, renderScatterChart } from "./lib/research-charts.mjs";
 import { teamColor } from "../src/team-colors.js";
 
 // A player's own page gets a subtle background wash of their club's color (see
@@ -311,6 +312,28 @@ function renderGameweekSurpriseBody(post, slugById) {
 // is a simple typed block list in posts.json (`blocks: [{type: "paragraph"|"heading"|"image"|
 // "list"|"callout", ...}]`) rather than free-form HTML, so the JSON stays reviewable and every
 // post's structure is uniform.
+// Value formatters for the "chart" block type below -- named by what they format, not by which
+// chart uses them, since more than one chart type can reuse the same one.
+const CHART_VALUE_FMT = {
+  eur: (v) => (v >= 1e6 ? `€${(v / 1e6).toFixed(1)}m` : v >= 1e3 ? `€${(v / 1e3).toFixed(0)}k` : `€${v}`),
+  correlation: (v) => `${v >= 0 ? "+" : ""}${v.toFixed(2)}`,
+  percent: (v) => `${v.toFixed(1)}%`,
+};
+
+function renderResearchChart(block) {
+  const valueFmt = block.valueFmt ? CHART_VALUE_FMT[block.valueFmt] : undefined;
+  switch (block.chartType) {
+    case "hbar":
+      return renderHBarChart(block.data, { valueFmt, sort: block.sort !== false });
+    case "diverging_hbar":
+      return renderDivergingBarChart(block.data, { valueFmt });
+    case "scatter":
+      return renderScatterChart(block.data, { xLabel: block.xLabel, yLabel: block.yLabel });
+    default:
+      return "";
+  }
+}
+
 function renderDeepResearchBlock(block) {
   switch (block.type) {
     case "paragraph":
@@ -321,6 +344,10 @@ function renderDeepResearchBlock(block) {
       return `<ul>${block.items.map((item) => `<li>${item}</li>`).join("")}</ul>`;
     case "image":
       return `<figure class="blog-figure"><img src="${block.src}" alt="${escapeHtml(block.alt)}" loading="lazy" />${
+        block.caption ? `<figcaption>${block.caption}</figcaption>` : ""
+      }</figure>`;
+    case "chart":
+      return `<figure class="blog-figure blog-chart-figure">${renderResearchChart(block)}${
         block.caption ? `<figcaption>${block.caption}</figcaption>` : ""
       }</figure>`;
     case "callout":

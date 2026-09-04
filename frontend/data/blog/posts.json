@@ -368,10 +368,32 @@
         "html": "We spent this research cycle finding out, using real historical data: about <b>187,000 valuation snapshots across roughly 9,000 players</b> in the top five European leagues, going back to the mid-2000s."
       },
       {
-        "type": "image",
-        "src": "/blog/deep-research/predicting-transfer-value/value-by-league.png",
-        "alt": "Median player market value by league",
-        "caption": "Median market value per valuation event, by league — the real data behind this research."
+        "type": "chart",
+        "chartType": "hbar",
+        "data": [
+          {
+            "label": "Premier League",
+            "value": 3000000
+          },
+          {
+            "label": "Ligue 1",
+            "value": 1000000
+          },
+          {
+            "label": "La Liga",
+            "value": 1000000
+          },
+          {
+            "label": "Bundesliga",
+            "value": 750000
+          },
+          {
+            "label": "Serie A",
+            "value": 600000
+          }
+        ],
+        "valueFmt": "eur",
+        "caption": "Median market value per valuation event, by league — the real data behind this research. Hover a bar for the exact figure."
       },
       {
         "type": "heading",
@@ -384,7 +406,7 @@
       {
         "type": "list",
         "items": [
-          "<b>Time-series forecasting.</b> Treat a player's value history like a stock chart and extrapolate the trend. Intuitive &mdash; and it turned out to add no real predictive value at all, however carefully we tuned it. It badly underreacts when a player's trajectory bends, and wasn't even better than simply assuming a player's price won't change. We dug into exactly why (a real bug in our first attempt, then a real ceiling even once that was fixed) rather than quietly dropping it.",
+          "<b>Time-series forecasting.</b> Treat a player's value history like a stock chart and extrapolate the trend. Intuitive &mdash; and it turned out to add no real predictive value at all, however carefully we tuned it. It badly underreacts when a player's trajectory bends, and wasn't even better than simply assuming a player's price won't change. We dug into exactly why (a real bug in our first attempt, then a real ceiling even once that was fixed) rather than quietly dropping it &mdash; more on that below.",
           "<b>Momentum.</b> Rather than looking at one player in isolation, pool the patterns across <i>every</i> player: is this player's price rising fast, and is their output (goals, assists, minutes) rising too? This approach doesn't need years of history on a single player &mdash; it borrows patterns from everyone else's careers. This turned out to be the strongest of the three individual approaches.",
           "<b>Bayesian updating.</b> Start with an informed opinion of what a player <i>should</i> be worth &mdash; anchored on their last known transfer fee, or on typical value curves for their age and league if there's no recent deal &mdash; and then update that opinion using their recent on-pitch output. The appeal isn't just the prediction itself, it's that this method also tells you <i>how confident</i> to be in it."
         ]
@@ -407,6 +429,35 @@
       },
       {
         "type": "heading",
+        "text": "What did fixing our mistake actually buy us?"
+      },
+      {
+        "type": "paragraph",
+        "html": "Worth being honest about, since it's the most useful thing that happened in this research cycle: our first pass at the time-series approach had a real bug in how it was being tested &mdash; it made the approach look usable when it quietly wasn't. Once we caught that and re-tested everything properly, it turned out time series wasn't pulling its weight at all, however we tuned it. The honest fix was to drop it from the blend entirely and lean harder on the two approaches that actually did the work &mdash; momentum and Bayesian updating &mdash; and to sharpen the pattern-detection underneath both of them."
+      },
+      {
+        "type": "chart",
+        "chartType": "hbar",
+        "data": [
+          {
+            "label": "Our first version",
+            "value": 16.5
+          },
+          {
+            "label": "After the fix",
+            "value": 14.4
+          }
+        ],
+        "valueFmt": "percent",
+        "sort": false,
+        "caption": "Typical prediction error (as a % of a player's value) before and after we caught and fixed the issue — lower is better."
+      },
+      {
+        "type": "paragraph",
+        "html": "That's not a rounding error &mdash; it's roughly a <b>13% reduction in typical prediction error</b>, and it came entirely from being willing to distrust a result that looked fine on the surface and dig into why. We'd rather publish the slower, more honest version of this research than the faster, flattering one."
+      },
+      {
+        "type": "heading",
         "text": "What actually moves the needle — and what it means for your squad"
       },
       {
@@ -414,9 +465,35 @@
         "html": "Here's the part that matters most if you're playing FPL or La Liga fantasy rather than running a scouting department. We cross-referenced the features that predict market value against real Fantasy Premier League scoring data for hundreds of Premier League players. The question: does whatever predicts a rising price tag also predict fantasy points?"
       },
       {
-        "type": "image",
-        "src": "/blog/deep-research/predicting-transfer-value/fpl-correlation.png",
-        "alt": "Which market-value features correlate with FPL scoring rate",
+        "type": "chart",
+        "chartType": "diverging_hbar",
+        "data": [
+          {
+            "label": "Current market value",
+            "value": 0.417
+          },
+          {
+            "label": "Goals + assists per 90",
+            "value": 0.675
+          },
+          {
+            "label": "Minutes played (365d)",
+            "value": 0.242
+          },
+          {
+            "label": "Value momentum",
+            "value": 0.184
+          },
+          {
+            "label": "Performance momentum",
+            "value": -0.029
+          },
+          {
+            "label": "Age",
+            "value": -0.192
+          }
+        ],
+        "valueFmt": "correlation",
         "caption": "How strongly each signal lines up with FPL points per 90 minutes, across ~500 Premier League players."
       },
       {
@@ -424,15 +501,2550 @@
         "html": "<b>The single strongest signal for fantasy output wasn't market value at all &mdash; it was recent output itself.</b> A player's trailing goal-and-assist rate correlated with their FPL points-per-90 roughly <b>60% more strongly</b> than their current market value did. In plain terms: the market price is a noisier read on fantasy potential than just looking directly at what a player has actually been doing on the pitch. Value bakes in reputation, potential, and club prestige &mdash; none of which score you FPL points."
       },
       {
-        "type": "image",
-        "src": "/blog/deep-research/predicting-transfer-value/ga-per90-vs-fpl.png",
-        "alt": "Goals plus assists per 90 versus FPL points per 90",
-        "caption": "Recent output predicts fantasy scoring rate more directly than the price tag does."
+        "type": "chart",
+        "chartType": "scatter",
+        "data": [
+          {
+            "x": 0.0,
+            "y": 2.65,
+            "label": "Gary Cahill"
+          },
+          {
+            "x": 0.0,
+            "y": 2.54,
+            "label": "Fabian Delph"
+          },
+          {
+            "x": 0.038,
+            "y": 3.12,
+            "label": "Ben Foster"
+          },
+          {
+            "x": 0.242,
+            "y": 4.04,
+            "label": "Mark Noble"
+          },
+          {
+            "x": 0.616,
+            "y": 5.18,
+            "label": "Enock Mwepu"
+          },
+          {
+            "x": 0.117,
+            "y": 3.5,
+            "label": "Aaron Lennon"
+          },
+          {
+            "x": 0.0,
+            "y": 1.88,
+            "label": "Craig Cathcart"
+          },
+          {
+            "x": 0.0,
+            "y": 1.81,
+            "label": "Jake Livermore"
+          },
+          {
+            "x": 0.0,
+            "y": 3.37,
+            "label": "Danny Ward"
+          },
+          {
+            "x": 0.0,
+            "y": 1.91,
+            "label": "Ben Gibson"
+          },
+          {
+            "x": 0.0,
+            "y": 1.87,
+            "label": "Enda Stevens"
+          },
+          {
+            "x": 0.0,
+            "y": 2.6,
+            "label": "Scott Dann"
+          },
+          {
+            "x": 0.0,
+            "y": 2.43,
+            "label": "Darnell Furlong"
+          },
+          {
+            "x": 0.0,
+            "y": 2.8,
+            "label": "Jamie Shackleton"
+          },
+          {
+            "x": 0.0,
+            "y": 2.68,
+            "label": "Tom Cleverley"
+          },
+          {
+            "x": 0.0,
+            "y": 2.75,
+            "label": "Kyle Bartley"
+          },
+          {
+            "x": 0.0,
+            "y": 3.94,
+            "label": "Erik Pieters"
+          },
+          {
+            "x": 0.0,
+            "y": 3.42,
+            "label": "Matt Phillips"
+          },
+          {
+            "x": 0.0,
+            "y": 1.81,
+            "label": "Kevin Long"
+          },
+          {
+            "x": 0.0,
+            "y": 2.0,
+            "label": "Romaine Sawyers"
+          },
+          {
+            "x": 0.0,
+            "y": 3.29,
+            "label": "Karlan Grant"
+          },
+          {
+            "x": 0.279,
+            "y": 3.81,
+            "label": "Marc Albrighton"
+          },
+          {
+            "x": 0.0,
+            "y": 3.24,
+            "label": "Tyler Roberts"
+          },
+          {
+            "x": 0.0,
+            "y": 3.13,
+            "label": "Matthew Lowton"
+          },
+          {
+            "x": 0.0,
+            "y": 1.86,
+            "label": "Ciaran Clark"
+          },
+          {
+            "x": 0.0,
+            "y": 3.76,
+            "label": "David McGoldrick"
+          },
+          {
+            "x": 0.0,
+            "y": 2.93,
+            "label": "Wes Burns"
+          },
+          {
+            "x": 0.0,
+            "y": 4.82,
+            "label": "Reece James"
+          },
+          {
+            "x": 0.0,
+            "y": 3.13,
+            "label": "Adam Smith"
+          },
+          {
+            "x": 0.0,
+            "y": 1.88,
+            "label": "Steve Cook"
+          },
+          {
+            "x": 0.0,
+            "y": 3.14,
+            "label": "James McArthur"
+          },
+          {
+            "x": 0.0,
+            "y": 2.43,
+            "label": "Adam Forshaw"
+          },
+          {
+            "x": 0.841,
+            "y": 3.23,
+            "label": "Shane Duffy"
+          },
+          {
+            "x": 0.304,
+            "y": 3.94,
+            "label": "Theo Walcott"
+          },
+          {
+            "x": 0.166,
+            "y": 2.5,
+            "label": "Luke Ayling"
+          },
+          {
+            "x": 0.0,
+            "y": 3.57,
+            "label": "Stuart Dallas"
+          },
+          {
+            "x": 0.0,
+            "y": 2.54,
+            "label": "Juraj Kucka"
+          },
+          {
+            "x": 0.0,
+            "y": 2.21,
+            "label": "Federico Fernández"
+          },
+          {
+            "x": 0.0,
+            "y": 2.61,
+            "label": "Luka Milivojevic"
+          },
+          {
+            "x": 0.0,
+            "y": 2.6,
+            "label": "Kean Bryan"
+          },
+          {
+            "x": 0.0,
+            "y": 2.51,
+            "label": "Ryan Bertrand"
+          },
+          {
+            "x": 0.0,
+            "y": 4.58,
+            "label": "Callum Robinson"
+          },
+          {
+            "x": 0.703,
+            "y": 5.13,
+            "label": "Patrick Bamford"
+          },
+          {
+            "x": 0.459,
+            "y": 5.15,
+            "label": "Patson Daka"
+          },
+          {
+            "x": 0.0,
+            "y": 2.08,
+            "label": "Daniel Bachmann"
+          },
+          {
+            "x": 0.088,
+            "y": 2.49,
+            "label": "Liam Cooper"
+          },
+          {
+            "x": 1.233,
+            "y": 6.07,
+            "label": "Joe Gelhardt"
+          },
+          {
+            "x": 0.0,
+            "y": 4.13,
+            "label": "Aaron Connolly"
+          },
+          {
+            "x": 0.0,
+            "y": 2.98,
+            "label": "Ibrahima Diallo"
+          },
+          {
+            "x": 0.0,
+            "y": 4.2,
+            "label": "Nathaniel Phillips"
+          },
+          {
+            "x": 0.0,
+            "y": 1.6,
+            "label": "Brandon Williams"
+          },
+          {
+            "x": 0.0,
+            "y": 2.47,
+            "label": "John Fleck"
+          },
+          {
+            "x": 0.0,
+            "y": 3.63,
+            "label": "Jeff Hendrick"
+          },
+          {
+            "x": 0.0,
+            "y": 3.09,
+            "label": "Japhet Tanganga"
+          },
+          {
+            "x": 0.0,
+            "y": 1.84,
+            "label": "Chris Basham"
+          },
+          {
+            "x": 0.0,
+            "y": 2.79,
+            "label": "Rhian Brewster"
+          },
+          {
+            "x": 0.602,
+            "y": 4.34,
+            "label": "Shandon Baptiste"
+          },
+          {
+            "x": 0.0,
+            "y": 3.01,
+            "label": "Cheikhou Kouyaté"
+          },
+          {
+            "x": 0.343,
+            "y": 3.34,
+            "label": "Gustavo Hamer"
+          },
+          {
+            "x": 0.541,
+            "y": 6.02,
+            "label": "Elijah Adebayo"
+          },
+          {
+            "x": 0.306,
+            "y": 3.05,
+            "label": "Jordan Clark"
+          },
+          {
+            "x": 0.0,
+            "y": 3.46,
+            "label": "Angelo Ogbonna"
+          },
+          {
+            "x": 0.148,
+            "y": 1.77,
+            "label": "Tom Lockyer"
+          },
+          {
+            "x": 0.383,
+            "y": 3.05,
+            "label": "Matt Ritchie"
+          },
+          {
+            "x": 0.0,
+            "y": 3.86,
+            "label": "Nathan Redmond"
+          },
+          {
+            "x": 0.06,
+            "y": 1.56,
+            "label": "Jack Robinson"
+          },
+          {
+            "x": 0.0,
+            "y": 3.1,
+            "label": "Tim Krul"
+          },
+          {
+            "x": 0.0,
+            "y": 3.21,
+            "label": "Tom Davies"
+          },
+          {
+            "x": 0.292,
+            "y": 3.11,
+            "label": "Alfie Doughty"
+          },
+          {
+            "x": 0.122,
+            "y": 3.57,
+            "label": "Ben Mee"
+          },
+          {
+            "x": 0.239,
+            "y": 5.7,
+            "label": "Divock Origi"
+          },
+          {
+            "x": 0.031,
+            "y": 1.53,
+            "label": "Teden Mengi"
+          },
+          {
+            "x": 0.106,
+            "y": 2.37,
+            "label": "Oliver Norwood"
+          },
+          {
+            "x": 0.0,
+            "y": 3.19,
+            "label": "Paul Dummett"
+          },
+          {
+            "x": 0.236,
+            "y": 3.46,
+            "label": "Jacob Brown"
+          },
+          {
+            "x": 0.0,
+            "y": 2.27,
+            "label": "Marvelous Nakamba"
+          },
+          {
+            "x": 0.0,
+            "y": 2.51,
+            "label": "Jack Cork"
+          },
+          {
+            "x": 0.0,
+            "y": 3.03,
+            "label": "Ryan Fredericks"
+          },
+          {
+            "x": 0.0,
+            "y": 2.27,
+            "label": "Thomas Kaminski"
+          },
+          {
+            "x": 0.056,
+            "y": 3.18,
+            "label": "Jonny Evans"
+          },
+          {
+            "x": 0.183,
+            "y": 2.17,
+            "label": "Reece Burke"
+          },
+          {
+            "x": 0.0,
+            "y": 4.53,
+            "label": "Joel Matip"
+          },
+          {
+            "x": 0.126,
+            "y": 2.71,
+            "label": "Ben Osborn"
+          },
+          {
+            "x": 0.26,
+            "y": 4.07,
+            "label": "Jay Rodríguez"
+          },
+          {
+            "x": 0.375,
+            "y": 3.89,
+            "label": "Calum Chambers"
+          },
+          {
+            "x": 0.195,
+            "y": 3.56,
+            "label": "Tahith Chong"
+          },
+          {
+            "x": 0.0,
+            "y": 2.88,
+            "label": "James Tomkins"
+          },
+          {
+            "x": 0.446,
+            "y": 4.6,
+            "label": "Carlton Morris"
+          },
+          {
+            "x": 0.18,
+            "y": 1.89,
+            "label": "Max Lowe"
+          },
+          {
+            "x": 0.0,
+            "y": 2.9,
+            "label": "Pelly Ruddock Mpanzu"
+          },
+          {
+            "x": 0.181,
+            "y": 3.64,
+            "label": "Serge Aurier"
+          },
+          {
+            "x": 0.028,
+            "y": 2.17,
+            "label": "Caleb Okoli"
+          },
+          {
+            "x": 0.034,
+            "y": 2.3,
+            "label": "Boubakary Soumaré"
+          },
+          {
+            "x": 0.468,
+            "y": 3.49,
+            "label": "Adam Lallana"
+          },
+          {
+            "x": 0.0,
+            "y": 2.94,
+            "label": "Craig Dawson"
+          },
+          {
+            "x": 0.0,
+            "y": 4.56,
+            "label": "Kortney Hause"
+          },
+          {
+            "x": 0.0,
+            "y": 2.71,
+            "label": "Joel Ward"
+          },
+          {
+            "x": 0.042,
+            "y": 2.19,
+            "label": "Sam Morsy"
+          },
+          {
+            "x": 0.142,
+            "y": 2.16,
+            "label": "Jack Stephens"
+          },
+          {
+            "x": 0.088,
+            "y": 3.78,
+            "label": "Ashley Young"
+          },
+          {
+            "x": 0.773,
+            "y": 4.11,
+            "label": "Jack Clarke"
+          },
+          {
+            "x": 0.153,
+            "y": 3.56,
+            "label": "Jordan Ayew"
+          },
+          {
+            "x": 0.073,
+            "y": 1.69,
+            "label": "James Bree"
+          },
+          {
+            "x": 0.357,
+            "y": 4.03,
+            "label": "Stephy Mavididi"
+          },
+          {
+            "x": 0.0,
+            "y": 1.75,
+            "label": "Taylor Harwood-Bellis"
+          },
+          {
+            "x": 0.0,
+            "y": 2.33,
+            "label": "Flynn Downes"
+          },
+          {
+            "x": 0.0,
+            "y": 2.08,
+            "label": "Luke Thomas"
+          },
+          {
+            "x": 0.0,
+            "y": 1.36,
+            "label": "Luke Woolfenden"
+          },
+          {
+            "x": 0.0,
+            "y": 2.44,
+            "label": "Oliver Skipp"
+          },
+          {
+            "x": 0.0,
+            "y": 2.42,
+            "label": "Daniel Iversen"
+          },
+          {
+            "x": 0.0,
+            "y": 2.46,
+            "label": "Charlie Taylor"
+          },
+          {
+            "x": 0.0,
+            "y": 2.51,
+            "label": "Harry Winks"
+          },
+          {
+            "x": 0.0,
+            "y": 4.02,
+            "label": "Cameron Archer"
+          },
+          {
+            "x": 0.0,
+            "y": 2.91,
+            "label": "Alex McCarthy"
+          },
+          {
+            "x": 0.061,
+            "y": 1.75,
+            "label": "Leif Davis"
+          },
+          {
+            "x": 0.058,
+            "y": 1.51,
+            "label": "Jacob Greaves"
+          },
+          {
+            "x": 0.474,
+            "y": 5.74,
+            "label": "Danny Ings"
+          },
+          {
+            "x": 0.295,
+            "y": 1.77,
+            "label": "Issa Kaboré"
+          },
+          {
+            "x": 0.115,
+            "y": 2.89,
+            "label": "Jens Cajuste"
+          },
+          {
+            "x": 0.056,
+            "y": 3.09,
+            "label": "Conor Coady"
+          },
+          {
+            "x": 0.142,
+            "y": 3.05,
+            "label": "Conor Townsend"
+          },
+          {
+            "x": 0.0,
+            "y": 1.82,
+            "label": "Harry Souttar"
+          },
+          {
+            "x": 0.24,
+            "y": 2.88,
+            "label": "Ben Johnson"
+          },
+          {
+            "x": 0.0,
+            "y": 3.72,
+            "label": "Aaron Cresswell"
+          },
+          {
+            "x": 0.0,
+            "y": 2.54,
+            "label": "Jamaal Lascelles"
+          },
+          {
+            "x": 0.0,
+            "y": 2.38,
+            "label": "Wes Foderingham"
+          },
+          {
+            "x": 0.476,
+            "y": 4.8,
+            "label": "Pablo Sarabia"
+          },
+          {
+            "x": 0.476,
+            "y": 5.44,
+            "label": "İlkay Gündoğan"
+          },
+          {
+            "x": 0.273,
+            "y": 4.08,
+            "label": "Philip Billing"
+          },
+          {
+            "x": 0.0,
+            "y": 2.62,
+            "label": "Gavin Bazunu"
+          },
+          {
+            "x": 0.0,
+            "y": 3.59,
+            "label": "Matt Targett"
+          },
+          {
+            "x": 0.0,
+            "y": 2.65,
+            "label": "Nampalys Mendy"
+          },
+          {
+            "x": 0.46,
+            "y": 1.52,
+            "label": "Cameron Burgess"
+          },
+          {
+            "x": 0.0,
+            "y": 1.76,
+            "label": "Dara O'Shea"
+          },
+          {
+            "x": 0.254,
+            "y": 3.53,
+            "label": "Tommy Doyle"
+          },
+          {
+            "x": 0.166,
+            "y": 2.1,
+            "label": "Ryan Manning"
+          },
+          {
+            "x": 0.0,
+            "y": 2.56,
+            "label": "Ki-Jana Hoever"
+          },
+          {
+            "x": 0.0,
+            "y": 2.15,
+            "label": "Jannik Vestergaard"
+          },
+          {
+            "x": 0.0,
+            "y": 2.29,
+            "label": "Kenny McLean"
+          },
+          {
+            "x": 0.0,
+            "y": 1.89,
+            "label": "Chris Mepham"
+          },
+          {
+            "x": 0.0,
+            "y": 1.68,
+            "label": "John Egan"
+          },
+          {
+            "x": 0.0,
+            "y": 4.48,
+            "label": "Bobby De Cordova-Reid"
+          },
+          {
+            "x": 0.0,
+            "y": 2.08,
+            "label": "Isaac Hayden"
+          },
+          {
+            "x": 0.264,
+            "y": 3.62,
+            "label": "Frank Onyeka"
+          },
+          {
+            "x": 0.064,
+            "y": 4.93,
+            "label": "Jakub Kiwior"
+          },
+          {
+            "x": 0.0,
+            "y": 2.38,
+            "label": "Kalvin Phillips"
+          },
+          {
+            "x": 0.0,
+            "y": 3.23,
+            "label": "Joe Aribo"
+          },
+          {
+            "x": 0.0,
+            "y": 1.33,
+            "label": "Victor Kristiansen"
+          },
+          {
+            "x": 0.0,
+            "y": 3.68,
+            "label": "Chiedozie Ogbene"
+          },
+          {
+            "x": 0.238,
+            "y": 4.21,
+            "label": "Jack Harrison"
+          },
+          {
+            "x": 0.085,
+            "y": 4.08,
+            "label": "Niclas Füllkrug"
+          },
+          {
+            "x": 0.07,
+            "y": 3.37,
+            "label": "Manuel Akanji"
+          },
+          {
+            "x": 0.376,
+            "y": 4.35,
+            "label": "Simon Adingra"
+          },
+          {
+            "x": 0.153,
+            "y": 3.65,
+            "label": "Arthur Masuaku"
+          },
+          {
+            "x": 0.0,
+            "y": 5.55,
+            "label": "Josh Dasilva"
+          },
+          {
+            "x": 0.591,
+            "y": 6.45,
+            "label": "Phil Foden"
+          },
+          {
+            "x": 0.078,
+            "y": 3.32,
+            "label": "Tyrick Mitchell"
+          },
+          {
+            "x": 0.132,
+            "y": 3.4,
+            "label": "Joël Veltman"
+          },
+          {
+            "x": 0.105,
+            "y": 2.69,
+            "label": "Bashir Humphreys"
+          },
+          {
+            "x": 0.414,
+            "y": 4.18,
+            "label": "Jaidon Anthony"
+          },
+          {
+            "x": 0.693,
+            "y": 5.66,
+            "label": "Jérémy Doku"
+          },
+          {
+            "x": 0.0,
+            "y": 3.48,
+            "label": "Séamus Coleman"
+          },
+          {
+            "x": 0.0,
+            "y": 4.87,
+            "label": "Jaydee Canvot"
+          },
+          {
+            "x": 0.308,
+            "y": 4.29,
+            "label": "Mikkel Damsgaard"
+          },
+          {
+            "x": 0.056,
+            "y": 3.52,
+            "label": "Luke Shaw"
+          },
+          {
+            "x": 0.588,
+            "y": 6.55,
+            "label": "Cole Palmer"
+          },
+          {
+            "x": 0.313,
+            "y": 4.82,
+            "label": "Reece James"
+          },
+          {
+            "x": 0.234,
+            "y": 4.64,
+            "label": "Josh King"
+          },
+          {
+            "x": 0.36,
+            "y": 3.39,
+            "label": "Ben Davies"
+          },
+          {
+            "x": 0.571,
+            "y": 5.45,
+            "label": "Leandro Trossard"
+          },
+          {
+            "x": 0.158,
+            "y": 4.4,
+            "label": "Adrien Truffert"
+          },
+          {
+            "x": 0.117,
+            "y": 4.54,
+            "label": "James Hill"
+          },
+          {
+            "x": 0.069,
+            "y": 3.22,
+            "label": "Amadou Onana"
+          },
+          {
+            "x": 0.589,
+            "y": 4.95,
+            "label": "Danny Welbeck"
+          },
+          {
+            "x": 0.058,
+            "y": 3.25,
+            "label": "Kyle Walker"
+          },
+          {
+            "x": 0.444,
+            "y": 2.83,
+            "label": "Randal Kolo Muani"
+          },
+          {
+            "x": 0.0,
+            "y": 2.69,
+            "label": "Joe Worrall"
+          },
+          {
+            "x": 0.232,
+            "y": 4.52,
+            "label": "Mats Wieffer"
+          },
+          {
+            "x": 0.261,
+            "y": 3.48,
+            "label": "Ryan Gravenberch"
+          },
+          {
+            "x": 0.056,
+            "y": 2.95,
+            "label": "Sepp van den Berg"
+          },
+          {
+            "x": 0.468,
+            "y": 5.09,
+            "label": "Bryan Mbeumo"
+          },
+          {
+            "x": 0.47,
+            "y": 5.13,
+            "label": "Nick Woltemade"
+          },
+          {
+            "x": 0.419,
+            "y": 5.61,
+            "label": "Amine Adli"
+          },
+          {
+            "x": 0.392,
+            "y": 3.73,
+            "label": "Wilson Odobert"
+          },
+          {
+            "x": 0.112,
+            "y": 3.31,
+            "label": "Milos Kerkez"
+          },
+          {
+            "x": 0.038,
+            "y": 3.22,
+            "label": "Timothy Castagne"
+          },
+          {
+            "x": 0.0,
+            "y": 3.32,
+            "label": "Willy Boly"
+          },
+          {
+            "x": 0.536,
+            "y": 5.22,
+            "label": "Jarrod Bowen"
+          },
+          {
+            "x": 0.393,
+            "y": 4.95,
+            "label": "Chris Wood"
+          },
+          {
+            "x": 0.0,
+            "y": 3.56,
+            "label": "Dean Henderson"
+          },
+          {
+            "x": 0.128,
+            "y": 3.21,
+            "label": "Levi Colwill"
+          },
+          {
+            "x": 0.0,
+            "y": 5.05,
+            "label": "John Stones"
+          },
+          {
+            "x": 0.0,
+            "y": 2.87,
+            "label": "Benoît Badiashile"
+          },
+          {
+            "x": 0.333,
+            "y": 5.43,
+            "label": "Nico O'Reilly"
+          },
+          {
+            "x": 0.278,
+            "y": 4.0,
+            "label": "Alexis Mac Allister"
+          },
+          {
+            "x": 0.028,
+            "y": 2.72,
+            "label": "Pascal Struijk"
+          },
+          {
+            "x": 0.466,
+            "y": 4.43,
+            "label": "Dominic Solanke"
+          },
+          {
+            "x": 0.355,
+            "y": 4.98,
+            "label": "Kevin Schade"
+          },
+          {
+            "x": 0.331,
+            "y": 4.4,
+            "label": "Omari Hutchinson"
+          },
+          {
+            "x": 0.17,
+            "y": 3.19,
+            "label": "Ryan Christie"
+          },
+          {
+            "x": 0.312,
+            "y": 4.81,
+            "label": "Chemsdine Talbi"
+          },
+          {
+            "x": 0.213,
+            "y": 3.76,
+            "label": "Tomáš Souček"
+          },
+          {
+            "x": 0.0,
+            "y": 3.9,
+            "label": "Caoimhín Kelleher"
+          },
+          {
+            "x": 0.028,
+            "y": 3.94,
+            "label": "Nick Pope"
+          },
+          {
+            "x": 0.235,
+            "y": 3.92,
+            "label": "Pape Matar Sarr"
+          },
+          {
+            "x": 0.138,
+            "y": 3.26,
+            "label": "Tosin Adarabioyo"
+          },
+          {
+            "x": 0.0,
+            "y": 3.84,
+            "label": "Kepa Arrizabalaga"
+          },
+          {
+            "x": 0.096,
+            "y": 4.38,
+            "label": "Piero Hincapié"
+          },
+          {
+            "x": 0.163,
+            "y": 2.73,
+            "label": "Idrissa Gueye"
+          },
+          {
+            "x": 0.644,
+            "y": 6.13,
+            "label": "Benjamin Sesko"
+          },
+          {
+            "x": 0.615,
+            "y": 6.17,
+            "label": "Lukas Nmecha"
+          },
+          {
+            "x": 0.0,
+            "y": 5.75,
+            "label": "James Maddison"
+          },
+          {
+            "x": 0.144,
+            "y": 3.13,
+            "label": "Ben White"
+          },
+          {
+            "x": 0.201,
+            "y": 2.8,
+            "label": "Tyler Adams"
+          },
+          {
+            "x": 0.32,
+            "y": 4.8,
+            "label": "Georginio Rutter"
+          },
+          {
+            "x": 0.0,
+            "y": 3.29,
+            "label": "Emil Krafth"
+          },
+          {
+            "x": 0.263,
+            "y": 2.77,
+            "label": "Boubacar Kamara"
+          },
+          {
+            "x": 1.044,
+            "y": 7.43,
+            "label": "Erling Haaland"
+          },
+          {
+            "x": 0.143,
+            "y": 3.27,
+            "label": "Ibrahim Sangaré"
+          },
+          {
+            "x": 0.19,
+            "y": 3.86,
+            "label": "James Milner"
+          },
+          {
+            "x": 0.375,
+            "y": 5.28,
+            "label": "Cody Gakpo"
+          },
+          {
+            "x": 0.052,
+            "y": 3.33,
+            "label": "Victor Lindelöf"
+          },
+          {
+            "x": 0.0,
+            "y": 2.26,
+            "label": "Radu Drăgușin"
+          },
+          {
+            "x": 0.029,
+            "y": 3.06,
+            "label": "Joachim Andersen"
+          },
+          {
+            "x": 0.324,
+            "y": 4.72,
+            "label": "Amad Diallo"
+          },
+          {
+            "x": 0.234,
+            "y": 3.57,
+            "label": "Lucas Digne"
+          },
+          {
+            "x": 0.295,
+            "y": 3.91,
+            "label": "Brenden Aaronson"
+          },
+          {
+            "x": 0.062,
+            "y": 4.02,
+            "label": "Omar Alderete"
+          },
+          {
+            "x": 0.03,
+            "y": 2.42,
+            "label": "Sander Berge"
+          },
+          {
+            "x": 1.014,
+            "y": 5.08,
+            "label": "Kai Havertz"
+          },
+          {
+            "x": 0.183,
+            "y": 3.22,
+            "label": "Micky van de Ven"
+          },
+          {
+            "x": 0.031,
+            "y": 3.09,
+            "label": "Lewis Dunk"
+          },
+          {
+            "x": 0.721,
+            "y": 6.26,
+            "label": "Hugo Ekitiké"
+          },
+          {
+            "x": 0.796,
+            "y": 7.92,
+            "label": "Reiss Nelson"
+          },
+          {
+            "x": 0.0,
+            "y": 3.25,
+            "label": "Bafodé Diakité"
+          },
+          {
+            "x": 0.091,
+            "y": 4.3,
+            "label": "Ayden Heaven"
+          },
+          {
+            "x": 0.054,
+            "y": 2.41,
+            "label": "Destiny Udogie"
+          },
+          {
+            "x": 0.486,
+            "y": 4.63,
+            "label": "Ismaïla Sarr"
+          },
+          {
+            "x": 0.138,
+            "y": 4.69,
+            "label": "Kieran Trippier"
+          },
+          {
+            "x": 0.0,
+            "y": 2.46,
+            "label": "Yves Bissouma"
+          },
+          {
+            "x": 0.0,
+            "y": 3.89,
+            "label": "Robin Roefs"
+          },
+          {
+            "x": 0.044,
+            "y": 2.47,
+            "label": "Jean-Clair Todibo"
+          },
+          {
+            "x": 0.066,
+            "y": 2.87,
+            "label": "Freddie Potts"
+          },
+          {
+            "x": 0.098,
+            "y": 2.49,
+            "label": "Kyle Walker-Peters"
+          },
+          {
+            "x": 0.054,
+            "y": 3.48,
+            "label": "Jake O'Brien"
+          },
+          {
+            "x": 0.041,
+            "y": 2.93,
+            "label": "Daichi Kamada"
+          },
+          {
+            "x": 0.0,
+            "y": 3.37,
+            "label": "Jason Steele"
+          },
+          {
+            "x": 0.262,
+            "y": 3.9,
+            "label": "Mathias Jensen"
+          },
+          {
+            "x": 0.042,
+            "y": 3.44,
+            "label": "Ibrahima Konaté"
+          },
+          {
+            "x": 0.18,
+            "y": 2.34,
+            "label": "Santiago Bueno"
+          },
+          {
+            "x": 0.348,
+            "y": 4.87,
+            "label": "David Brooks"
+          },
+          {
+            "x": 0.0,
+            "y": 3.37,
+            "label": "Lisandro Martínez"
+          },
+          {
+            "x": 0.377,
+            "y": 3.74,
+            "label": "Rico Lewis"
+          },
+          {
+            "x": 0.26,
+            "y": 3.16,
+            "label": "Christian Nørgaard"
+          },
+          {
+            "x": 0.179,
+            "y": 3.86,
+            "label": "Dan Ndoye"
+          },
+          {
+            "x": 0.0,
+            "y": 3.83,
+            "label": "Daniel James"
+          },
+          {
+            "x": 0.134,
+            "y": 3.12,
+            "label": "Marcos Senesi"
+          },
+          {
+            "x": 0.592,
+            "y": 5.64,
+            "label": "Harry Wilson"
+          },
+          {
+            "x": 0.0,
+            "y": 3.67,
+            "label": "Lukasz Fabianski"
+          },
+          {
+            "x": 0.208,
+            "y": 3.41,
+            "label": "Granit Xhaka"
+          },
+          {
+            "x": 0.136,
+            "y": 3.46,
+            "label": "El Hadji Malick Diouf"
+          },
+          {
+            "x": 0.653,
+            "y": 7.4,
+            "label": "Mohamed Salah"
+          },
+          {
+            "x": 0.442,
+            "y": 5.2,
+            "label": "Eberechi Eze"
+          },
+          {
+            "x": 0.0,
+            "y": 3.43,
+            "label": "Martin Dúbravka"
+          },
+          {
+            "x": 0.0,
+            "y": 3.19,
+            "label": "Nathan Patterson"
+          },
+          {
+            "x": 0.209,
+            "y": 3.42,
+            "label": "Nicolò Savona"
+          },
+          {
+            "x": 0.0,
+            "y": 3.17,
+            "label": "Bart Verbruggen"
+          },
+          {
+            "x": 0.527,
+            "y": 6.08,
+            "label": "Callum Wilson"
+          },
+          {
+            "x": 0.191,
+            "y": 5.03,
+            "label": "Emile Smith Rowe"
+          },
+          {
+            "x": 0.071,
+            "y": 2.91,
+            "label": "Issa Diop"
+          },
+          {
+            "x": 0.184,
+            "y": 3.86,
+            "label": "Pedro Porro"
+          },
+          {
+            "x": 0.379,
+            "y": 4.32,
+            "label": "Liam Delap"
+          },
+          {
+            "x": 0.425,
+            "y": 5.26,
+            "label": "Mikel Merino"
+          },
+          {
+            "x": 0.0,
+            "y": 4.31,
+            "label": "Nathan Aké"
+          },
+          {
+            "x": 1.053,
+            "y": 6.58,
+            "label": "Taiwo Awoniyi"
+          },
+          {
+            "x": 0.05,
+            "y": 3.08,
+            "label": "Ethan Ampadu"
+          },
+          {
+            "x": 0.422,
+            "y": 4.33,
+            "label": "Mohammed Kudus"
+          },
+          {
+            "x": 0.194,
+            "y": 4.34,
+            "label": "Elliot Anderson"
+          },
+          {
+            "x": 0.718,
+            "y": 6.33,
+            "label": "William Osula"
+          },
+          {
+            "x": 0.39,
+            "y": 2.98,
+            "label": "Ryan Yates"
+          },
+          {
+            "x": 0.205,
+            "y": 3.51,
+            "label": "Harry Maguire"
+          },
+          {
+            "x": 0.0,
+            "y": 3.65,
+            "label": "Cristhian Mosquera"
+          },
+          {
+            "x": 0.437,
+            "y": 4.74,
+            "label": "Florian Wirtz"
+          },
+          {
+            "x": 0.0,
+            "y": 3.46,
+            "label": "Bernd Leno"
+          },
+          {
+            "x": 0.0,
+            "y": 2.48,
+            "label": "Cheick Doucouré"
+          },
+          {
+            "x": 0.0,
+            "y": 2.85,
+            "label": "Antonín Kinský"
+          },
+          {
+            "x": 0.019,
+            "y": 3.66,
+            "label": "Robert Sánchez"
+          },
+          {
+            "x": 0.257,
+            "y": 4.67,
+            "label": "Yankuba Minteh"
+          },
+          {
+            "x": 0.07,
+            "y": 4.02,
+            "label": "James Ward-Prowse"
+          },
+          {
+            "x": 0.116,
+            "y": 3.77,
+            "label": "Ian Maatsen"
+          },
+          {
+            "x": 0.027,
+            "y": 2.49,
+            "label": "Noah Sadiki"
+          },
+          {
+            "x": 0.058,
+            "y": 3.32,
+            "label": "Joe Rodon"
+          },
+          {
+            "x": 0.024,
+            "y": 4.26,
+            "label": "Emiliano Martínez"
+          },
+          {
+            "x": 0.259,
+            "y": 5.16,
+            "label": "Ryan Sessegnon"
+          },
+          {
+            "x": 0.0,
+            "y": 3.05,
+            "label": "Kevin Danso"
+          },
+          {
+            "x": 0.0,
+            "y": 3.28,
+            "label": "Illan Meslier"
+          },
+          {
+            "x": 0.202,
+            "y": 3.53,
+            "label": "Marc Guéhi"
+          },
+          {
+            "x": 0.18,
+            "y": 3.3,
+            "label": "Lesley Ugochukwu"
+          },
+          {
+            "x": 0.317,
+            "y": 5.0,
+            "label": "Harvey Elliott"
+          },
+          {
+            "x": 0.243,
+            "y": 4.42,
+            "label": "Tom Cairney"
+          },
+          {
+            "x": 0.183,
+            "y": 3.13,
+            "label": "Matty Cash"
+          },
+          {
+            "x": 0.341,
+            "y": 4.66,
+            "label": "Callum Hudson-Odoi"
+          },
+          {
+            "x": 0.0,
+            "y": 3.11,
+            "label": "Djed Spence"
+          },
+          {
+            "x": 0.339,
+            "y": 3.29,
+            "label": "Cristian Romero"
+          },
+          {
+            "x": 0.217,
+            "y": 4.49,
+            "label": "Brennan Johnson"
+          },
+          {
+            "x": 0.26,
+            "y": 3.32,
+            "label": "Vitaly Janelt"
+          },
+          {
+            "x": 0.0,
+            "y": 3.96,
+            "label": "Zeki Amdouni"
+          },
+          {
+            "x": 0.189,
+            "y": 4.02,
+            "label": "Curtis Jones"
+          },
+          {
+            "x": 0.17,
+            "y": 4.09,
+            "label": "Tim Iroegbunam"
+          },
+          {
+            "x": 0.0,
+            "y": 3.69,
+            "label": "Matt Doherty"
+          },
+          {
+            "x": 0.358,
+            "y": 4.34,
+            "label": "Marcus Edwards"
+          },
+          {
+            "x": 0.238,
+            "y": 4.84,
+            "label": "Matheus Nunes"
+          },
+          {
+            "x": 0.124,
+            "y": 3.19,
+            "label": "James Tarkowski"
+          },
+          {
+            "x": 0.201,
+            "y": 5.49,
+            "label": "Jeremie Frimpong"
+          },
+          {
+            "x": 0.0,
+            "y": 2.59,
+            "label": "James Trafford"
+          },
+          {
+            "x": 0.071,
+            "y": 3.54,
+            "label": "Rodrigo Bentancur"
+          },
+          {
+            "x": 0.198,
+            "y": 2.47,
+            "label": "Wataru Endo"
+          },
+          {
+            "x": 0.0,
+            "y": 3.02,
+            "label": "Ethan Pinnock"
+          },
+          {
+            "x": 0.0,
+            "y": 2.55,
+            "label": "Roméo Lavia"
+          },
+          {
+            "x": 0.397,
+            "y": 4.05,
+            "label": "Jørgen Strand Larsen"
+          },
+          {
+            "x": 0.326,
+            "y": 5.03,
+            "label": "Mason Mount"
+          },
+          {
+            "x": 0.103,
+            "y": 3.67,
+            "label": "Marc Cucurella"
+          },
+          {
+            "x": 0.204,
+            "y": 5.03,
+            "label": "Kaoru Mitoma"
+          },
+          {
+            "x": 0.464,
+            "y": 5.33,
+            "label": "Jean-Philippe Mateta"
+          },
+          {
+            "x": 0.216,
+            "y": 4.62,
+            "label": "Jadon Sancho"
+          },
+          {
+            "x": 0.13,
+            "y": 3.86,
+            "label": "Michael Keane"
+          },
+          {
+            "x": 0.26,
+            "y": 4.36,
+            "label": "Evann Guessand"
+          },
+          {
+            "x": 0.031,
+            "y": 2.98,
+            "label": "Pau Torres"
+          },
+          {
+            "x": 0.15,
+            "y": 3.13,
+            "label": "Adam Smith"
+          },
+          {
+            "x": 0.238,
+            "y": 2.91,
+            "label": "Saša Lukić"
+          },
+          {
+            "x": 0.457,
+            "y": 3.37,
+            "label": "Harrison Reed"
+          },
+          {
+            "x": 0.068,
+            "y": 2.72,
+            "label": "Wesley Fofana"
+          },
+          {
+            "x": 0.218,
+            "y": 4.04,
+            "label": "Joe Willock"
+          },
+          {
+            "x": 0.325,
+            "y": 4.52,
+            "label": "Enzo Le Fée"
+          },
+          {
+            "x": 0.098,
+            "y": 2.43,
+            "label": "Leny Yoro"
+          },
+          {
+            "x": 0.242,
+            "y": 4.22,
+            "label": "Loum Tchaouna"
+          },
+          {
+            "x": 0.63,
+            "y": 5.2,
+            "label": "Viktor Gyökeres"
+          },
+          {
+            "x": 0.456,
+            "y": 4.46,
+            "label": "Patrick Dorgu"
+          },
+          {
+            "x": 0.147,
+            "y": 3.98,
+            "label": "Alex Scott"
+          },
+          {
+            "x": 0.422,
+            "y": 5.04,
+            "label": "Martin Ødegaard"
+          },
+          {
+            "x": 0.299,
+            "y": 4.79,
+            "label": "Jurriën Timber"
+          },
+          {
+            "x": 0.477,
+            "y": 3.96,
+            "label": "Kiernan Dewsbury-Hall"
+          },
+          {
+            "x": 0.061,
+            "y": 2.32,
+            "label": "Gabriel Gudmundsson"
+          },
+          {
+            "x": 0.0,
+            "y": 2.91,
+            "label": "Connor Roberts"
+          },
+          {
+            "x": 0.147,
+            "y": 4.72,
+            "label": "Jaka Bijol"
+          },
+          {
+            "x": 0.358,
+            "y": 4.03,
+            "label": "Hee-chan Hwang"
+          },
+          {
+            "x": 0.122,
+            "y": 3.3,
+            "label": "Nicolás Domínguez"
+          },
+          {
+            "x": 0.304,
+            "y": 5.38,
+            "label": "Maxim De Cuyper"
+          },
+          {
+            "x": 0.0,
+            "y": 2.19,
+            "label": "Jordan Beyer"
+          },
+          {
+            "x": 0.0,
+            "y": 2.12,
+            "label": "Maxime Estève"
+          },
+          {
+            "x": 0.0,
+            "y": 2.48,
+            "label": "Manuel Ugarte"
+          },
+          {
+            "x": 0.119,
+            "y": 4.18,
+            "label": "Jean-Ricner Bellegarde"
+          },
+          {
+            "x": 0.332,
+            "y": 3.77,
+            "label": "Declan Rice"
+          },
+          {
+            "x": 0.344,
+            "y": 3.47,
+            "label": "Sean Longstaff"
+          },
+          {
+            "x": 0.091,
+            "y": 2.7,
+            "label": "Lewis Cook"
+          },
+          {
+            "x": 0.498,
+            "y": 5.6,
+            "label": "Yoane Wissa"
+          },
+          {
+            "x": 0.084,
+            "y": 3.37,
+            "label": "Kristoffer Ajer"
+          },
+          {
+            "x": 0.083,
+            "y": 3.7,
+            "label": "Lewis Hall"
+          },
+          {
+            "x": 0.242,
+            "y": 3.2,
+            "label": "James Garner"
+          },
+          {
+            "x": 0.082,
+            "y": 2.55,
+            "label": "Jackson Tchatchoua"
+          },
+          {
+            "x": 0.063,
+            "y": 3.79,
+            "label": "Dwight McNeil"
+          },
+          {
+            "x": 0.208,
+            "y": 3.34,
+            "label": "Dan Burn"
+          },
+          {
+            "x": 0.178,
+            "y": 3.82,
+            "label": "Ilia Gruev"
+          },
+          {
+            "x": 0.265,
+            "y": 4.64,
+            "label": "James McAtee"
+          },
+          {
+            "x": 0.059,
+            "y": 3.26,
+            "label": "Sam Johnstone"
+          },
+          {
+            "x": 0.237,
+            "y": 3.41,
+            "label": "Josh Cullen"
+          },
+          {
+            "x": 0.316,
+            "y": 4.58,
+            "label": "Josko Gvardiol"
+          },
+          {
+            "x": 0.193,
+            "y": 4.02,
+            "label": "Jacob Ramsey"
+          },
+          {
+            "x": 0.312,
+            "y": 3.99,
+            "label": "Yasin Ayari"
+          },
+          {
+            "x": 0.06,
+            "y": 2.94,
+            "label": "Axel Disasi"
+          },
+          {
+            "x": 0.198,
+            "y": 2.88,
+            "label": "Myles Lewis-Skelly"
+          },
+          {
+            "x": 0.125,
+            "y": 3.25,
+            "label": "Neco Williams"
+          },
+          {
+            "x": 0.052,
+            "y": 3.12,
+            "label": "Mads Hermansen"
+          },
+          {
+            "x": 0.302,
+            "y": 4.17,
+            "label": "Habib Diarra"
+          },
+          {
+            "x": 0.056,
+            "y": 3.33,
+            "label": "Noussair Mazraoui"
+          },
+          {
+            "x": 0.619,
+            "y": 5.06,
+            "label": "Antoine Semenyo"
+          },
+          {
+            "x": 0.079,
+            "y": 3.39,
+            "label": "Reinildo Mandava"
+          },
+          {
+            "x": 0.38,
+            "y": 4.54,
+            "label": "Ross Barkley"
+          },
+          {
+            "x": 0.483,
+            "y": 4.67,
+            "label": "Morgan Rogers"
+          },
+          {
+            "x": 0.69,
+            "y": 4.71,
+            "label": "Anthony Gordon"
+          },
+          {
+            "x": 0.125,
+            "y": 1.5,
+            "label": "Jorrel Hato"
+          },
+          {
+            "x": 0.057,
+            "y": 2.78,
+            "label": "Calvin Bassey"
+          },
+          {
+            "x": 0.0,
+            "y": 2.88,
+            "label": "Guglielmo Vicario"
+          },
+          {
+            "x": 0.04,
+            "y": 3.54,
+            "label": "Nikola Milenković"
+          },
+          {
+            "x": 0.094,
+            "y": 3.83,
+            "label": "Sven Botman"
+          },
+          {
+            "x": 0.0,
+            "y": 1.92,
+            "label": "Sam Byram"
+          },
+          {
+            "x": 0.447,
+            "y": 5.38,
+            "label": "Noni Madueke"
+          },
+          {
+            "x": 0.369,
+            "y": 3.88,
+            "label": "Lucas Bergvall"
+          },
+          {
+            "x": 0.173,
+            "y": 3.39,
+            "label": "Jordan Henderson"
+          },
+          {
+            "x": 0.159,
+            "y": 3.34,
+            "label": "James Justin"
+          },
+          {
+            "x": 0.218,
+            "y": 3.54,
+            "label": "Malo Gusto"
+          },
+          {
+            "x": 0.292,
+            "y": 4.12,
+            "label": "Lewis Miley"
+          },
+          {
+            "x": 0.369,
+            "y": 3.67,
+            "label": "Lyle Foster"
+          },
+          {
+            "x": 0.0,
+            "y": 3.5,
+            "label": "Tyler Dibling"
+          },
+          {
+            "x": 0.074,
+            "y": 3.89,
+            "label": "Maxence Lacroix"
+          },
+          {
+            "x": 0.225,
+            "y": 4.49,
+            "label": "Andrew Robertson"
+          },
+          {
+            "x": 0.0,
+            "y": 3.7,
+            "label": "Jordan Pickford"
+          },
+          {
+            "x": 0.0,
+            "y": 3.32,
+            "label": "Rico Henry"
+          },
+          {
+            "x": 0.05,
+            "y": 3.41,
+            "label": "Tino Livramento"
+          },
+          {
+            "x": 0.362,
+            "y": 4.52,
+            "label": "Jack Hinshelwood"
+          },
+          {
+            "x": 0.199,
+            "y": 2.96,
+            "label": "Archie Gray"
+          },
+          {
+            "x": 0.043,
+            "y": 3.69,
+            "label": "Ola Aina"
+          },
+          {
+            "x": 0.159,
+            "y": 4.98,
+            "label": "Riccardo Calafiori"
+          },
+          {
+            "x": 0.288,
+            "y": 5.2,
+            "label": "Anton Stach"
+          },
+          {
+            "x": 0.0,
+            "y": 4.7,
+            "label": "Dejan Kulusevski"
+          },
+          {
+            "x": 0.0,
+            "y": 3.11,
+            "label": "Karl Darlow"
+          },
+          {
+            "x": 0.088,
+            "y": 4.28,
+            "label": "Trevoh Chalobah"
+          },
+          {
+            "x": 0.261,
+            "y": 3.87,
+            "label": "Alex Iwobi"
+          },
+          {
+            "x": 0.074,
+            "y": 3.04,
+            "label": "Matthijs de Ligt"
+          },
+          {
+            "x": 0.213,
+            "y": 4.65,
+            "label": "Anthony Elanga"
+          },
+          {
+            "x": 0.101,
+            "y": 5.3,
+            "label": "Bertrand Traoré"
+          },
+          {
+            "x": 0.0,
+            "y": 3.07,
+            "label": "Fraser Forster"
+          },
+          {
+            "x": 0.348,
+            "y": 4.5,
+            "label": "Thierno Barry"
+          },
+          {
+            "x": 0.056,
+            "y": 3.35,
+            "label": "Chris Richards"
+          },
+          {
+            "x": 0.117,
+            "y": 5.04,
+            "label": "Oscar Bobb"
+          },
+          {
+            "x": 0.273,
+            "y": 4.62,
+            "label": "Armando Broja"
+          },
+          {
+            "x": 0.0,
+            "y": 3.22,
+            "label": "Mark Travers"
+          },
+          {
+            "x": 0.364,
+            "y": 5.07,
+            "label": "Jacob Murphy"
+          },
+          {
+            "x": 0.133,
+            "y": 3.19,
+            "label": "Nathan Collins"
+          },
+          {
+            "x": 0.567,
+            "y": 5.81,
+            "label": "Bukayo Saka"
+          },
+          {
+            "x": 0.116,
+            "y": 3.83,
+            "label": "Malick Thiaw"
+          },
+          {
+            "x": 0.223,
+            "y": 4.83,
+            "label": "Carlos Alcaraz"
+          },
+          {
+            "x": 0.0,
+            "y": 2.73,
+            "label": "Lamare Bogarde"
+          },
+          {
+            "x": 0.13,
+            "y": 3.84,
+            "label": "Joe Gomez"
+          },
+          {
+            "x": 0.436,
+            "y": 6.53,
+            "label": "Alexander Isak"
+          },
+          {
+            "x": 0.0,
+            "y": 3.78,
+            "label": "Abdukodir Khusanov"
+          },
+          {
+            "x": 0.149,
+            "y": 4.94,
+            "label": "Conor Bradley"
+          },
+          {
+            "x": 0.224,
+            "y": 3.26,
+            "label": "Sandro Tonali"
+          },
+          {
+            "x": 0.475,
+            "y": 4.63,
+            "label": "Dominik Szoboszlai"
+          },
+          {
+            "x": 0.418,
+            "y": 4.83,
+            "label": "Jack Grealish"
+          },
+          {
+            "x": 0.438,
+            "y": 5.1,
+            "label": "Tijjani Reijnders"
+          },
+          {
+            "x": 0.0,
+            "y": 3.46,
+            "label": "Matz Sels"
+          },
+          {
+            "x": 0.113,
+            "y": 3.55,
+            "label": "Tyrone Mings"
+          },
+          {
+            "x": 0.158,
+            "y": 3.08,
+            "label": "Jan Paul van Hecke"
+          },
+          {
+            "x": 0.14,
+            "y": 3.0,
+            "label": "Nathaniel Clyne"
+          },
+          {
+            "x": 0.175,
+            "y": 2.66,
+            "label": "Jayden Bogle"
+          },
+          {
+            "x": 0.177,
+            "y": 5.18,
+            "label": "Justin Kluivert"
+          },
+          {
+            "x": 0.288,
+            "y": 4.15,
+            "label": "Adama Traoré"
+          },
+          {
+            "x": 0.0,
+            "y": 4.01,
+            "label": "Tyrell Malacia"
+          },
+          {
+            "x": 0.231,
+            "y": 4.92,
+            "label": "Jacob Bruun Larsen"
+          },
+          {
+            "x": 0.419,
+            "y": 4.79,
+            "label": "Joshua Zirkzee"
+          },
+          {
+            "x": 0.521,
+            "y": 3.36,
+            "label": "John McGinn"
+          },
+          {
+            "x": 0.264,
+            "y": 3.38,
+            "label": "Jarrad Branthwaite"
+          },
+          {
+            "x": 0.052,
+            "y": 3.05,
+            "label": "Hjalmar Ekdal"
+          },
+          {
+            "x": 0.209,
+            "y": 3.56,
+            "label": "Adam Wharton"
+          },
+          {
+            "x": 0.0,
+            "y": 3.46,
+            "label": "Aaron Ramsdale"
+          },
+          {
+            "x": 0.101,
+            "y": 2.91,
+            "label": "Antonee Robinson"
+          },
+          {
+            "x": 0.225,
+            "y": 3.59,
+            "label": "Conor Gallagher"
+          },
+          {
+            "x": 0.598,
+            "y": 6.23,
+            "label": "Omar Marmoush"
+          },
+          {
+            "x": 0.088,
+            "y": 3.18,
+            "label": "Aaron Hickey"
+          },
+          {
+            "x": 0.45,
+            "y": 4.14,
+            "label": "Facundo Buonanotte"
+          },
+          {
+            "x": 0.143,
+            "y": 3.89,
+            "label": "Soungoutou Magassa"
+          },
+          {
+            "x": 0.487,
+            "y": 3.77,
+            "label": "Enzo Fernández"
+          },
+          {
+            "x": 0.09,
+            "y": 2.88,
+            "label": "Josh Laurent"
+          },
+          {
+            "x": 0.0,
+            "y": 2.08,
+            "label": "Maximilian Kilman"
+          },
+          {
+            "x": 0.366,
+            "y": 4.31,
+            "label": "Brian Brobbey"
+          },
+          {
+            "x": 0.108,
+            "y": 3.28,
+            "label": "Aaron Wan-Bissaka"
+          },
+          {
+            "x": 0.088,
+            "y": 4.93,
+            "label": "Justin Devenny"
+          },
+          {
+            "x": 0.0,
+            "y": 2.83,
+            "label": "Carlos Baleba"
+          },
+          {
+            "x": 0.075,
+            "y": 3.33,
+            "label": "Michael Kayode"
+          },
+          {
+            "x": 0.093,
+            "y": 3.07,
+            "label": "Konstantinos Mavropanos"
+          },
+          {
+            "x": 0.275,
+            "y": 4.19,
+            "label": "Iliman Ndiaye"
+          },
+          {
+            "x": 0.83,
+            "y": 6.86,
+            "label": "Rayan Cherki"
+          },
+          {
+            "x": 0.398,
+            "y": 4.2,
+            "label": "Crysencio Summerville"
+          },
+          {
+            "x": 0.263,
+            "y": 3.43,
+            "label": "Adam Armstrong"
+          },
+          {
+            "x": 0.356,
+            "y": 5.3,
+            "label": "Eddie Nketiah"
+          },
+          {
+            "x": 0.0,
+            "y": 3.47,
+            "label": "Daniel Bentley"
+          },
+          {
+            "x": 0.0,
+            "y": 3.97,
+            "label": "Gianluigi Donnarumma"
+          },
+          {
+            "x": 0.542,
+            "y": 4.65,
+            "label": "Morgan Gibbs-White"
+          },
+          {
+            "x": 0.044,
+            "y": 4.29,
+            "label": "William Saliba"
+          },
+          {
+            "x": 0.026,
+            "y": 3.39,
+            "label": "Ferdi Kadıoğlu"
+          },
+          {
+            "x": 0.387,
+            "y": 4.3,
+            "label": "Marcus Tavernier"
+          },
+          {
+            "x": 0.501,
+            "y": 6.32,
+            "label": "Noah Okafor"
+          },
+          {
+            "x": 0.064,
+            "y": 3.61,
+            "label": "Fabian Schär"
+          },
+          {
+            "x": 0.0,
+            "y": 5.11,
+            "label": "Solly March"
+          },
+          {
+            "x": 0.529,
+            "y": 4.71,
+            "label": "Dango Ouattara"
+          },
+          {
+            "x": 0.04,
+            "y": 3.19,
+            "label": "Alphonse Areola"
+          },
+          {
+            "x": 0.0,
+            "y": 3.18,
+            "label": "Adam Webster"
+          },
+          {
+            "x": 0.288,
+            "y": 3.67,
+            "label": "Youri Tielemans"
+          },
+          {
+            "x": 0.199,
+            "y": 3.32,
+            "label": "Kobbie Mainoo"
+          },
+          {
+            "x": 0.624,
+            "y": 5.26,
+            "label": "Ollie Watkins"
+          },
+          {
+            "x": 0.341,
+            "y": 3.02,
+            "label": "David Møller Wolfe"
+          },
+          {
+            "x": 0.415,
+            "y": 3.63,
+            "label": "Mateo Kovacic"
+          },
+          {
+            "x": 0.222,
+            "y": 3.82,
+            "label": "Daniel Muñoz"
+          },
+          {
+            "x": 0.59,
+            "y": 5.62,
+            "label": "Harvey Barnes"
+          },
+          {
+            "x": 0.457,
+            "y": 4.32,
+            "label": "Raúl Jiménez"
+          },
+          {
+            "x": 0.2,
+            "y": 4.22,
+            "label": "Virgil van Dijk"
+          },
+          {
+            "x": 0.636,
+            "y": 6.9,
+            "label": "Junior Kroupi"
+          },
+          {
+            "x": 0.717,
+            "y": 3.71,
+            "label": "Ashley Barnes"
+          },
+          {
+            "x": 0.32,
+            "y": 4.82,
+            "label": "Mathys Tel"
+          },
+          {
+            "x": 0.404,
+            "y": 5.8,
+            "label": "Wilson Isidor"
+          },
+          {
+            "x": 0.487,
+            "y": 4.38,
+            "label": "Dominic Calvert-Lewin"
+          },
+          {
+            "x": 0.048,
+            "y": 3.15,
+            "label": "Kenny Tete"
+          },
+          {
+            "x": 0.205,
+            "y": 4.88,
+            "label": "Nordi Mukiele"
+          },
+          {
+            "x": 0.554,
+            "y": 5.05,
+            "label": "Zian Flemming"
+          },
+          {
+            "x": 0.503,
+            "y": 4.68,
+            "label": "Alejandro Garnacho"
+          },
+          {
+            "x": 0.046,
+            "y": 3.01,
+            "label": "Will Hughes"
+          },
+          {
+            "x": 0.35,
+            "y": 3.92,
+            "label": "Keane Lewis-Potter"
+          },
+          {
+            "x": 0.224,
+            "y": 3.11,
+            "label": "Quilindschy Hartman"
+          },
+          {
+            "x": 0.519,
+            "y": 4.19,
+            "label": "Wilfried Gnonto"
+          },
+          {
+            "x": 0.28,
+            "y": 3.65,
+            "label": "Rayan Aït-Nouri"
+          },
+          {
+            "x": 0.055,
+            "y": 1.93,
+            "label": "Axel Tuanzebe"
+          },
+          {
+            "x": 0.083,
+            "y": 3.27,
+            "label": "Trai Hume"
+          },
+          {
+            "x": 0.228,
+            "y": 3.0,
+            "label": "Guido Rodríguez"
+          }
+        ],
+        "xLabel": "Goals + assists per 90 (trailing 365 days)",
+        "yLabel": "FPL points per 90 (career)",
+        "caption": "Every dot is a Premier League player — hover for the name. The upward drift is the correlation above, made visible."
       },
       {
         "type": "callout",
         "heading": "What this means for your squad",
         "html": "<p><b>Don't chase the price tag, chase the underlying output.</b> A player whose output has quietly been trending up, before the price everyone's fixated on has caught up, is exactly the kind of gap our Transfer Finder and Predictions tools are built to help you spot.</p>"
+      },
+      {
+        "type": "heading",
+        "text": "Does a player's own fantasy price predict their transfer value?"
+      },
+      {
+        "type": "paragraph",
+        "html": "One more thing we tried, since it's a natural question once you're staring at both datasets side by side: FPL runs its own weekly-updated \"valuation\" of every player &mdash; its price. That's a genuinely independent opinion of a player's worth, from a different institution, updated by a different mechanism than Transfermarkt's own valuation. Does knowing a player's FPL price, or how many fantasy points they've racked up recently, help predict where their <i>transfer</i> value is headed?"
+      },
+      {
+        "type": "paragraph",
+        "html": "Short answer: <b>not really</b>, and the reason is a nice bit of intuition once you see it. FPL price is deliberately compressed for game balance &mdash; two squad players can cost the same in FPL while being worth wildly different amounts on the transfer market. It just isn't fine-grained enough to track real value differences. Recent fantasy points fared a little better on their own, but added almost nothing once our model already knew a player's actual output (goals, assists, minutes) &mdash; it was measuring mostly the same thing through a different lens. A tidy negative result, but a real one, and exactly the kind of thing worth checking rather than assuming."
       },
       {
         "type": "heading",
