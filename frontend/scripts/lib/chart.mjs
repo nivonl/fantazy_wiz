@@ -91,8 +91,18 @@ export function renderPriceLineChart(rows, { width = 640, height = 230 } = {}) {
     <text x="${p.x.toFixed(1)}" y="${(p.y - 10).toFixed(1)}" text-anchor="${anchor}" font-size="13" font-weight="700" fill="var(--text)">${p.r.price.toFixed(1)}m</text>
     <text x="${p.x.toFixed(1)}" y="${(chartHeight + 20).toFixed(1)}" text-anchor="${anchor}" font-size="12" fill="var(--text-dim)">GW${p.r.gameweek}</text>`
         : "";
+      // Every point gets a hover tooltip, not just the ones with an always-visible label --
+      // the label-thinning above is purely about not cluttering the chart with dozens of
+      // overlapping text elements, it isn't meant to limit which points are even inspectable.
+      // pointer-events="all" on the (transparent) hit circle is load-bearing -- a zero-alpha
+      // fill isn't reliably hit-tested under the default `pointer-events: visiblePainted` in
+      // every browser, which would otherwise make the invisible hit target silently un-hoverable
+      // despite a correct <title> sitting right there in the DOM (see radarChart.js for the same
+      // fix, found the same way).
+      const tooltip = `${p.r.price.toFixed(1)}m — GW${p.r.gameweek}`;
       return `
-    <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${showLabel ? 3.5 : 2}" fill="var(--accent)" />${label}`;
+    <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="transparent" pointer-events="all"><title>${tooltip}</title></circle>
+    <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${showLabel ? 3.5 : 2}" fill="var(--accent)" pointer-events="none" />${label}`;
     })
     .join("");
 

@@ -137,8 +137,14 @@ export function renderRadarChart(categoryLabels, seriesAll, seriesPosition, opti
         const cx2 = x.toFixed(1);
         const cy2 = y.toFixed(1);
         return (
-          `<circle cx="${cx2}" cy="${cy2}" r="9" fill="transparent"><title>${tooltip}</title></circle>` +
-          `<circle cx="${cx2}" cy="${cy2}" r="3" fill="${color}" fill-opacity="${hasValue ? 1 : 0.35}" style="pointer-events:none" />`
+          // pointer-events="all" is load-bearing here -- a zero-alpha fill isn't reliably
+          // hit-tested under the default `pointer-events: visiblePainted` in every browser
+          // (some treat "painted with alpha 0" as "not painted" for hit-testing purposes), which
+          // silently made this whole invisible hit-circle un-hoverable despite the correct
+          // <title> content sitting right there in the DOM. Forcing "all" makes the geometry
+          // itself the hit target regardless of paint/fill state.
+          `<circle cx="${cx2}" cy="${cy2}" r="9" fill="transparent" pointer-events="all"><title>${tooltip}</title></circle>` +
+          `<circle cx="${cx2}" cy="${cy2}" r="3" fill="${color}" fill-opacity="${hasValue ? 1 : 0.35}" pointer-events="none" />`
         );
       })
       .join("");
