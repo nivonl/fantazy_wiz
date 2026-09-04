@@ -3,33 +3,134 @@ import pytest
 
 from fantasy_app.recommend.fpl import CandidatePlayer
 from fantasy_app.services.fpl_service import (
+    PriceRatePrior,
+    _fit_price_rate_priors,
     _is_backup_goalkeeper,
+    _is_priced_like_backup,
     _is_unproven_this_season,
     _max_gk_minutes_by_team,
+    _momentum_factor,
     _player_rates,
     _risk_flags,
+    _squad_depth_price_threshold,
     _team_games_played,
     entry_squad_and_starters,
     match_player_names,
 )
 
+_FLAT_PRIOR = {"GK": PriceRatePrior(0.0, 0.0, 0.0, 0.0), "DEF": PriceRatePrior(0.0, 0.0, 0.0, 0.0),
+               "MID": PriceRatePrior(0.0, 0.0, 0.0, 0.0), "FWD": PriceRatePrior(0.0, 0.0, 0.0, 0.0)}
 
-def test_player_rates_zero_starts_gives_zero_not_fabricated_rate():
-    # Regression: a player with starts=0 but a stray goals_scored>0 (e.g. a leftover stat
-    # from before the season reset — seen live for a keeper with goals_scored=11, starts=0)
-    # must not have that turned into an inflated per-match rate by dividing by a fake "1".
-    element = {"starts": 0, "goals_scored": 11, "assists": 0, "chance_of_playing_next_round": None}
-    goal_rate, assist_rate, start_prob = _player_rates(element)
+
+def test_player_rates_zero_minutes_falls_back_to_the_price_prior():
+    # No minutes at all this season (a completely blank slate) — with a flat (zero) prior,
+    # goal/assist rate must be exactly 0, not a fabricated non-zero figure. A stray
+    # goals_scored>0 with 0 minutes (a leftover stat from before a season reset) must not leak
+    # through either, since it can't be divided into a real per-90 rate.
+    element = {
+        "minutes": 0, "goals_scored": 11, "assists": 0, "chance_of_playing_next_round": None,
+        "element_type": 4, "now_cost": 70,
+    }
+    goal_rate, assist_rate, start_prob = _player_rates(element, _FLAT_PRIOR)
     assert goal_rate == 0.0
     assert assist_rate == 0.0
 
 
-def test_player_rates_uses_real_starts_when_present():
-    element = {"starts": 4, "goals_scored": 2, "assists": 1, "chance_of_playing_next_round": 100}
-    goal_rate, assist_rate, start_prob = _player_rates(element)
-    assert goal_rate == pytest.approx(0.5)
-    assert assist_rate == pytest.approx(0.25)
+def test_player_rates_blends_observed_rate_with_price_prior():
+    # 90 minutes (1 "effective match") of real evidence, blended with a non-flat prior that
+    # predicts a higher rate at this player's price — the result should sit strictly between
+    # the two, not equal either one outright (a single match shouldn't fully override a prior
+    # tuned on many established players, and shouldn't be fully overridden by it either).
+    prior = {"FWD": PriceRatePrior(goal_slope=0.05, goal_intercept=0.0, assist_slope=0.0, assist_intercept=0.0)}
+    element = {"minutes": 90, "goals_scored": 0, "assists": 0, "chance_of_playing_next_round": 100,
+               "element_type": 4, "now_cost": 100}
+    goal_rate, assist_rate, start_prob = _player_rates(element, prior)
+    prior_rate = prior["FWD"].predict(10.0)[0]
+    assert 0.0 < goal_rate < prior_rate
     assert start_prob == 1.0
+
+
+def test_player_rates_observed_form_dominates_once_established():
+    # Many effective matches of real, consistent output should push the blended rate close to
+    # the observed rate, largely swamping a prior tuned for a completely different price level.
+    prior = {"MID": PriceRatePrior(goal_slope=0.0, goal_intercept=0.01, assist_slope=0.0, assist_intercept=0.0)}
+    element = {"minutes": 3600, "goals_scored": 20, "assists": 0, "chance_of_playing_next_round": None,
+               "element_type": 3, "now_cost": 80}
+    goal_rate, _, _ = _player_rates(element, prior)
+    assert goal_rate == pytest.approx(0.5, abs=0.05)  # 20 goals in 3600 mins = 0.5/90
+
+
+def test_fit_price_rate_priors_learns_a_positive_price_goal_relationship():
+    # Synthetic but realistic: pricier forwards score more per 90 than cheaper ones. The fitted
+    # line should reflect that (a higher price predicts a higher rate), not just default flat.
+    elements = [
+        {"element_type": 4, "now_cost": p, "minutes": 900, "goals_scored": g, "assists": 0}
+        for p, g in [(45, 1), (55, 2), (65, 4), (75, 5), (85, 7), (95, 8), (105, 9), (150, 12)]
+    ]
+    priors = _fit_price_rate_priors({"elements": elements})
+    cheap_rate, _ = priors["FWD"].predict(4.5)
+    expensive_rate, _ = priors["FWD"].predict(15.0)
+    assert expensive_rate > cheap_rate
+
+
+def test_fit_price_rate_priors_falls_back_when_a_position_has_too_few_established_players():
+    # Only 2 established players total, all midfielders — below MIN_PLAYERS_FOR_PRICE_PRIOR_FIT
+    # for both the position-specific fit AND the pooled fallback, so every position should get
+    # the same flat, zero-slope prior rather than an unstable line fit on 2 points.
+    elements = [
+        {"element_type": 3, "now_cost": 60, "minutes": 900, "goals_scored": 2, "assists": 1},
+        {"element_type": 3, "now_cost": 90, "minutes": 900, "goals_scored": 5, "assists": 3},
+    ]
+    priors = _fit_price_rate_priors({"elements": elements})
+    for pos in ("GK", "DEF", "MID", "FWD"):
+        assert priors[pos].goal_slope == 0.0
+        assert priors[pos].goal_intercept == 0.0
+
+
+def test_momentum_factor_neutral_with_no_season_history():
+    assert _momentum_factor({"points_per_game": "0.0", "form": "0.0"}) == 1.0
+    assert _momentum_factor({}) == 1.0
+
+
+def test_momentum_factor_reflects_trending_up_or_down():
+    trending_up = _momentum_factor({"points_per_game": "4.0", "form": "8.0"})
+    trending_down = _momentum_factor({"points_per_game": "8.0", "form": "4.0"})
+    assert trending_up > 1.0
+    assert trending_down < 1.0
+
+
+def test_momentum_factor_is_capped_both_ways():
+    wild_up = _momentum_factor({"points_per_game": "1.0", "form": "20.0"})
+    wild_down = _momentum_factor({"points_per_game": "20.0", "form": "0.1"})
+    assert wild_up == pytest.approx(1.4)
+    assert wild_down == pytest.approx(0.7)
+
+
+def _squad(team, pos, prices):
+    return [{"team": team, "element_type": pos, "now_cost": int(p * 10)} for p in prices]
+
+
+def test_squad_depth_flags_a_cheap_player_behind_expensive_teammates():
+    # 5 defenders at one club, priced 8/7/6/4.5/3 (element_type 2 = DEF, 4 typical starters) —
+    # the cheapest is well below 75% of the 4th-most-expensive (4.5), so should read as squad depth.
+    elements = _squad(team=1, pos=2, prices=[8.0, 7.0, 6.0, 4.5, 3.0])
+    thresholds = _squad_depth_price_threshold({"elements": elements})
+    assert _is_priced_like_backup(elements[4], thresholds, team_games_played={}) is True
+
+
+def test_squad_depth_ignores_the_regular_starters():
+    elements = _squad(team=1, pos=2, prices=[8.0, 7.0, 6.0, 4.5, 3.0])
+    thresholds = _squad_depth_price_threshold({"elements": elements})
+    assert _is_priced_like_backup(elements[0], thresholds, team_games_played={}) is False
+
+
+def test_squad_depth_defers_to_real_minutes_evidence():
+    # Same cheap defender as above, but now with real evidence of actually starting most of
+    # the team's games — that should win over the price-based guess.
+    elements = _squad(team=1, pos=2, prices=[8.0, 7.0, 6.0, 4.5, 3.0])
+    elements[4]["starts"] = 4
+    thresholds = _squad_depth_price_threshold({"elements": elements})
+    assert _is_priced_like_backup(elements[4], thresholds, team_games_played={1: 5}) is False
 
 
 class _FakePicks404Client:

@@ -1,10 +1,20 @@
 # Model improvement notes (from the blog's Gameweek 1 & 2 "surprise" posts)
 
-Internal only — not linked from the site, not published. Written while building the blog's
-gameweek-surprise posts (see `frontend/data/blog/posts.json`), which required re-running the
-real prediction pipeline (`fit_ratings` / `predict_fixture` / `player_xp`, timed to only see
-data available before each gameweek) against real Gameweek 1 and 2 results. That backtest
-surfaced a specific, recurring failure mode worth fixing. Captured here for when we pick this up.
+**Status: implemented.** See `fantasy_app/services/fpl_service.py` — `_fit_price_rate_priors` /
+`_player_rates` (price prior + minutes-weighted shrinkage, replacing the old starts-only rate),
+`_momentum_factor` (FPL's own `form` vs `points_per_game`), and `_squad_depth_price_threshold` /
+`_is_priced_like_backup` (price-implied rotation risk). Tests in `tests/test_fpl_service.py`.
+Documented for users on `/methodology`. Internal only below — not linked from the site.
+
+Originally written while building the blog's gameweek-surprise posts (see
+`frontend/data/blog/posts.json`), which required re-running the real prediction pipeline
+(`fit_ratings` / `predict_fixture` / `player_xp`, timed to only see data available before each
+gameweek) against real Gameweek 1 and 2 results. That backtest surfaced a specific, recurring
+failure mode; the fix below also folds in the user's separate request to weight momentum,
+current price, and squad depth into the core model, informed by the Deep Research team's
+market-value study (`predicting-transfer-value` post) finding recent output is the stronger
+fantasy-points signal whenever it actually exists — so price is used here as a cold-start
+fallback prior, not a competitor to observed form.
 
 ## The core problem: player-level rates have no memory across seasons, and no shrinkage
 
@@ -64,3 +74,14 @@ Net effect: Gameweek 1 predictions stop being a near-flat floor for the whole le
 players keep some of their known quality; genuine unknowns stay near the floor), and no single
 match — start or substitute appearance — should ever be able to swing a prediction as far as
 De Cuyper's 16.66 or Cherki's 0.74 did.
+
+## Deferred: actual transfer fee paid
+
+The user's original ask also included the real transfer fee a club paid (not just FPL price) as
+a signal — deliberately scoped out for now. FPL price is a strong, already-integrated proxy for
+the same underlying "reputation/quality" signal a transfer fee would carry, without needing new
+infrastructure. A real fee would need a new provider (Transfermarkt or similar), matched to FPL
+players by name — comparable scope to `providers/fpl_history.py`, plus the same name-matching
+work `services/team_matching.py` already does for football-data.org, and ongoing upkeep since
+it's a source not otherwise integrated anywhere in this app. Revisit if the price-prior above
+turns out not to be informative enough on its own.

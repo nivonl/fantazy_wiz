@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 
 import httpx
+import numpy as np
 
 from fantasy_app.models.player_points import player_xp
 from fantasy_app.models.predict import FixturePrediction, predict_fixture
@@ -207,30 +208,207 @@ BACKUP_GK_START_PROB_CAP = 0.1
 UNPROVEN_PLAYER_START_PROB_CAP = 0.3
 
 
-def _player_rates(element: dict) -> tuple[float, float, float]:
-    """
-    (goals per start, assists per start, start_prob) from this season's totals.
+# --- Price-informed prior for goal/assist rate --------------------------------------------
+#
+# The observed rate below (goals/assists per 90) is real evidence, but for a player with little
+# or no current-season minutes there isn't enough of it to trust on its own — the old version of
+# this function simply returned 0.0 in that case, which treats a completely unknown academy
+# player and a proven, expensively-priced veteran identically the moment either one has a quiet
+# game. See NOTES-model-improvements.md for the two live cases (a 12m-priced international
+# predicted near a squad player's floor; a single lucky goal blown up into a 16-point-a-week
+# forecast) that motivated this.
+#
+# FPL's price already bakes in exactly the signal that's missing: reputation, output at a
+# previous club or league, the transfer fee a manager was willing to pay — none of which show up
+# in "goals this season" for someone who just arrived, but all of which the market (and FPL's
+# own pricing team) already priced in. Rather than sourcing that externally (a real transfer-fee
+# feed is a much bigger integration — see NOTES-model-improvements.md), this fits a simple
+# price -> expected-rate curve straight from this gameweek's own bootstrap data: established
+# players (real minutes on the board) are the training set, everyone else borrows their line.
 
-    With zero starts there's no real per-match rate to compute — return 0.0 rather than
-    dividing by a fabricated "1 appearance" floor. That floor used to turn stray leftover
-    stats (e.g. a goalkeeper carrying `goals_scored=11` from before the season reset, with
-    starts=0) into a wildly inflated rate; treating "no starts" as "no data" avoids that
-    entirely, consistent with this project's rule of never fabricating an estimate over real
-    absence of evidence.
+MIN_MINUTES_FOR_PRICE_PRIOR_FIT = 270  # ~3 full matches — enough for a per-90 rate to mean something
+MIN_PLAYERS_FOR_PRICE_PRIOR_FIT = 8  # below this many established players at a position, don't trust a position-specific line yet
+PRICE_PRIOR_WEIGHT_MATCHES = 4.0  # the price prior counts as this many "matches" of evidence when blended with what's actually been observed — enough to anchor 0-2 starts, small enough that half a season of real form dominates it
 
-    `chance_of_playing_next_round is None` means "FPL has no injury doubt" — it does NOT mean
-    "likely to start." A completely unproven backup with a clean bill of health gets the same
-    0.9 here as an established starter; `_is_backup_goalkeeper` below corrects for that
-    specific, high-confidence case using real relative playing time, not a guess.
+
+@dataclass(frozen=True)
+class PriceRatePrior:
+    """A straight line from FPL price (£m) to expected goals/assists per 90 minutes, fit fresh
+    from this gameweek's own bootstrap — see _fit_price_rate_priors for why and how."""
+
+    goal_slope: float
+    goal_intercept: float
+    assist_slope: float
+    assist_intercept: float
+
+    def predict(self, price: float) -> tuple[float, float]:
+        # A price/rate line fit on established players can dip slightly negative at the very
+        # bottom of the price range (a cheap bench player's true rate is close to 0, not below
+        # it) — clip rather than let that become a negative expected rate downstream.
+        return (
+            max(0.0, self.goal_slope * price + self.goal_intercept),
+            max(0.0, self.assist_slope * price + self.assist_intercept),
+        )
+
+
+_FLAT_PRIOR = PriceRatePrior(0.0, 0.0, 0.0, 0.0)
+
+
+def _fit_price_rate_priors(bootstrap: dict) -> dict[str, PriceRatePrior]:
     """
-    starts = element.get("starts", 0) or 0
+    One price -> rate line per position, fit each time this is called (prices and season-to-date
+    rates both drift across a season, and refitting ~600 players with numpy is cheap). Positions
+    without enough established players yet (plausible very early in a season) fall back to a
+    single line fit across every position pooled together, or to a flat zero-rate prior if even
+    that pool is too thin — never a crash, just a less informed prior.
+    """
+    rows_by_pos: dict[str, list[tuple[float, float, float]]] = {}
+    for e in bootstrap["elements"]:
+        minutes = e.get("minutes", 0) or 0
+        if minutes < MIN_MINUTES_FOR_PRICE_PRIOR_FIT:
+            continue
+        pos = POSITION_BY_ELEMENT_TYPE[e["element_type"]]
+        price = e["now_cost"] / 10.0
+        goal_rate = (e.get("goals_scored", 0) or 0) * 90.0 / minutes
+        assist_rate = (e.get("assists", 0) or 0) * 90.0 / minutes
+        rows_by_pos.setdefault(pos, []).append((price, goal_rate, assist_rate))
+
+    def fit_one(rows: list[tuple[float, float, float]]) -> PriceRatePrior:
+        prices = np.array([r[0] for r in rows])
+        goal_slope, goal_intercept = np.polyfit(prices, [r[1] for r in rows], 1)
+        assist_slope, assist_intercept = np.polyfit(prices, [r[2] for r in rows], 1)
+        return PriceRatePrior(
+            float(goal_slope), float(goal_intercept), float(assist_slope), float(assist_intercept)
+        )
+
+    all_established = [row for rows in rows_by_pos.values() for row in rows]
+    fallback = fit_one(all_established) if len(all_established) >= MIN_PLAYERS_FOR_PRICE_PRIOR_FIT else _FLAT_PRIOR
+
+    return {
+        pos: fit_one(rows_by_pos[pos]) if len(rows_by_pos.get(pos, [])) >= MIN_PLAYERS_FOR_PRICE_PRIOR_FIT else fallback
+        for pos in POSITION_BY_ELEMENT_TYPE.values()
+    }
+
+
+def _player_rates(element: dict, price_priors: dict[str, PriceRatePrior]) -> tuple[float, float, float]:
+    """
+    (goals per 90, assists per 90, start_prob), blending this season's observed rate with the
+    price-informed prior above via the same empirical-Bayes shrinkage the model already applies
+    to opponent-specific history (services/opponent_history.py's shrinkage_factor) — just one
+    layer earlier, on the base rate itself, weighted by minutes rather than starts so a
+    productive substitute appearance counts for something instead of being discarded outright
+    (the old starts-only version couldn't see a substitute's output at all).
+
+    Per-90 rather than per-start: dimensionally consistent with team_avg_goals below (a
+    per-match figure), and doesn't understate a player who's regularly subbed at 60' relative to
+    one who plays every minute.
+
+    As real minutes accumulate the observed rate quickly dominates the blend — this is a
+    fallback for the genuinely unknown, not a competitor to actual current-season form (see the
+    Deep Research post on market value: recent output is the stronger fantasy-points signal
+    whenever it actually exists).
+    """
+    minutes = element.get("minutes", 0) or 0
     chance = element.get("chance_of_playing_next_round")
     start_prob = 0.9 if chance is None else max(chance, 0) / 100.0
-    if starts == 0:
-        return 0.0, 0.0, start_prob
+
+    pos = POSITION_BY_ELEMENT_TYPE[element["element_type"]]
+    price = element["now_cost"] / 10.0
+    prior_goal_rate, prior_assist_rate = price_priors[pos].predict(price)
+
     goals = element.get("goals_scored", 0) or 0
     assists = element.get("assists", 0) or 0
-    return goals / starts, assists / starts, start_prob
+    observed_goal_rate = goals * 90.0 / minutes if minutes else 0.0
+    observed_assist_rate = assists * 90.0 / minutes if minutes else 0.0
+    effective_matches = minutes / 90.0
+
+    goal_rate = (observed_goal_rate * effective_matches + prior_goal_rate * PRICE_PRIOR_WEIGHT_MATCHES) / (
+        effective_matches + PRICE_PRIOR_WEIGHT_MATCHES
+    )
+    assist_rate = (observed_assist_rate * effective_matches + prior_assist_rate * PRICE_PRIOR_WEIGHT_MATCHES) / (
+        effective_matches + PRICE_PRIOR_WEIGHT_MATCHES
+    )
+    return goal_rate, assist_rate, start_prob
+
+
+# --- Momentum ---------------------------------------------------------------------------------
+
+MOMENTUM_MIN_FACTOR = 0.7
+MOMENTUM_MAX_FACTOR = 1.4
+
+
+def _momentum_factor(element: dict) -> float:
+    """
+    A recency signal FPL already computes for every player, reused rather than rebuilt: `form`
+    is their average points over the last 30 days, `points_per_game` their season-long average.
+    The ratio is a clean "trending up or down relative to their own baseline" read, with no need
+    to fetch or weight a per-gameweek history ourselves — and critically, no lag: both fields
+    update the moment FPL's live data does, unlike the community archive this app otherwise
+    relies on for per-gameweek history (providers/fpl_history.py), which can trail the real
+    current gameweek by one or more matches.
+
+    Capped both ways so a thin early-season sample can't swing a prediction too far on its own.
+    Neutral (1.0) with no season history yet — filling that gap is the price prior's job above,
+    not momentum's; a player with points_per_game == 0 has nothing for "trending" to mean yet.
+    """
+    points_per_game = float(element.get("points_per_game") or 0.0)
+    if points_per_game <= 0:
+        return 1.0
+    form = float(element.get("form") or 0.0)
+    ratio = form / points_per_game
+    return max(MOMENTUM_MIN_FACTOR, min(MOMENTUM_MAX_FACTOR, ratio))
+
+
+# --- Squad depth (price-implied rotation risk) -------------------------------------------------
+
+# A rough "how many starters at this position" shape, used only to pick which price rank counts
+# as "probably not first-choice" — not meant to model any one team's actual formation, just a
+# sane default across the division's mix of back-3/back-4/etc systems.
+TYPICAL_STARTERS_BY_POSITION = {"GK": 1, "DEF": 4, "MID": 4, "FWD": 2}
+SQUAD_DEPTH_PRICE_RATIO = 0.75  # meaningfully cheaper than the Nth-most-expensive teammate at the position
+SQUAD_DEPTH_START_PROB_CAP = 0.55  # softer than the evidence-based caps below — this is a price *hint*, not proof
+SQUAD_DEPTH_PROVEN_START_RATIO = 0.5  # started at least half the team's games so far -> real evidence wins, ignore the price hint
+
+
+def _squad_depth_price_threshold(bootstrap: dict) -> dict[tuple[int, str], float]:
+    """
+    Per (team id, position), the price of the Nth-most-expensive player in that position group
+    at that club — N being the typical number of starters there. A club's own pricing already
+    encodes who they rate as starters vs. squad depth (that's what price reflects); this turns
+    it into a threshold so a much cheaper teammate in the same slot reads as real rotation risk
+    even before any minutes evidence exists either way — the gap _is_unproven_this_season and
+    _is_backup_goalkeeper can't cover, since both need the team to have played at least once.
+    """
+    prices_by_team_pos: dict[tuple[int, str], list[float]] = {}
+    for e in bootstrap["elements"]:
+        pos = POSITION_BY_ELEMENT_TYPE[e["element_type"]]
+        prices_by_team_pos.setdefault((e["team"], pos), []).append(e["now_cost"] / 10.0)
+
+    thresholds: dict[tuple[int, str], float] = {}
+    for (team_id, pos), prices in prices_by_team_pos.items():
+        prices.sort(reverse=True)
+        n_starters = TYPICAL_STARTERS_BY_POSITION.get(pos, 1)
+        thresholds[(team_id, pos)] = prices[min(n_starters, len(prices)) - 1]
+    return thresholds
+
+
+def _is_priced_like_backup(
+    element: dict, price_thresholds: dict[tuple[int, str], float], team_games_played: dict[int, int]
+) -> bool:
+    """True only when the price hint AND the lack of real evidence against it both hold — a
+    player who's actually started most of their team's games so far is a starter regardless of
+    how their price stacks up against a teammate's; real minutes always outrank a price guess."""
+    pos = POSITION_BY_ELEMENT_TYPE[element["element_type"]]
+    threshold = price_thresholds.get((element["team"], pos))
+    if threshold is None:
+        return False
+    if element["now_cost"] / 10.0 >= threshold * SQUAD_DEPTH_PRICE_RATIO:
+        return False
+    games_played = team_games_played.get(element["team"], 0)
+    starts = element.get("starts", 0) or 0
+    if games_played > 0 and starts / games_played >= SQUAD_DEPTH_PROVEN_START_RATIO:
+        return False
+    return True
 
 
 def _max_gk_minutes_by_team(bootstrap: dict) -> dict[int, int]:
@@ -302,15 +480,18 @@ def _candidates_for_gameweek(
     history_index: dict[str, list],
     event: int,
     team_games_played: dict[int, int],
+    price_priors: dict[str, PriceRatePrior],
+    price_thresholds: dict[tuple[int, str], float],
 ) -> dict[str, CandidatePlayer]:
     """The single-gameweek xP model for every player with a fixture that week, keyed by
     element id. Factored out of build_candidate_pool so build_candidate_pool_multi_gw can
     call it once per gameweek in a window and sum, without duplicating the model.
 
-    `team_games_played` is computed once by the caller (it doesn't vary across which
-    gameweek we're predicting — only whether a match has already been played) and passed in
-    rather than recomputed here, since build_candidate_pool_multi_gw calls this once per
-    gameweek in its window."""
+    `team_games_played`, `price_priors` and `price_thresholds` are all computed once by the
+    caller from data that doesn't vary across which gameweek we're predicting (only whether a
+    match has already been played, and this gameweek's bootstrap snapshot) and passed in rather
+    than recomputed here, since build_candidate_pool_multi_gw calls this once per gameweek in
+    its window."""
     team_name_by_id = {t["id"]: t["name"] for t in bootstrap["teams"]}
     fixture_by_team = _gameweek_fixture_by_team(client, event)
     max_gk_minutes = _max_gk_minutes_by_team(bootstrap)
@@ -330,15 +511,17 @@ def _candidates_for_gameweek(
         p_cs = pred.p_home_clean_sheet if is_home else pred.p_away_clean_sheet
 
         pos = POSITION_BY_ELEMENT_TYPE[element["element_type"]]
-        goal_rate, assist_rate, start_prob = _player_rates(element)
+        goal_rate, assist_rate, start_prob = _player_rates(element, price_priors)
         if _is_unproven_this_season(element, team_games_played):
             start_prob = min(start_prob, UNPROVEN_PLAYER_START_PROB_CAP)
         if _is_backup_goalkeeper(element, max_gk_minutes):
             start_prob = min(start_prob, BACKUP_GK_START_PROB_CAP)
+        if _is_priced_like_backup(element, price_thresholds, team_games_played):
+            start_prob = min(start_prob, SQUAD_DEPTH_START_PROB_CAP)
         team_avg_goals = max(goal_avgs.get(norm_name_by_id[team_id], 1.0), 0.1)
         # A player can't be responsible for more than the whole team's average output — clamp
-        # defensively in case any future data source has a rate/average mismatch like the
-        # zero-starts case _player_rates already guards against.
+        # defensively in case a small-sample rate (even after price-prior blending) or a
+        # rate/average mismatch from a future data source pushes the raw ratio past 100%.
         goal_share = min(goal_rate / team_avg_goals, 1.0)
 
         base_xp = player_xp(
@@ -357,7 +540,8 @@ def _candidates_for_gameweek(
         history_rows = history_index.get(full_name, [])
         opponent_name = team_name_by_id[fixture["team_a"] if is_home else fixture["team_h"]]
         current_team_name = team_name_by_id[team_id]
-        factor = shrinkage_factor(history_rows, opponent_name)
+        opponent_factor = shrinkage_factor(history_rows, opponent_name)
+        momentum = _momentum_factor(element)
         stats = compute_opponent_stats(history_rows, opponent_name, current_team_name)
 
         candidates[str(element["id"])] = CandidatePlayer(
@@ -366,7 +550,7 @@ def _candidates_for_gameweek(
             pos=pos,
             team=current_team_name,
             price=element["now_cost"] / 10.0,
-            xp=round(base_xp * factor, 3),
+            xp=round(base_xp * opponent_factor * momentum, 3),
             opponent_stats=stats,
         )
     return candidates
@@ -380,9 +564,12 @@ def build_candidate_pool(
     event = event or client.current_event(bootstrap)
     history_index = fpl_history.index_by_player()
     team_games_played = _team_games_played(client)
+    price_priors = _fit_price_rate_priors(bootstrap)
+    price_thresholds = _squad_depth_price_threshold(bootstrap)
     return list(
         _candidates_for_gameweek(
-            client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event, team_games_played
+            client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event, team_games_played,
+            price_priors, price_thresholds,
         ).values()
     )
 
@@ -408,13 +595,16 @@ def build_candidate_pool_multi_gw(
     start_event = start_event or client.current_event(bootstrap)
     history_index = fpl_history.index_by_player()
     team_games_played = _team_games_played(client)
+    price_priors = _fit_price_rate_priors(bootstrap)
+    price_thresholds = _squad_depth_price_threshold(bootstrap)
 
     template_by_id: dict[str, CandidatePlayer] = {}
     total_xp: dict[str, float] = {}
     for offset in range(num_gameweeks):
         event = start_event + offset
         gw_candidates = _candidates_for_gameweek(
-            client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event, team_games_played
+            client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event, team_games_played,
+            price_priors, price_thresholds,
         )
         for pid, c in gw_candidates.items():
             total_xp[pid] = total_xp.get(pid, 0.0) + c.xp

@@ -32,13 +32,35 @@ export function MethodologyPanel() {
 
         <p className="section-heading">From team goals to player points</p>
         <p className="summary-line">
-          Given a fixture's expected goals for a player's team, and their real share of that
-          team's goals and assists this season (from actual per-match history, not a guess),
-          the official FPL classic scoring table converts that into expected points: goals,
-          assists, clean sheets, appearance points, and the rest, weighted by an estimated
-          probability of actually playing meaningful minutes. A player's own observed output
-          always overrides an assumed rate — someone with zero starts this season gets 0.0 for a
-          rate rather than a rate inflated by leftover stats from before a reset.
+          Given a fixture's expected goals for a player's team, and their share of that team's
+          goals and assists, the official FPL classic scoring table converts that into expected
+          points: goals, assists, clean sheets, appearance points, and the rest, weighted by an
+          estimated probability of actually playing meaningful minutes.
+        </p>
+
+        <p className="section-heading">A player's own history vs. what their price already knows</p>
+        <p className="summary-line">
+          A player's real per-90 goal and assist rate this season is the primary input — but for
+          anyone with little or no current-season track record (a summer signing, someone back
+          from injury, a squad player who's just started getting minutes), that rate alone isn't
+          much to go on. Rather than falling back to a flat, generic number for every such player
+          regardless of who they actually are, the model blends the observed rate with a prior
+          derived from the player's FPL price: a simple price-to-expected-rate line, fit per
+          position from every established player in the league right now. Price already bakes in
+          reputation, output at a previous club or league, and the transfer fee a manager was
+          willing to pay — signals a blank scoresheet can't show yet. As real minutes accumulate,
+          the observed rate quickly takes over and the price prior fades out — it's a placeholder
+          for the unknown, not a competitor to actual current-season form. (Our <a href="/blog/predicting-transfer-value">Deep Research
+          post</a> on market value found recent output is still the stronger fantasy signal
+          whenever it actually exists — this only steps in when it doesn't yet.)
+        </p>
+
+        <p className="section-heading">Recent form: momentum</p>
+        <p className="summary-line">
+          Every prediction also gets a recency nudge from FPL's own "form" figure (points per
+          match over the last 30 days) compared against a player's season-long average — trending
+          up recently pushes the prediction up a little, trending down pulls it back, both capped
+          so a hot or cold run over a couple of matches can't swing things too far on its own.
         </p>
 
         <p className="section-heading">Opponent-specific history</p>
@@ -49,6 +71,19 @@ export function MethodologyPanel() {
           toward the player's real overall average the fewer head-to-head matches exist — a
           player with one game against an opponent doesn't get judged purely on that one game,
           it's blended with their broader level of form.
+        </p>
+
+        <p className="section-heading">Playing-time risk: minutes, and price as a backup signal</p>
+        <p className="summary-line">
+          Start probability defaults to a generic estimate, then gets capped down by real
+          evidence where it exists: a goalkeeper who's clearly not first-choice by relative
+          minutes played, or any player with zero starts despite their team already having
+          played. Where minutes evidence doesn't exist yet either way (early in a season, or a
+          player who just arrived), the model also checks how a player's price compares to their
+          own teammates in the same position — someone priced well below the club's other
+          options at their spot reads as a real rotation risk, the same conclusion a manager's
+          own pricing already reflects. Actual minutes evidence always overrides this price-based
+          hint the moment it exists.
         </p>
 
         <p className="section-heading">Known limitations</p>
@@ -62,8 +97,12 @@ export function MethodologyPanel() {
             volatile early in a season, the "optimal" squad it finds can look extreme. Treat it
             as a upper-bound estimate on that day's model, not investment advice.</li>
           <li>Player availability (rotation risk, late fitness calls) is estimated from FPL's own
-            published status, not insider information — always check the live status flags
-            before a deadline.</li>
+            published status plus the price-based signal above, not insider information — always
+            check the live status flags before a deadline.</li>
+          <li>The price-implied rotation-risk check assumes a rough, generic squad shape (how many
+            starters a position "usually" has) rather than any one team's actual formation, so it
+            can occasionally misjudge a club that plays unusually few or many players in a given
+            position.</li>
         </ul>
       </Card>
     </>
