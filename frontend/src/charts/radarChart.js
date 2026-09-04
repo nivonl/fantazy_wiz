@@ -34,10 +34,24 @@ export function renderRadarChart(categoryLabels, seriesAll, seriesPosition, opti
     return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
   };
 
-  const rings = [0.2, 0.4, 0.6, 0.8, 1.0]
+  const ringFractions = [0.2, 0.4, 0.6, 0.8, 1.0];
+  const rings = ringFractions
     .map((f) => {
       const pts = Array.from({ length: n }, (_, i) => axisPoint(i, maxRadius * f).map((v) => v.toFixed(1)).join(",")).join(" ");
       return `<polygon points="${pts}" fill="none" stroke="var(--panel-border)" stroke-width="1" />`;
+    })
+    .join("");
+
+  // Every ring is a fixed percentile value (20/40/60/80/100), the SAME across every window and
+  // every player -- this scale never auto-fits to a single chart's own data (unlike some radar
+  // libraries), so a mark drawn further out always means a genuinely higher percentile, comparable
+  // chart to chart. These small numbers along the top spoke make that fixed scale visible rather
+  // than just true-but-invisible; offset off the spoke line itself so they don't sit under the
+  // vertex dot/line drawn on that same axis.
+  const scaleTicks = ringFractions
+    .map((f) => {
+      const y = cy - maxRadius * f;
+      return `<text x="${(cx + 5).toFixed(1)}" y="${(y + 3).toFixed(1)}" font-size="8" fill="var(--text-dim)" fill-opacity="0.75">${Math.round(f * 100)}</text>`;
     })
     .join("");
 
@@ -55,8 +69,14 @@ export function renderRadarChart(categoryLabels, seriesAll, seriesPosition, opti
     })
     .join("");
 
-  const seriesPolygon = (series, color, dashed) => {
-    if (!series) return "";
+  // Native <title> on each vertex -- the browser's own hover tooltip, not a custom one -- is the
+  // right call for this "model" specifically: these SVGs are static markup with no JS runtime of
+  // their own (the static player pages need to work with zero JS, and the React popup renders
+  // this exact same string via dangerouslySetInnerHTML rather than a parallel implementation), so
+  // a real interactive tooltip component isn't an option here without duplicating the chart in
+  // JSX. A titled dot per data point needs none of that and behaves identically in both places.
+  const seriesMarkup = (series, color, dashed, groupLabel) => {
+    if (!series) return { polygon: "", markers: "" };
     const pts = series
       .map((v, i) => {
         const clamped = Math.max(0, Math.min(100, v ?? 0));
@@ -64,11 +84,25 @@ export function renderRadarChart(categoryLabels, seriesAll, seriesPosition, opti
       })
       .join(" ");
     const dash = dashed ? ` stroke-dasharray="4,3"` : "";
-    return `<polygon points="${pts}" fill="${color}" fill-opacity="${dashed ? 0.08 : 0.18}" stroke="${color}" stroke-width="2"${dash} />`;
+    const polygon = `<polygon points="${pts}" fill="${color}" fill-opacity="${dashed ? 0.08 : 0.18}" stroke="${color}" stroke-width="2"${dash} />`;
+
+    const markers = series
+      .map((v, i) => {
+        const hasValue = v != null;
+        const clamped = Math.max(0, Math.min(100, v ?? 0));
+        const [x, y] = axisPoint(i, maxRadius * (clamped / 100));
+        const tooltip = hasValue
+          ? `${escapeXml(categoryLabels[i])}: ${v.toFixed(1)}th percentile (${escapeXml(groupLabel)})`
+          : `${escapeXml(categoryLabels[i])}: no data (${escapeXml(groupLabel)})`;
+        return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="${color}" fill-opacity="${hasValue ? 1 : 0.35}"><title>${tooltip}</title></circle>`;
+      })
+      .join("");
+
+    return { polygon, markers };
   };
 
-  const allPolygon = seriesPolygon(seriesAll, "var(--accent)", false);
-  const positionPolygon = seriesPolygon(seriesPosition, "var(--analytics)", true);
+  const all = seriesMarkup(seriesAll, "var(--accent)", false, labelAll);
+  const position = seriesMarkup(seriesPosition, "var(--analytics)", true, labelPosition);
 
   const legendY = height - 22;
   let legend = "";
@@ -83,8 +117,11 @@ export function renderRadarChart(categoryLabels, seriesAll, seriesPosition, opti
   return `<svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" role="img" aria-label="Stat radar">
     ${rings}
     ${spokes}
-    ${allPolygon}
-    ${positionPolygon}
+    ${scaleTicks}
+    ${all.polygon}
+    ${position.polygon}
+    ${all.markers}
+    ${position.markers}
     ${labels}
     ${legend}
   </svg>`;
