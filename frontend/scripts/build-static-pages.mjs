@@ -203,7 +203,7 @@ function rarityLabel(percentile) {
   return "Notable surprise";
 }
 
-function renderBlogPlayerCard(p) {
+function renderBlogPlayerCard(p, slugById) {
   const photoBlock = p.photo
     ? `<img class="blog-player-photo" src="/blog/players/${p.photo}" alt="${escapeHtml(p.name)}" loading="lazy" width="96" height="96" />
        <p class="blog-photo-credit">Photo: ${escapeHtml(p.photo_credit.name)}, <a href="${p.photo_credit.license_url}">${escapeHtml(p.photo_credit.license)}</a>, via <a href="${p.photo_credit.source_url}">Wikimedia Commons</a></p>`
@@ -217,13 +217,19 @@ function renderBlogPlayerCard(p) {
   if (p.clean_sheets) boxscoreParts.push("clean sheet");
   if (p.bonus) boxscoreParts.push(`${p.bonus} bonus`);
 
+  // Links out to the player's real static profile page when the id is still in the current
+  // predicted-players pool (it won't be for someone who's since left the league, been sent out
+  // on loan, etc.) -- falls back to plain text rather than a broken link.
+  const slug = p.element_id != null ? slugById.get(String(p.element_id)) : undefined;
+  const nameHtml = slug ? `<a href="/fpl/player/${slug}">${escapeHtml(p.name)}</a>` : escapeHtml(p.name);
+
   return `
     <div class="blog-player-card">
       <div class="blog-player-photo-wrap">${photoBlock}</div>
       <div class="blog-player-body">
         <div class="blog-player-name-row">
           <span class="blog-player-rank">#${p.rank}</span>
-          <span class="blog-player-name">${escapeHtml(p.name)}</span>
+          <span class="blog-player-name">${nameHtml}</span>
           <span class="blog-rarity-tag">${rarityLabel(p.percentile)}</span>
         </div>
         <p class="blog-player-meta">${POS_LABEL_LONG[p.position] || p.position} &middot; ${escapeHtml(p.team)} &middot; ${p.value.toFixed(1)}m &middot; ${fixtureLine} &middot; ${p.minutes}&prime;</p>
@@ -239,7 +245,7 @@ function renderBlogPlayerCard(p) {
     </div>`;
 }
 
-function renderBlogPostBody(post) {
+function renderBlogPostBody(post, slugById) {
   const dateLabel = new Date(post.published + "T00:00:00Z").toLocaleDateString("en-GB", {
     year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
   });
@@ -249,8 +255,9 @@ function renderBlogPostBody(post) {
     <p class="blog-dek">${escapeHtml(post.dek)}</p>
     <p class="summary-line">${post.intro}</p>
     <p class="hint">Ranked among ${post.qualifying_player_count} players who played at least ${post.min_minutes} minutes in gameweek ${post.gameweek}, by actual points minus predicted xP. Average surprise across that pool: ${fmtSigned(post.mean_surprise)} (std. dev. ${post.stdev_surprise.toFixed(2)}).</p>
-    ${post.players.map(renderBlogPlayerCard).join("\n")}
+    ${post.players.map((p) => renderBlogPlayerCard(p, slugById)).join("\n")}
     <p class="summary-line">${post.closing}</p>
+    ${post.model_notes ? `<div class="blog-callout"><p class="blog-callout-heading">Where the model should improve</p>${post.model_notes}</div>` : ""}
     <p><a href="/blog">&larr; All posts</a> &middot; <a href="/methodology">How predictions work</a></p>
   `;
 }
@@ -442,7 +449,7 @@ async function main() {
             author: { "@type": "Organization", name: "PitchMetric" },
           },
         ],
-        bodyHtml: renderBlogPostBody(post),
+        bodyHtml: renderBlogPostBody(post, slugById),
       });
       generatedPaths.push(writePage(path, html));
     }

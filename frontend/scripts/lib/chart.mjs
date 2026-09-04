@@ -44,6 +44,13 @@ export function renderPriceLineChart(rows, { width = 640, height = 230 } = {}) {
   const plotWidth = width - margin * 2;
   const bottomAxisHeight = 48; // room for two label rows: GW number, then season
   const chartHeight = height - bottomAxisHeight;
+  // The price *label* drawn above a point (font-size 13, baseline 10px above the dot) needs its
+  // own headroom on top of the dot's own position -- a dot placed too close to y=0 pushes that
+  // label's glyph tops above the viewBox and clips them (seen live: a multi-gameweek plateau at
+  // the season's peak price rendered as several clipped "X.Xm" labels along the top edge).
+  const topMargin = 26;
+  const bottomMargin = 16;
+  const plotHeight = chartHeight - topMargin - bottomMargin;
 
   const n = priced.length;
   const stepX = n > 1 ? plotWidth / (n - 1) : 0;
@@ -54,7 +61,7 @@ export function renderPriceLineChart(rows, { width = 640, height = 230 } = {}) {
 
   const points = priced.map((r, i) => {
     const x = margin + i * stepX;
-    const y = chartHeight - ((r.price - min) / range) * (chartHeight - 30) - 16;
+    const y = topMargin + (1 - (r.price - min) / range) * plotHeight;
     return { x, y, r };
   });
   const path = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");

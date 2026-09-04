@@ -789,6 +789,24 @@ ul.flags li {
   .blog-player-photo-wrap { display: flex; flex-direction: column; align-items: center; }
 }
 
+.blog-callout {
+  background: var(--tint-warn);
+  border: 1px solid var(--panel-border);
+  border-left: 3px solid var(--warn);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin: 20px 0;
+}
+.blog-callout-heading {
+  margin: 0 0 8px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--warn);
+}
+.blog-callout p { font-size: 0.87rem; line-height: 1.6; margin: 0 0 10px; }
+.blog-callout p:last-child { margin-bottom: 0; }
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 640px) {

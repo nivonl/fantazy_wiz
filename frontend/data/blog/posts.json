@@ -11,10 +11,12 @@
     "stdev_surprise": 3.46,
     "intro": "Every player here cleared 30 minutes on the pitch in Gameweek 1, which leaves 229 qualifying performances to rank by one number: actual points scored minus PitchMetric's predicted points (xP) for that player, that match. The five below are the biggest positive gaps of the round — the players the model most under-rated. A shared theme runs through all five, and it's a real limitation, not a bug: Gameweek 1 is the one week of the season where the model's per-player scoring rates (goal share, assist share) have literally zero current-season data to draw on, since nobody has a start yet when the predictions are made. It falls back to a flat appearance-and-clean-sheet floor for almost everyone, which means it's structurally blind to exactly the kind of breakout individual moments that decide fantasy gameweeks. See the <a href=\"/methodology\">methodology</a> for the full model.",
     "closing": "Four of these five points came out of just two matches — Brighton's and Hull City's, both wins built on a clean sheet plus a goal from an unheralded name. That's the Gameweek 1 pattern in miniature: the model correctly rates a fixture's clean-sheet chance, but has no way yet to know which individual will supply the goal on top of it. From Gameweek 2 onward, every one of these players now has a real observed data point, and the model's individual rates stop being flat — see how that plays out in <a href=\"/blog/gameweek-2-fantasy-surprises\">Gameweek 2's surprise list</a>.",
+    "model_notes": "<p>Every predicted number on this list sits in the same narrow 1.5&ndash;2.0 xP band, and that's not a coincidence &mdash; it's a visible model limitation, not just five unlucky misses. Gameweek 1 is the one week where literally every player has zero current-season starts, and the model's player-level goal share and assist share are computed purely from this-season starts (see the <a href=\"/methodology\">methodology</a>): zero starts means a hard 0.0 rate, full stop, for a proven veteran and a completely unproven rookie alike. All the model has left to work with is the fixture-level clean-sheet probability, which is exactly why four of this week's five surprises cluster into just two matches.</p><p><b>Recommendation:</b> for the season opener specifically, blend in each player's per-90 goal/assist rate from last season (shrunk toward a position-average prior for anyone who's new to the club or league) instead of zeroing everyone identically. The team-rating side of the model already does this &mdash; early-season fixture predictions blend in the previous two seasons' results until the current season has enough matches of its own &mdash; but the player-rate side currently has no equivalent, and Gameweek 1 is where that gap shows up most starkly. See how the model's individual rates start to differentiate once real data exists in <a href=\"/blog/gameweek-2-fantasy-surprises\">Gameweek 2's surprise list</a> &mdash; including a case where one week of data turned out to be just as misleading in the other direction.",
     "players": [
       {
         "rank": 1,
         "name": "Maxim De Cuyper",
+        "element_id": 115,
         "team": "Brighton",
         "position": "DEF",
         "opponent": "Aston Villa",
@@ -42,6 +44,7 @@
       {
         "rank": 2,
         "name": "Jack Hinshelwood",
+        "element_id": 123,
         "team": "Brighton",
         "position": "MID",
         "opponent": "Aston Villa",
@@ -69,6 +72,7 @@
       {
         "rank": 3,
         "name": "Nobel Mendy",
+        "element_id": 586,
         "team": "Hull City",
         "position": "DEF",
         "opponent": "Man Utd",
@@ -96,6 +100,7 @@
       {
         "rank": 4,
         "name": "Semi Ajayi",
+        "element_id": 279,
         "team": "Hull City",
         "position": "DEF",
         "opponent": "Man Utd",
@@ -123,6 +128,7 @@
       {
         "rank": 5,
         "name": "Mamadou Sangaré",
+        "element_id": 565,
         "team": "Brentford",
         "position": "MID",
         "opponent": "Spurs",
@@ -161,10 +167,12 @@
     "stdev_surprise": 3.90,
     "intro": "Same method as Gameweek 1 — every player below played at least 30 minutes, and is ranked by actual points minus PitchMetric's predicted xP for that fixture. The difference this time is that the model is no longer working from a blank slate: every returning player now has one gameweek of real 2026-27 output behind their goal and assist rates, and it shows in who tops this list and why. See the <a href=\"/methodology\">methodology</a> for exactly how a player's rate is computed from real per-match history rather than an assumption.",
     "closing": "Compare the underlying expected-goals numbers across this list and two different stories emerge. Bruno Fernandes's 2.02 xG very nearly explains his hat-trick outright — his performance was mostly signal, a genuine chance-quality outburst the model just had no prior data to anticipate. Haaland (0.66 xG for two goals) and Groß (0.05 xG for a goal) leaned much more on finishing than on chance quality — closer to variance than to a repeatable pattern. Rayan Cherki's case is different again: the model actively discounted him (start probability capped at 0.3) for having zero starts to his name after Gameweek 1, which was reasonable caution right up until he played 81 minutes and scored twice. None of that is a flaw exactly — it's what a model honestly built from observed history looks like in only its second week of data.",
+    "model_notes": "<p><b>Does a 2.14-point prediction for Bruno Fernandes actually make sense?</b> No — and it's worth being direct about why not, because it isn't genuine uncertainty about a player the model \"doesn't know.\" Fernandes is a 12.0m-priced player (the model's own pricing tier already treats him as elite) and one of the Premier League's most productive playmakers of the last several seasons. None of that history reaches the prediction. Player-level goal share and assist share are computed only from the current season's starts, and a blank Gameweek 1 (0 goals, 0 assists) reset his rate to exactly 0.0 &mdash; identical to how a completely unproven academy player would be treated. There is currently no mechanism anywhere in the pipeline for \"this specific person has averaged double-digit assists a season for years\" to survive one quiet match.</p><p>The same missing ingredient bites just as hard in the other direction. After Maxim De Cuyper's Gameweek 1 wondergoal (see <a href=\"/blog/gameweek-1-fantasy-surprises\">last week's post</a>) &mdash; his only shot of the match, registered as 1 goal from 1 start, a literal 100% share of Brighton's expected goals under the model's cap &mdash; this gameweek's prediction for him wasn't a moderate bump. It was 16.66 points, more than anyone's actual Gameweek 2 total on this list. He returned a blank. Two double-digit swings in opposite directions, same root cause: a rate estimated from a single match, with nothing pulling it back toward a sane baseline.</p><p><b>Recommendation:</b> apply the same empirical-Bayes shrinkage the model already uses elsewhere &mdash; the opponent-history adjustment blends a player's record against a specific opponent with their overall average, weighted by how many head-to-head games actually exist &mdash; one layer earlier, directly on goal share and assist share. Blend the current season's observed rate with last season's rate (or a multi-season career rate for an established player like Fernandes), weighted by how many starts the current-season sample actually represents. One start should barely move a five-season veteran's estimate; it should move an unproven player's a lot. Right now the model moves both by exactly the same amount.</p>",
     "players": [
       {
         "rank": 1,
         "name": "Bruno Fernandes",
+        "element_id": 426,
         "team": "Man Utd",
         "position": "MID",
         "opponent": "Ipswich Town",
@@ -192,6 +200,7 @@
       {
         "rank": 2,
         "name": "Rayan Cherki",
+        "element_id": 399,
         "team": "Man City",
         "position": "MID",
         "opponent": "Crystal Palace",
@@ -219,6 +228,7 @@
       {
         "rank": 3,
         "name": "Morgan Gibbs-White",
+        "element_id": 480,
         "team": "Nott'm Forest",
         "position": "MID",
         "opponent": "Liverpool",
@@ -246,6 +256,7 @@
       {
         "rank": 4,
         "name": "Erling Haaland",
+        "element_id": 411,
         "team": "Man City",
         "position": "FWD",
         "opponent": "Crystal Palace",
@@ -273,6 +284,7 @@
       {
         "rank": 5,
         "name": "Pascal Groß",
+        "element_id": 124,
         "team": "Brighton",
         "position": "MID",
         "opponent": "Chelsea",
