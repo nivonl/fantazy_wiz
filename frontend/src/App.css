@@ -453,7 +453,23 @@ ul.flags li {
   font-size: 0.85rem;
 }
 
-/* ---------- Tooltip ---------- */
+/* ---------- Tooltip ----------
+   One shared visual system for every hover tooltip on the site (.hover-tooltip), so a player
+   card's tip-bubble and a chart's chart-tooltip read as the same design language rather than
+   two different-looking popups that happen to both float near the cursor -- same gradient/
+   border/shadow treatment as .card, not the flat single-tone box + plain <hr> rules this used
+   to have (read as dated next to everything else on the site using that card treatment). */
+
+.hover-tooltip {
+  background: linear-gradient(160deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  font-family: var(--sans);
+  color: var(--text);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
 
 .tip-wrap {
   position: relative;
@@ -465,17 +481,9 @@ ul.flags li {
   /* position/top/bottom/left are set inline (components/ui.jsx) from the trigger's real
      on-screen coordinates — this is portaled to <body>, not a normal absolute child. */
   z-index: 30;
-  background: var(--input-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 0.76rem;
-  line-height: 1.5;
+  padding: 12px 14px;
   white-space: normal;
   width: 235px;
-  color: var(--text);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  font-family: var(--sans);
   animation: fadeSlideUp 0.12s ease both;
 }
 
@@ -483,12 +491,31 @@ ul.flags li {
   display: block;
   font-weight: 700;
   color: var(--analytics);
-  margin-bottom: 3px;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
 }
 
 .tip-xp { display: block; color: var(--text-dim); }
+.tip-xp-value { color: var(--accent); font-size: 0.95rem; }
 
-.tip-divider { border: none; border-top: 1px solid var(--panel-border); margin: 7px 0; }
+/* Replaces the old <hr> divider: a bordered, padded block reads as a card section, not a
+   horizontal rule dropped between plain text lines. */
+.tip-section {
+  display: block;
+  border-top: 1px solid var(--panel-border);
+  margin-top: 8px;
+  padding-top: 8px;
+  color: var(--text-dim);
+}
+
+.tip-footer {
+  display: block;
+  border-top: 1px solid var(--panel-border);
+  margin-top: 8px;
+  padding-top: 8px;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+}
 
 /* ---------- Chart tooltip (radar / price-history hover) ----------
    A single shared bubble per page, shown/positioned by a small delegated-hover script (see
@@ -503,15 +530,7 @@ ul.flags li {
      display:block, just invisible behind the modal card). */
   z-index: 110;
   display: none;
-  background: var(--input-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: 8px;
-  padding: 7px 10px;
-  font-size: 0.76rem;
-  line-height: 1.4;
-  color: var(--text);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  font-family: var(--sans);
+  padding: 8px 11px;
   pointer-events: none;
   max-width: 260px;
   white-space: normal;
@@ -865,6 +884,20 @@ ul.flags li {
   margin-top: 8px;
   text-align: center;
 }
+
+/* Chart figures (inline SVG, not a raster image) get the site's own panel background instead
+   of the white card an image figure uses — the SVG's own colors are already theme-aware CSS
+   variables, so a themed panel behind them (rather than white) is what makes them look native
+   to the page instead of like an embedded picture. */
+.blog-chart-figure {
+  background: var(--panel-2);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 18px 14px 10px;
+}
+.research-chart { display: block; overflow: visible; }
+.research-chart rect, .research-chart circle { cursor: pointer; transition: opacity 0.12s ease; }
+.research-chart rect:hover, .research-chart circle:hover { opacity: 0.8; }
 
 .blog-post-body h3 { margin: 26px 0 8px; font-family: var(--display); font-weight: 700; font-size: 1rem; color: var(--text); }
 .blog-post-body p { font-size: 0.9rem; line-height: 1.65; margin: 0 0 14px; color: var(--text-dim); }

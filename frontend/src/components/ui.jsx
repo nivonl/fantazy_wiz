@@ -224,16 +224,15 @@ export function PlayerTip({ player }) {
       {open &&
         bubblePos &&
         createPortal(
-          <span className="tip-bubble" style={{ position: "fixed", ...bubblePos }}>
+          <span className="hover-tooltip tip-bubble" style={{ position: "fixed", ...bubblePos }}>
             <span className="tip-header">
               {player.pos} · {player.team} · {player.price.toFixed(1)}m
             </span>
             <span className="tip-xp">
-              Predicted {player.xp.toFixed(2)} pts{stats ? ` vs ${stats.opponent}` : ""}
+              Predicted <b className="tip-xp-value">{player.xp.toFixed(2)}</b> pts{stats ? ` vs ${stats.opponent}` : ""}
             </span>
             {stats && (
-              <>
-                <hr className="tip-divider" />
+              <span className="tip-section">
                 {stats.games_overall === 0 ? (
                   <>No PL history vs {stats.opponent} in the last 5 seasons.</>
                 ) : (
@@ -250,10 +249,9 @@ export function PlayerTip({ player }) {
                     )}
                   </>
                 )}
-              </>
+              </span>
             )}
-            <hr className="tip-divider" />
-            Click for their points breakdown
+            <span className="tip-footer">Click for their points breakdown &rarr;</span>
           </span>,
           document.body
         )}
@@ -360,7 +358,7 @@ function ChartTooltipHost({ children }) {
       {children}
       {tooltip &&
         createPortal(
-          <div className="chart-tooltip" style={{ display: "block", position: "fixed", ...tooltip.pos }}>
+          <div className="hover-tooltip chart-tooltip" style={{ display: "block", position: "fixed", ...tooltip.pos }}>
             {tooltip.text}
           </div>,
           document.body

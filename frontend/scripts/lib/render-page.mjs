@@ -126,7 +126,7 @@ const CHART_TOOLTIP_SCRIPT = `
   function ensureBubble() {
     if (!bubble) {
       bubble = document.createElement("div");
-      bubble.className = "chart-tooltip";
+      bubble.className = "hover-tooltip chart-tooltip";
       document.body.appendChild(bubble);
     }
     return bubble;
