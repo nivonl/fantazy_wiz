@@ -121,8 +121,8 @@ header.top > p {
   z-index: 20;
   display: flex;
   justify-content: center;
-  gap: 4px;
-  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+  gap: 2px;
+  padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px));
   background: var(--panel);
   border-top: 1px solid var(--panel-border);
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.2);
@@ -137,17 +137,17 @@ header.top > p {
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: 6px 18px;
+  padding: 6px 8px;
   border-radius: 10px;
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 600;
   cursor: pointer;
   flex: 1;
-  max-width: 110px;
+  max-width: 90px;
   transition: color 0.15s ease, background 0.15s ease;
 }
 
-.bottom-nav-item svg { width: 21px; height: 21px; }
+.bottom-nav-item svg { width: 20px; height: 20px; }
 .bottom-nav-item:hover { color: var(--text); }
 .bottom-nav-item.active { color: var(--analytics); background: var(--tint-analytics); }
 
@@ -747,13 +747,9 @@ ul.flags li {
   border-radius: 50%;
   border: 2px solid var(--panel-border);
   background: var(--tint-accent);
-  color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 1.5rem;
 }
 .blog-photo-credit { color: var(--text-dim); font-size: 0.62rem; margin-top: 6px; text-align: center; line-height: 1.4; }
 .blog-photo-credit a { color: var(--text-dim); }
@@ -814,5 +810,13 @@ ul.flags li {
   .card { padding: 16px; }
   table { font-size: 0.76rem; }
   th, td { padding: 6px 8px; }
-  .bottom-nav-item { padding: 6px 10px; font-size: 0.62rem; }
+  .bottom-nav-item { padding: 6px 5px; font-size: 0.6rem; }
+}
+
+/* Six tabs need every spare pixel on narrow phones -- shrink the icons a touch further rather
+   than let labels wrap to two lines or the row overflow. */
+@media (max-width: 400px) {
+  .bottom-nav { gap: 0; padding-left: 2px; padding-right: 2px; }
+  .bottom-nav-item { padding: 6px 3px; font-size: 0.56rem; gap: 2px; }
+  .bottom-nav-item svg { width: 18px; height: 18px; }
 }

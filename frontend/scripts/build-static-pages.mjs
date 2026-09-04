@@ -204,11 +204,19 @@ function rarityLabel(percentile) {
 }
 
 function renderBlogPlayerCard(p, slugById) {
+  // No free-licensed photo on Commons for every player yet -- rather than a blank circle or
+  // a "no photo" caption drawing attention to the gap, the fallback is the same brand mark
+  // used in the site header (App.jsx's BrandMark / render-page.mjs's inline <svg>), so the
+  // circle still reads as a deliberate PitchMetric placeholder, not a missing asset.
   const photoBlock = p.photo
     ? `<img class="blog-player-photo" src="/blog/players/${p.photo}" alt="${escapeHtml(p.name)}" loading="lazy" width="96" height="96" />
        <p class="blog-photo-credit">Photo: ${escapeHtml(p.photo_credit.name)}, <a href="${p.photo_credit.license_url}">${escapeHtml(p.photo_credit.license)}</a>, via <a href="${p.photo_credit.source_url}">Wikimedia Commons</a></p>`
-    : `<div class="blog-player-photo-placeholder">${escapeHtml(p.name.split(" ").map((w) => w[0]).join("").slice(0, 2))}</div>
-       <p class="blog-photo-credit">No free photo available yet</p>`;
+    : `<div class="blog-player-photo-placeholder" role="img" aria-label="${escapeHtml(p.name)} — no photo available">
+         <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+           <circle cx="10" cy="10" r="6.5" stroke="#04F5FF" stroke-width="2" />
+           <line x1="14.8" y1="14.8" x2="20" y2="20" stroke="#963CFF" stroke-width="2.2" stroke-linecap="round" />
+         </svg>
+       </div>`;
 
   const fixtureLine = `${p.was_home ? "vs" : "@"} ${escapeHtml(p.opponent)}`;
   const boxscoreParts = [];
