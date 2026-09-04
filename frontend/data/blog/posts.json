@@ -353,5 +353,99 @@
         "analysis": "Groß only returned to Brighton in January, back from a spell at Borussia Dortmund, and has quickly become the club's main penalty and set-piece taker — exactly the kind of role that can produce a goal or an assist out of nothing. None of that reached the prediction, though: he'd played the full 90 in Gameweek 1 without a goal or assist, so the model had no personal scoring history to draw on, and its 2.60-point prediction (the highest of this week's five, but driven by Brighton's own fixture rather than anything specific to him) still wasn't close to enough. Brighton conceded four goals away at Chelsea and lost 4-3, but Groß personally returned a goal and an assist worth 13 points on his own. The 0.05 expected goals behind that goal is about as low as the underlying numbers get for an actual finish — the kind of moment a box score just can't explain, whatever it looked like on the pitch."
       }
     ]
+  },
+  {
+    "type": "deep_research",
+    "slug": "predicting-transfer-value",
+    "category": "Deep Research",
+    "title": "Can We Predict a Player's Market Value — and Does It Actually Tell You Anything About Fantasy Points?",
+    "dek": "We built and tested three different forecasting approaches on real Transfermarkt data, plus a blended model of our own. Here's what actually predicts a player's price — and what it means for your squad.",
+    "published": "2026-09-04",
+    "lede": "Transfermarkt's market value estimates are the closest thing football has to a public price tag. Everyone watches them &mdash; pundits use them to call transfer windows &ldquo;value&rdquo; or &ldquo;overpaid,&rdquo; and fans use them as a shorthand for &ldquo;is this player good.&rdquo; But can that number actually be <i>predicted</i>, ahead of time, from data that's already public? And if it can &mdash; does whatever predicts it also predict fantasy points?",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "html": "We spent this research cycle finding out, using real historical data: about <b>187,000 valuation snapshots across roughly 9,000 players</b> in the top five European leagues, going back to the mid-2000s."
+      },
+      {
+        "type": "image",
+        "src": "/blog/deep-research/predicting-transfer-value/value-by-league.png",
+        "alt": "Median player market value by league",
+        "caption": "Median market value per valuation event, by league — the real data behind this research."
+      },
+      {
+        "type": "heading",
+        "text": "Three different ways to forecast a price"
+      },
+      {
+        "type": "paragraph",
+        "html": "We tested three well-established forecasting philosophies against each other, honestly &mdash; meaning we never let a model see the future, and we tested it both on players it already knew about (forward in time) and on players it had never seen at all."
+      },
+      {
+        "type": "list",
+        "items": [
+          "<b>Time-series forecasting.</b> Treat a player's value history like a stock chart and extrapolate the trend. Intuitive &mdash; and it turned out to add no real predictive value at all, however carefully we tuned it. It badly underreacts when a player's trajectory bends, and wasn't even better than simply assuming a player's price won't change. We dug into exactly why (a real bug in our first attempt, then a real ceiling even once that was fixed) rather than quietly dropping it.",
+          "<b>Momentum.</b> Rather than looking at one player in isolation, pool the patterns across <i>every</i> player: is this player's price rising fast, and is their output (goals, assists, minutes) rising too? This approach doesn't need years of history on a single player &mdash; it borrows patterns from everyone else's careers. This turned out to be the strongest of the three individual approaches.",
+          "<b>Bayesian updating.</b> Start with an informed opinion of what a player <i>should</i> be worth &mdash; anchored on their last known transfer fee, or on typical value curves for their age and league if there's no recent deal &mdash; and then update that opinion using their recent on-pitch output. The appeal isn't just the prediction itself, it's that this method also tells you <i>how confident</i> to be in it."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "html": "On top of these three, we built a fourth, blended model that combines the two strongest approaches (momentum and Bayesian updating &mdash; full details of exactly how deliberately kept behind the curtain for now) &mdash; and it beat <b>both</b> of its ingredients on our held-out tests, not just the weaker of the two."
+      },
+      {
+        "type": "heading",
+        "text": "The honest part: it's a lot easier for players you already track"
+      },
+      {
+        "type": "paragraph",
+        "html": "One of the more useful things this research surfaced wasn't a number &mdash; it was a pattern. Prediction accuracy depends enormously on <i>how much history you have on a player</i>. For players with a rich track record, our best model's typical error was in the range of <b>14&ndash;15%</b> of their value. For the full universe of players, including fringe and youth players with thin histories, that error is meaningfully higher."
+      },
+      {
+        "type": "paragraph",
+        "html": "We also tested the models against players they'd genuinely never seen before (not just future dates, but entirely new careers) &mdash; and here the honest picture is more encouraging than we expected going in: the models still clearly beat the simplest possible baseline (assume the price doesn't change), especially at correctly calling which <i>direction</i> an unfamiliar player's value is about to move. What doesn't hold up for unseen players is our blended model's edge &mdash; it's tuned for players with a track record, and a plain momentum read does just as well or better once a player is a genuine unknown. The lesson: these tools are strongest as a way to <b>track players you're already watching forward in time</b> &mdash; less a crystal ball for scouting a name you've never heard of, more a sharper lens on names you already follow."
+      },
+      {
+        "type": "heading",
+        "text": "What actually moves the needle — and what it means for your squad"
+      },
+      {
+        "type": "paragraph",
+        "html": "Here's the part that matters most if you're playing FPL or La Liga fantasy rather than running a scouting department. We cross-referenced the features that predict market value against real Fantasy Premier League scoring data for hundreds of Premier League players. The question: does whatever predicts a rising price tag also predict fantasy points?"
+      },
+      {
+        "type": "image",
+        "src": "/blog/deep-research/predicting-transfer-value/fpl-correlation.png",
+        "alt": "Which market-value features correlate with FPL scoring rate",
+        "caption": "How strongly each signal lines up with FPL points per 90 minutes, across ~500 Premier League players."
+      },
+      {
+        "type": "paragraph",
+        "html": "<b>The single strongest signal for fantasy output wasn't market value at all &mdash; it was recent output itself.</b> A player's trailing goal-and-assist rate correlated with their FPL points-per-90 roughly <b>60% more strongly</b> than their current market value did. In plain terms: the market price is a noisier read on fantasy potential than just looking directly at what a player has actually been doing on the pitch. Value bakes in reputation, potential, and club prestige &mdash; none of which score you FPL points."
+      },
+      {
+        "type": "image",
+        "src": "/blog/deep-research/predicting-transfer-value/ga-per90-vs-fpl.png",
+        "alt": "Goals plus assists per 90 versus FPL points per 90",
+        "caption": "Recent output predicts fantasy scoring rate more directly than the price tag does."
+      },
+      {
+        "type": "callout",
+        "heading": "What this means for your squad",
+        "html": "<p><b>Don't chase the price tag, chase the underlying output.</b> A player whose output has quietly been trending up, before the price everyone's fixated on has caught up, is exactly the kind of gap our Transfer Finder and Predictions tools are built to help you spot.</p>"
+      },
+      {
+        "type": "heading",
+        "text": "What's next"
+      },
+      {
+        "type": "paragraph",
+        "html": "This is the first entry in our new <b>Deep Research</b> series &mdash; periodic, honest, methodologically serious dives into questions we're genuinely curious about, using real data and real held-out testing rather than vibes. Part of that honesty: an earlier pass at this analysis had a real mistake in how the time-series approach was being evaluated, and fixing it (rather than quietly deleting the disappointing result) is exactly what led us to the stronger blended model above. We'll keep that habit up &mdash; next on the list is validating our blend against players our models have never touched at all, and seeing whether a smarter time-series approach can add anything once it's given a fairer shot."
+      },
+      {
+        "type": "paragraph",
+        "html": "If you want the numbers behind your own squad, head to <a href=\"/fpl-transfer-finder\">Transfer Finder</a> or <a href=\"/fpl-predictions\">Predictions</a> &mdash; both are built on the same &ldquo;trust the underlying output&rdquo; philosophy this research validated."
+      }
+    ]
   }
 ]

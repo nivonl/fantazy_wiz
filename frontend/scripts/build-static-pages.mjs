@@ -11,7 +11,7 @@
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { warmUpBackend, fetchJson, mapWithConcurrency } from "./lib/fetch-api.mjs";
 import { buildSlugMap } from "./lib/slugify.mjs";
@@ -258,7 +258,7 @@ function renderBlogPlayerCard(p, slugById) {
     </div>`;
 }
 
-function renderBlogPostBody(post, slugById) {
+function renderGameweekSurpriseBody(post, slugById) {
   const dateLabel = new Date(post.published + "T00:00:00Z").toLocaleDateString("en-GB", {
     year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
   });
@@ -275,16 +275,62 @@ function renderBlogPostBody(post, slugById) {
   `;
 }
 
-function renderBlogIndexBody(posts) {
+// --- Deep Research posts ---
+// A different, longer-form post type living under the same /blog section (same index, sitemap,
+// JSON-LD machinery as the gameweek-surprise posts above) -- periodic methodical research write
+// -ups (e.g. "can we predict a player's market value") rather than a per-gameweek recap. Content
+// is a simple typed block list in posts.json (`blocks: [{type: "paragraph"|"heading"|"image"|
+// "list"|"callout", ...}]`) rather than free-form HTML, so the JSON stays reviewable and every
+// post's structure is uniform.
+function renderDeepResearchBlock(block) {
+  switch (block.type) {
+    case "paragraph":
+      return `<p>${block.html}</p>`;
+    case "heading":
+      return `<h3>${escapeHtml(block.text)}</h3>`;
+    case "list":
+      return `<ul>${block.items.map((item) => `<li>${item}</li>`).join("")}</ul>`;
+    case "image":
+      return `<figure class="blog-figure"><img src="${block.src}" alt="${escapeHtml(block.alt)}" loading="lazy" />${
+        block.caption ? `<figcaption>${block.caption}</figcaption>` : ""
+      }</figure>`;
+    case "callout":
+      return `<div class="blog-callout"><p class="blog-callout-heading">${escapeHtml(block.heading)}</p>${block.html}</div>`;
+    default:
+      return "";
+  }
+}
+
+function renderDeepResearchBody(post) {
+  const dateLabel = new Date(post.published + "T00:00:00Z").toLocaleDateString("en-GB", {
+    year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
+  });
+  return `
+    <p class="blog-post-meta"><span class="blog-category-tag">${escapeHtml(post.category)}</span> &middot; ${dateLabel}</p>
+    <h2>${escapeHtml(post.title)}</h2>
+    <p class="blog-dek">${escapeHtml(post.dek)}</p>
+    <p class="blog-lede">${post.lede}</p>
+    <div class="blog-post-body">
+      ${post.blocks.map(renderDeepResearchBlock).join("\n")}
+    </div>
+    <p><a href="/blog">&larr; All posts</a> &middot; <a href="/methodology">How predictions work</a></p>
+  `;
+}
+
+export function renderBlogPostBody(post, slugById) {
+  return post.type === "deep_research" ? renderDeepResearchBody(post) : renderGameweekSurpriseBody(post, slugById);
+}
+
+export function renderBlogIndexBody(posts) {
   return `
     <h2>PitchMetric Blog</h2>
-    <p class="summary-line">Every gameweek, the five biggest gaps between what PitchMetric predicted and what actually happened — for players who played at least 30 minutes — with the underlying stats (xG, xA, ICT and more) behind each one, and how rare a surprise of that size really was.</p>
+    <p class="summary-line">Weekly gameweek surprises -- the biggest gaps between what PitchMetric predicted and what actually happened -- plus our <b>Deep Research</b> series: periodic, methodologically serious dives into the questions behind the numbers, using real data and real held-out testing.</p>
     <div class="blog-index-grid">
       ${posts
         .map(
           (post) => `
       <a class="blog-index-card" href="/blog/${post.slug}">
-        <p class="blog-index-meta">Gameweek ${post.gameweek}</p>
+        <p class="blog-index-meta">${post.type === "deep_research" ? escapeHtml(post.category) : `Gameweek ${post.gameweek}`}</p>
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.dek)}</p>
       </a>`
@@ -490,7 +536,12 @@ Sitemap: ${SITE_URL}/sitemap.xml
   console.log(`Done. Generated ${generatedPaths.length} static pages, sitemap.xml, and robots.txt.`);
 }
 
-main().catch((err) => {
-  console.error("Static page generation failed:", err);
-  process.exit(1);
-});
+// Guarded so this module can be imported (e.g. to reuse renderBlogIndexBody/renderBlogPostBody
+// from a standalone script) without immediately kicking off the real backend-fetching pipeline
+// -- only running it when this file is executed directly, same as `npm run build` always has.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error("Static page generation failed:", err);
+    process.exit(1);
+  });
+}

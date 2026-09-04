@@ -803,6 +803,48 @@ ul.flags li {
 .blog-callout p { font-size: 0.87rem; line-height: 1.6; margin: 0 0 10px; }
 .blog-callout p:last-child { margin-bottom: 0; }
 
+/* ---------- Deep Research posts (long-form article body, not a gameweek-surprise recap) ---------- */
+
+.blog-category-tag {
+  display: inline-block;
+  background: var(--tint-accent);
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+
+.blog-lede { font-size: 1rem; line-height: 1.7; margin: 0 0 18px; }
+
+.blog-figure {
+  margin: 22px 0;
+  padding: 0;
+}
+.blog-figure img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: #fff;
+  display: block;
+}
+.blog-figure figcaption {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.blog-post-body h3 { margin: 26px 0 8px; font-family: var(--display); font-weight: 700; font-size: 1rem; color: var(--text); }
+.blog-post-body p { font-size: 0.9rem; line-height: 1.65; margin: 0 0 14px; color: var(--text-dim); }
+.blog-post-body p b, .blog-post-body p strong { color: var(--text); }
+.blog-post-body ul { margin: 0 0 14px; padding-left: 20px; }
+.blog-post-body li { font-size: 0.9rem; line-height: 1.6; color: var(--text-dim); margin-bottom: 6px; }
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 640px) {
