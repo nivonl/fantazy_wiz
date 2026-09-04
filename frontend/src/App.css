@@ -490,6 +490,33 @@ ul.flags li {
 
 .tip-divider { border: none; border-top: 1px solid var(--panel-border); margin: 7px 0; }
 
+/* ---------- Chart tooltip (radar / price-history hover) ----------
+   A single shared bubble per page, shown/positioned by a small delegated-hover script (see
+   render-page.mjs for the static-page version, ChartTooltipHost in ui.jsx for the SPA popup) --
+   deliberately the same JS-driven approach as .tip-bubble above rather than the SVG's native
+   <title>, which proved unreliable to actually trigger on some real desktop browsers. */
+.chart-tooltip {
+  position: fixed;
+  /* Must clear .modal-backdrop's z-index: 100 -- the radar chart also renders inside the
+     player-breakdown modal, and a tooltip portaled to document.body needs to sit above that
+     modal, not underneath it (confirmed live: the bubble was rendering with correct content and
+     display:block, just invisible behind the modal card). */
+  z-index: 110;
+  display: none;
+  background: var(--input-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  font-family: var(--sans);
+  pointer-events: none;
+  max-width: 260px;
+  white-space: normal;
+}
+
 /* ---------- Player breakdown modal ---------- */
 
 .modal-backdrop {

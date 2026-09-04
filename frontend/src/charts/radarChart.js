@@ -143,7 +143,14 @@ export function renderRadarChart(categoryLabels, seriesAll, seriesPosition, opti
           // silently made this whole invisible hit-circle un-hoverable despite the correct
           // <title> content sitting right there in the DOM. Forcing "all" makes the geometry
           // itself the hit target regardless of paint/fill state.
-          `<circle cx="${cx2}" cy="${cy2}" r="9" fill="transparent" pointer-events="all"><title>${tooltip}</title></circle>` +
+          //
+          // `data-tooltip` (read by the small delegated-hover script every page loads, see
+          // render-page.mjs / ui.jsx's ChartTooltipHost) is the real tooltip mechanism now --
+          // native <title> is kept alongside it purely as a no-JS/accessibility fallback, not
+          // relied on: it turned out too inconsistent across real desktop browsers (no visible
+          // delay control, no styling, and at least one confirmed real-world case of it simply
+          // never firing despite correct hit-testing).
+          `<circle cx="${cx2}" cy="${cy2}" r="9" fill="transparent" pointer-events="all" data-tooltip="${tooltip}"><title>${tooltip}</title></circle>` +
           `<circle cx="${cx2}" cy="${cy2}" r="3" fill="${color}" fill-opacity="${hasValue ? 1 : 0.35}" pointer-events="none" />`
         );
       })
@@ -179,5 +186,5 @@ export function renderRadarChart(categoryLabels, seriesAll, seriesPosition, opti
 }
 
 function escapeXml(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }

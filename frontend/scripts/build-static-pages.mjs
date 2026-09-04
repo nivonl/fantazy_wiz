@@ -150,9 +150,38 @@ function renderPlayerBody(player, breakdown, priceHistory, radar) {
     <p class="hint">Predicted points are from a statistical model (Poisson-fit team ratings + the official FPL scoring
     table) -- see the <a href="/methodology">methodology</a> for exactly how. Want to trade for
     ${escapeHtml(player.name)}? Try the <a href="/fpl-transfer-finder">Transfer Finder</a>.</p>
+    <p id="blog-back" style="display:none"><a href="/blog" id="blog-back-link">&larr; Back to the blog post</a></p>
     <p><a href="/fpl/players">&larr; All players</a></p>
+    <script>${BLOG_BACK_LINK_SCRIPT}</script>
   `;
 }
+
+// If this player page was reached from a blog post (see /blog/{slug} pages, which link player
+// names to their profile), show a real link back to it -- clicking it calls history.back()
+// rather than just following the referrer URL, so the browser restores the exact scroll
+// position within that post (right where the player's card was) instead of landing at its top.
+// The href is still set as a plain fallback for a right-click/open-in-new-tab, or if history.back
+// somehow doesn't apply (e.g. this page was opened directly in a new tab from the blog).
+const BLOG_BACK_LINK_SCRIPT = `
+(function () {
+  var ref = document.referrer;
+  if (!ref) return;
+  try {
+    if (new URL(ref).pathname.indexOf("/blog/") !== 0 && new URL(ref).pathname !== "/blog") return;
+  } catch (e) {
+    return;
+  }
+  var wrap = document.getElementById("blog-back");
+  var link = document.getElementById("blog-back-link");
+  if (!wrap || !link) return;
+  wrap.style.display = "";
+  link.href = ref;
+  link.addEventListener("click", function (e) {
+    e.preventDefault();
+    history.back();
+  });
+})();
+`;
 
 function renderPlayersIndexBody(players, slugById) {
   const byPos = Object.fromEntries(POS_ORDER.map((pos) => [pos, players.filter((p) => p.pos === pos).sort((a, b) => b.xp - a.xp)]));

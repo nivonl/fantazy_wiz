@@ -302,6 +302,72 @@ function fetchRadarManifest() {
 const RADAR_WINDOW_LABELS = { last3: "Last 3 GWs", previous_season: "Previous Season", career: "Career" };
 const RADAR_WINDOW_ORDER = ["last3", "previous_season", "career"];
 const RADAR_POS_LABEL = { GK: "Goalkeepers", DEF: "Defenders", MID: "Midfielders", FWD: "Forwards" };
+const CHART_TOOLTIP_WIDTH = 260; // matches .chart-tooltip's max-width in App.css
+
+// Delegated hover/tap tooltip for any [data-tooltip] element inside `children` -- the radar
+// chart's SVG is injected via dangerouslySetInnerHTML (see PlayerRadarSection below), so it has
+// no React event handlers of its own; a single mouseover/mouseout listener on this wrapper
+// catches the bubbled native events from that injected markup, same way real DOM events always
+// bubble regardless of how a node was inserted. Same JS-driven approach (and the same
+// .chart-tooltip bubble) as scripts/lib/render-page.mjs's CHART_TOOLTIP_SCRIPT for static pages
+// -- deliberately not relying on the SVG's native <title> tooltip, which those charts still
+// carry as a fallback but which proved inconsistent to actually trigger on some real desktop
+// browsers, unlike this exact pattern (see PlayerTip's tip-bubble above, which already works).
+function ChartTooltipHost({ children }) {
+  const [tooltip, setTooltip] = useState(null); // { text, pos } | null
+
+  const findTarget = (e) => (e.target.closest ? e.target.closest("[data-tooltip]") : null);
+
+  const showFor = (el) => {
+    const text = el?.getAttribute("data-tooltip");
+    if (!text) return;
+    const rect = el.getBoundingClientRect();
+    const openUpward = rect.top > 100;
+    const left = Math.min(
+      Math.max(rect.left + rect.width / 2 - CHART_TOOLTIP_WIDTH / 2, TIP_MARGIN),
+      window.innerWidth - CHART_TOOLTIP_WIDTH - TIP_MARGIN
+    );
+    setTooltip({
+      text,
+      pos: openUpward ? { left, bottom: window.innerHeight - rect.top + TIP_MARGIN } : { left, top: rect.bottom + TIP_MARGIN },
+    });
+  };
+
+  return (
+    <div
+      onMouseOver={(e) => {
+        const el = findTarget(e);
+        if (el) showFor(el);
+      }}
+      onMouseOut={(e) => {
+        if (findTarget(e)) setTooltip(null);
+      }}
+      // mousemove as a second, more universally reliable path alongside mouseover/mouseout above
+      // -- some synthetic/automated input (and, per real reports, at least one real desktop
+      // setup) never generates a mouseover event even though it does move the pointer, so relying
+      // on mouseover alone left the tooltip genuinely unreachable there despite correct
+      // hit-testing on the underlying SVG element.
+      onMouseMove={(e) => {
+        const el = findTarget(e);
+        if (el) showFor(el);
+        else if (tooltip) setTooltip(null);
+      }}
+      onTouchStart={(e) => {
+        const el = findTarget(e);
+        if (el) showFor(el);
+      }}
+    >
+      {children}
+      {tooltip &&
+        createPortal(
+          <div className="chart-tooltip" style={{ display: "block", position: "fixed", ...tooltip.pos }}>
+            {tooltip.text}
+          </div>,
+          document.body
+        )}
+    </div>
+  );
+}
 
 // renderRadarChart returns an SVG string (the same generator scripts/build-static-pages.mjs
 // uses for the static pages) -- rendered here via dangerouslySetInnerHTML rather than ported to
@@ -333,14 +399,16 @@ function PlayerRadarSection({ radar, pos }) {
       <p className="section-heading" style={{ marginTop: 16 }}>
         Stat radar
       </p>
-      <div className="radar-row">
-        {charts.map(({ window, svg }) => (
-          <figure className="radar-chart" key={window}>
-            <figcaption>{RADAR_WINDOW_LABELS[window]}</figcaption>
-            <div dangerouslySetInnerHTML={{ __html: svg }} />
-          </figure>
-        ))}
-      </div>
+      <ChartTooltipHost>
+        <div className="radar-row">
+          {charts.map(({ window, svg }) => (
+            <figure className="radar-chart" key={window}>
+              <figcaption>{RADAR_WINDOW_LABELS[window]}</figcaption>
+              <div dangerouslySetInnerHTML={{ __html: svg }} />
+            </figure>
+          ))}
+        </div>
+      </ChartTooltipHost>
     </>
   );
 }

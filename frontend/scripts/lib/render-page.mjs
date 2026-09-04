@@ -106,7 +106,82 @@ export function renderPage({ title, description, path, bodyHtml, cssHref, breadc
         </div>
       </main>
     </div>
+    <script>${CHART_TOOLTIP_SCRIPT}</script>
   </body>
 </html>
 `;
 }
+
+// Delegated hover (and tap, for touch) tooltip for any [data-tooltip] element -- currently the
+// radar and price-history charts' invisible hit-circles (see charts/radarChart.js and
+// scripts/lib/chart.mjs). One shared listener per page rather than per-chart, since a static
+// page can have several charts and this needs no per-chart wiring. Deliberately JS-driven
+// rather than relying on SVG's native <title> tooltip, which those charts still carry as a
+// fallback but which proved inconsistent to actually trigger on some real desktop browsers --
+// same reasoning, and the same .chart-tooltip bubble styling, as components/ui.jsx's
+// ChartTooltipHost (the equivalent for the SPA popup).
+const CHART_TOOLTIP_SCRIPT = `
+(function () {
+  var bubble;
+  function ensureBubble() {
+    if (!bubble) {
+      bubble = document.createElement("div");
+      bubble.className = "chart-tooltip";
+      document.body.appendChild(bubble);
+    }
+    return bubble;
+  }
+  function show(el) {
+    var text = el.getAttribute("data-tooltip");
+    if (!text) return;
+    var b = ensureBubble();
+    b.textContent = text;
+    b.style.display = "block";
+    var rect = el.getBoundingClientRect();
+    var margin = 8;
+    var left = rect.left + rect.width / 2 - b.offsetWidth / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - b.offsetWidth - margin));
+    var top = rect.top - b.offsetHeight - margin;
+    if (top < margin) top = rect.bottom + margin;
+    b.style.left = left + "px";
+    b.style.top = top + "px";
+  }
+  function hide() {
+    current = null;
+    if (bubble) bubble.style.display = "none";
+  }
+  var current = null;
+  document.addEventListener("mouseover", function (e) {
+    var el = e.target.closest && e.target.closest("[data-tooltip]");
+    if (el) {
+      current = el;
+      show(el);
+    }
+  });
+  document.addEventListener("mouseout", function (e) {
+    var el = e.target.closest && e.target.closest("[data-tooltip]");
+    if (el) hide();
+  });
+  // mousemove as a second, more universally reliable path alongside mouseover/mouseout above --
+  // some synthetic/automated input (and, per real reports, at least one real desktop setup)
+  // never generates a mouseover event even though it does move the pointer, so relying on
+  // mouseover alone left the tooltip genuinely unreachable there despite correct hit-testing.
+  document.addEventListener("mousemove", function (e) {
+    var el = e.target.closest && e.target.closest("[data-tooltip]");
+    if (el && el !== current) {
+      current = el;
+      show(el);
+    } else if (!el && current) {
+      hide();
+    }
+  });
+  document.addEventListener(
+    "touchstart",
+    function (e) {
+      var el = e.target.closest && e.target.closest("[data-tooltip]");
+      if (el) show(el);
+    },
+    { passive: true }
+  );
+})();
+`;

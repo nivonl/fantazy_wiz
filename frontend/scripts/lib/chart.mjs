@@ -98,10 +98,12 @@ export function renderPriceLineChart(rows, { width = 640, height = 230 } = {}) {
       // fill isn't reliably hit-tested under the default `pointer-events: visiblePainted` in
       // every browser, which would otherwise make the invisible hit target silently un-hoverable
       // despite a correct <title> sitting right there in the DOM (see radarChart.js for the same
-      // fix, found the same way).
+      // fix, found the same way). `data-tooltip` is the real tooltip mechanism (read by the
+      // small delegated-hover script every page loads, see render-page.mjs) -- native <title>
+      // stays as a no-JS fallback only, since it proved too inconsistent to rely on alone.
       const tooltip = `${p.r.price.toFixed(1)}m — GW${p.r.gameweek}`;
       return `
-    <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="transparent" pointer-events="all"><title>${tooltip}</title></circle>
+    <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="transparent" pointer-events="all" data-tooltip="${tooltip}"><title>${tooltip}</title></circle>
     <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${showLabel ? 3.5 : 2}" fill="var(--accent)" pointer-events="none" />${label}`;
     })
     .join("");
