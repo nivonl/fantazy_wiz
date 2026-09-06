@@ -1,51 +1,55 @@
-@import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@500;600;700;800&display=swap");
-
 /* Dark is the brand default. Light is an explicit, persisted user choice (toggle, not
-   prefers-color-scheme) — see ThemeToggle + usePersistentState("theme", ...). */
+   prefers-color-scheme) — see ThemeToggle + usePersistentState("theme", ...).
+
+   Palette is Premier League purple + PL magenta (not a generic violet/cyan "AI dashboard"
+   duo) — --analytics is a distinct teal rather than reusing --accent's magenta so the radar
+   chart's two overlapping series (charts/radarChart.js) stay tell-apart-able by hue, not just
+   by dash pattern. --good/--bad/--warn are semantic status colors, deliberately untouched by
+   the rebrand (see artifact-design's rule: semantic color isn't the brand accent). */
 :root {
-  --bg: #24002f;
-  --bg-grad: radial-gradient(ellipse at top, #34063f 0%, #24002f 55%, #1a0022 100%);
-  --panel: #34063f;
-  --panel-2: #3d0a4a;
-  --panel-border: #4a1259;
-  --input-bg: #170021;
-  --text: #ffffff;
-  --text-dim: #a6a6b3;
-  --accent: #963cff;
-  --accent-dim: #6e2bbf;
-  --analytics: #04f5ff;
+  --bg: #170021;
+  --bg-grad: radial-gradient(ellipse at top, #230a30 0%, #170021 55%, #0f0016 100%);
+  --panel: #1f0a2b;
+  --panel-2: #271033;
+  --panel-border: #3a1f47;
+  --input-bg: #120019;
+  --text: #f5f1f7;
+  --text-dim: #b39cc4;
+  --accent: #e90052;
+  --accent-dim: #a80047;
+  --analytics: #22c3b6;
   --good: #00ff85;
   --bad: #ff3b5c;
   --warn: #ffc24b;
-  --tint-accent: rgba(150, 60, 255, 0.16);
-  --tint-analytics: rgba(4, 245, 255, 0.16);
+  --tint-accent: rgba(233, 0, 82, 0.16);
+  --tint-analytics: rgba(34, 195, 182, 0.16);
   --tint-good: rgba(0, 255, 133, 0.14);
   --tint-bad: rgba(255, 59, 92, 0.14);
   --tint-warn: rgba(255, 194, 75, 0.12);
   --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --display: "Exo 2", var(--sans);
-  --radius: 14px;
+  --sans: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --display: "Barlow Condensed", var(--sans);
+  --radius: 10px;
   --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 :root[data-theme="light"] {
-  --bg: #f6f3fb;
-  --bg-grad: radial-gradient(ellipse at top, #ffffff 0%, #f2ecfa 55%, #ece2f7 100%);
+  --bg: #f7f4fa;
+  --bg-grad: radial-gradient(ellipse at top, #ffffff 0%, #f7f4fa 55%, #efe7f5 100%);
   --panel: #ffffff;
-  --panel-2: #f6f1fc;
-  --panel-border: #e2d5f2;
+  --panel-2: #fbf8fd;
+  --panel-border: #e3d7ec;
   --input-bg: #ffffff;
-  --text: #200a2b;
-  --text-dim: #6d6178;
-  --accent: #7c2fe0;
-  --accent-dim: #6420c2;
-  --analytics: #007b8a;
+  --text: #1b0a24;
+  --text-dim: #6b5876;
+  --accent: #e90052;
+  --accent-dim: #a80047;
+  --analytics: #0e7f76;
   --good: #048a4e;
   --bad: #c81b40;
   --warn: #a3690a;
-  --tint-accent: rgba(124, 47, 224, 0.1);
-  --tint-analytics: rgba(0, 123, 138, 0.1);
+  --tint-accent: rgba(233, 0, 82, 0.1);
+  --tint-analytics: rgba(14, 127, 118, 0.1);
   --tint-good: rgba(4, 138, 78, 0.1);
   --tint-bad: rgba(200, 27, 64, 0.1);
   --tint-warn: rgba(163, 105, 10, 0.1);

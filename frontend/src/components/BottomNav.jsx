@@ -66,7 +66,7 @@ export function BottomNav() {
       {/* Plain <a>, not <Link>: /blog is a real static page (scripts/build-static-pages.mjs),
           not one of App.jsx's always-mounted SPA panels -- same reasoning as the Blog link in
           ToolsNav.jsx. */}
-      <a href="/blog" className={`bottom-nav-item ${pathname.startsWith("/blog") ? "active" : ""}`}>
+      <a href="/blog/" className={`bottom-nav-item ${pathname.startsWith("/blog") ? "active" : ""}`}>
         {ICONS.blog}
         <span>Blog</span>
       </a>

@@ -515,7 +515,7 @@ function PlayerBreakdownModal({ player, onClose }) {
             )}
             {profileSlug && (
               <p style={{ marginTop: 12, marginBottom: 0 }}>
-                <a href={`/fpl/player/${profileSlug}`}>View {player.name}'s full profile &amp; stats chart &rarr;</a>
+                <a href={`/fpl/player/${profileSlug}/`}>View {player.name}'s full profile &amp; stats chart &rarr;</a>
               </p>
             )}
             <PlayerRadarSection radar={radar} pos={player.pos} />

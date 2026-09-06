@@ -50,7 +50,7 @@ export function MethodologyPanel() {
           reputation, output at a previous club or league, and the transfer fee a manager was
           willing to pay — signals a blank scoresheet can't show yet. As real minutes accumulate,
           the observed rate quickly takes over and the price prior fades out — it's a placeholder
-          for the unknown, not a competitor to actual current-season form. (Our <a href="/blog/predicting-transfer-value">Deep Research
+          for the unknown, not a competitor to actual current-season form. (Our <a href="/blog/predicting-transfer-value/">Deep Research
           post</a> on market value found recent output is still the stronger fantasy signal
           whenever it actually exists — this only steps in when it doesn't yet.)
         </p>

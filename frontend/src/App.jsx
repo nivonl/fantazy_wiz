@@ -56,8 +56,8 @@ function BrandMark() {
   return (
     <span className="brand-mark">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <circle cx="10" cy="10" r="6.5" stroke="#04F5FF" strokeWidth="2" />
-        <line x1="14.8" y1="14.8" x2="20" y2="20" stroke="#963CFF" strokeWidth="2.2" strokeLinecap="round" />
+        <circle cx="10" cy="10" r="6.5" stroke="var(--text)" strokeWidth="2" />
+        <line x1="14.8" y1="14.8" x2="20" y2="20" stroke="var(--accent)" strokeWidth="2.2" strokeLinecap="round" />
       </svg>
     </span>
   );

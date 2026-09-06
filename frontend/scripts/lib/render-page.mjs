@@ -7,7 +7,7 @@ const NAV_LINKS = [
   { href: "/fpl-transfer-finder", label: "Transfer Finder" },
   { href: "/fpl-squad-builder", label: "Squad Builder" },
   { href: "/fpl-predictions", label: "Predictions" },
-  { href: "/blog", label: "Blog" },
+  { href: "/blog/", label: "Blog" },
   { href: "/methodology", label: "Methodology" },
 ];
 
@@ -67,7 +67,7 @@ export function renderPage({ title, description, path, bodyHtml, cssHref, breadc
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#24002F" />
+    <meta name="theme-color" content="#170021" />
     <title>${escapeHtml(fullTitle)}</title>
     <meta name="description" content="${escapeHtml(description)}" />
     <link rel="canonical" href="${canonical}" />
@@ -75,6 +75,12 @@ export function renderPage({ title, description, path, bodyHtml, cssHref, breadc
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:url" content="${canonical}" />
     <meta property="og:type" content="${ogType}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Work+Sans:wght@400;500;600&display=swap"
+    />
     <link rel="stylesheet" crossorigin href="${cssHref}" />
     <script type="application/ld+json">${escapeJsonForScriptTag(JSON.stringify(jsonLd))}</script>
   </head>
@@ -85,8 +91,8 @@ export function renderPage({ title, description, path, bodyHtml, cssHref, breadc
           <div class="brand">
             <span class="brand-mark">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <circle cx="10" cy="10" r="6.5" stroke="#04F5FF" stroke-width="2" />
-                <line x1="14.8" y1="14.8" x2="20" y2="20" stroke="#963CFF" stroke-width="2.2" stroke-linecap="round" />
+                <circle cx="10" cy="10" r="6.5" stroke="var(--text)" stroke-width="2" />
+                <line x1="14.8" y1="14.8" x2="20" y2="20" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" />
               </svg>
             </span>
             <h1><span class="brand-pitch">Pitch</span><span class="brand-metric">Metric</span></h1>

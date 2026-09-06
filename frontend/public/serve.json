@@ -1,0 +1,11 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/fpl-team-analyzer", "destination": "/index.html" },
+    { "source": "/fpl-transfer-finder", "destination": "/index.html" },
+    { "source": "/fpl-squad-builder", "destination": "/index.html" },
+    { "source": "/fpl-predictions", "destination": "/index.html" },
+    { "source": "/methodology", "destination": "/index.html" },
+    { "source": "/more", "destination": "/index.html" }
+  ]
+}

@@ -57,14 +57,22 @@ function getCssHref() {
   return match[1];
 }
 
+// Accepts relativePath with or without a trailing slash and always writes to .../index.html,
+// returning the canonical trailing-slash form -- every static page here is a real directory on
+// disk (dist/<path>/index.html), so the trailing-slash URL is the one that doesn't need a host
+// redirect to resolve. Callers should pass paths pre-slashed (see the `path` constants below)
+// so the same string is used for the written file, the sitemap entry, the <link rel=canonical>,
+// and every internal <a href> -- a mismatch there is exactly what left real pages showing up in
+// Search Console as "page with redirect" instead of getting indexed under their real URL.
 function writePage(relativePath, html) {
-  const outPath = join(DIST_DIR, relativePath, "index.html");
+  const clean = relativePath.replace(/\/+$/, "");
+  const outPath = join(DIST_DIR, clean, "index.html");
   if (existsSync(outPath)) {
-    throw new Error(`Refusing to overwrite an existing file at dist${relativePath}/index.html -- a route collision?`);
+    throw new Error(`Refusing to overwrite an existing file at dist${clean}/index.html -- a route collision?`);
   }
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, html, "utf-8");
-  return `${relativePath}/`;
+  return `${clean}/`;
 }
 
 function renderPlayerTable(players) {
@@ -151,8 +159,8 @@ function renderPlayerBody(player, breakdown, priceHistory, radar) {
     <p class="hint">Predicted points are from a statistical model (Poisson-fit team ratings + the official FPL scoring
     table) -- see the <a href="/methodology">methodology</a> for exactly how. Want to trade for
     ${escapeHtml(player.name)}? Try the <a href="/fpl-transfer-finder">Transfer Finder</a>.</p>
-    <p id="blog-back" style="display:none"><a href="/blog" id="blog-back-link">&larr; Back to the blog post</a></p>
-    <p><a href="/fpl/players">&larr; All players</a></p>
+    <p id="blog-back" style="display:none"><a href="/blog/" id="blog-back-link">&larr; Back to the blog post</a></p>
+    <p><a href="/fpl/players/">&larr; All players</a></p>
     <script>${BLOG_BACK_LINK_SCRIPT}</script>
   `;
 }
@@ -196,7 +204,7 @@ function renderPlayersIndexBody(players, slugById) {
     <ul>${byPos[pos]
       .map(
         (p) =>
-          `<li><a href="/fpl/player/${slugById.get(p.id)}">${escapeHtml(p.name)}</a> &mdash; ${escapeHtml(p.team)}, ${p.price.toFixed(1)}m, predicted ${p.xp.toFixed(2)} pts</li>`
+          `<li><a href="/fpl/player/${slugById.get(p.id)}/">${escapeHtml(p.name)}</a> &mdash; ${escapeHtml(p.team)}, ${p.price.toFixed(1)}m, predicted ${p.xp.toFixed(2)} pts</li>`
       )
       .join("")}</ul>`
     ).join("\n")}
@@ -214,7 +222,7 @@ function renderGameweekBody(event, players, { isCurrent }) {
     <h3>Top 10 overall</h3>
     ${renderPlayerTable(top10)}
     ${POS_ORDER.map((pos) => `<h3>Best ${POS_LABEL[pos]}</h3>${renderPlayerTable(byPos[pos].slice(0, 10))}`).join("\n")}
-    <p><a href="/fpl-predictions">&larr; Current gameweek</a> &middot; <a href="/fpl/players">All players</a></p>
+    <p><a href="/fpl-predictions">&larr; Current gameweek</a> &middot; <a href="/fpl/players/">All players</a></p>
   `;
 }
 
@@ -264,7 +272,7 @@ function renderBlogPlayerCard(p, slugById) {
   // predicted-players pool (it won't be for someone who's since left the league, been sent out
   // on loan, etc.) -- falls back to plain text rather than a broken link.
   const slug = p.element_id != null ? slugById.get(String(p.element_id)) : undefined;
-  const nameHtml = slug ? `<a href="/fpl/player/${slug}">${escapeHtml(p.name)}</a>` : escapeHtml(p.name);
+  const nameHtml = slug ? `<a href="/fpl/player/${slug}/">${escapeHtml(p.name)}</a>` : escapeHtml(p.name);
 
   return `
     <div class="blog-player-card">
@@ -304,7 +312,7 @@ function renderGameweekSurpriseBody(post, slugById) {
     ${post.players.map((p) => renderBlogPlayerCard(p, slugById)).join("\n")}
     <p class="summary-line">${post.closing}</p>
     ${post.model_notes ? `<div class="blog-callout"><p class="blog-callout-heading">Where the model should improve</p>${post.model_notes}</div>` : ""}
-    <p><a href="/blog">&larr; All posts</a> &middot; <a href="/methodology">How predictions work</a></p>
+    <p><a href="/blog/">&larr; All posts</a> &middot; <a href="/methodology">How predictions work</a></p>
   `;
 }
 
@@ -372,7 +380,7 @@ function renderDeepResearchBody(post) {
     <div class="blog-post-body">
       ${post.blocks.map(renderDeepResearchBlock).join("\n")}
     </div>
-    <p><a href="/blog">&larr; All posts</a> &middot; <a href="/methodology">How predictions work</a></p>
+    <p><a href="/blog/">&larr; All posts</a> &middot; <a href="/methodology">How predictions work</a></p>
   `;
 }
 
@@ -388,7 +396,7 @@ export function renderBlogIndexBody(posts) {
       ${posts
         .map(
           (post) => `
-      <a class="blog-index-card" href="/blog/${post.slug}">
+      <a class="blog-index-card" href="/blog/${post.slug}/">
         <p class="blog-index-meta">${post.type === "deep_research" ? escapeHtml(post.category) : `Gameweek ${post.gameweek}`}</p>
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.dek)}</p>
@@ -446,7 +454,7 @@ async function main() {
 
   for (const player of players) {
     const slug = slugById.get(player.id);
-    const path = `/fpl/player/${slug}`;
+    const path = `/fpl/player/${slug}/`;
     const html = renderPage({
       title: `${player.name} FPL Prediction, Price & Expected Points`,
       description: `${player.name} (${player.team}, ${player.pos}): FPL price ${player.price.toFixed(1)}m, predicted ${player.xp.toFixed(2)} points this gameweek, and recent gameweek-by-gameweek form.`,
@@ -454,7 +462,7 @@ async function main() {
       cssHref,
       breadcrumbs: [
         { name: "Home", path: "/" },
-        { name: "Players", path: "/fpl/players" },
+        { name: "Players", path: "/fpl/players/" },
         { name: player.name, path },
       ],
       bodyHtml: renderPlayerBody(player, breakdownById.get(player.id), priceHistoryById.get(player.id), radarTable[player.id]),
@@ -466,15 +474,15 @@ async function main() {
   const playersIndexHtml = renderPage({
     title: "FPL Players — Predicted Points & Prices",
     description: "Every Premier League player with PitchMetric's predicted points for the current gameweek, browsable by position.",
-    path: "/fpl/players",
+    path: "/fpl/players/",
     cssHref,
     breadcrumbs: [
       { name: "Home", path: "/" },
-      { name: "Players", path: "/fpl/players" },
+      { name: "Players", path: "/fpl/players/" },
     ],
     bodyHtml: renderPlayersIndexBody(players, slugById),
   });
-  generatedPaths.push(writePage("/fpl/players", playersIndexHtml));
+  generatedPaths.push(writePage("/fpl/players/", playersIndexHtml));
 
   // Small id -> slug lookup the SPA fetches once, so the interactive player popup (which only
   // knows a numeric player id) can link out to that player's real static page without trying
@@ -508,7 +516,7 @@ async function main() {
   ];
 
   for (const gw of gameweekDatasets) {
-    const path = `/fpl-predictions/gameweek-${gw.event}`;
+    const path = `/fpl-predictions/gameweek-${gw.event}/`;
     const html = renderPage({
       title: `Best FPL Players & Predictions for Gameweek ${gw.event}`,
       description: `PitchMetric's predicted points for gameweek ${gw.event}: top goalkeepers, defenders, midfielders and forwards, from a Poisson model fit on real Premier League results.`,
@@ -533,18 +541,18 @@ async function main() {
     const blogIndexHtml = renderPage({
       title: "Blog — Fantasy Gameweek Surprises",
       description: "Every gameweek's five biggest gaps between predicted and actual fantasy points, with the underlying stats behind each surprise.",
-      path: "/blog",
+      path: "/blog/",
       cssHref,
       breadcrumbs: [
         { name: "Home", path: "/" },
-        { name: "Blog", path: "/blog" },
+        { name: "Blog", path: "/blog/" },
       ],
       bodyHtml: renderBlogIndexBody(posts),
     });
-    generatedPaths.push(writePage("/blog", blogIndexHtml));
+    generatedPaths.push(writePage("/blog/", blogIndexHtml));
 
     for (const post of posts) {
-      const path = `/blog/${post.slug}`;
+      const path = `/blog/${post.slug}/`;
       const html = renderPage({
         title: post.title,
         description: post.dek,
@@ -553,7 +561,7 @@ async function main() {
         ogType: "article",
         breadcrumbs: [
           { name: "Home", path: "/" },
-          { name: "Blog", path: "/blog" },
+          { name: "Blog", path: "/blog/" },
           { name: post.title, path },
         ],
         extraJsonLd: [
