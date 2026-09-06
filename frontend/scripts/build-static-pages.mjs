@@ -282,7 +282,9 @@ function renderBlogPlayerCard(p, slugById) {
           <div><div class="blog-stat-label">Surprise</div><div class="blog-stat-value" style="color:var(--good)">${fmtSigned(p.surprise)}</div></div>
           <div><div class="blog-stat-label">Percentile</div><div class="blog-stat-value">${p.percentile.toFixed(1)}</div></div>
         </div>
-        <p class="blog-boxscore"><b>Box score:</b> ${boxscoreParts.length ? escapeHtml(boxscoreParts.join(", ")) : "&mdash;"} &middot; xG ${p.expected_goals.toFixed(2)}, xA ${p.expected_assists.toFixed(2)} &middot; ICT ${p.ict_index.toFixed(1)}</p>
+        <p class="blog-boxscore"><b>Box score:</b> ${boxscoreParts.length ? escapeHtml(boxscoreParts.join(", ")) : "&mdash;"} &middot; xG ${p.expected_goals.toFixed(2)}, xA ${p.expected_assists.toFixed(2)}${
+          p.ict_index ? ` &middot; ICT ${p.ict_index.toFixed(1)}` : " &middot; ICT not yet finalized by FPL"
+        }</p>
         <p class="blog-player-analysis">${p.analysis}</p>
       </div>
     </div>`;
@@ -296,6 +298,7 @@ function renderGameweekSurpriseBody(post, slugById) {
     <p class="blog-post-meta">Gameweek ${post.gameweek} &middot; ${dateLabel}</p>
     <h2>${escapeHtml(post.title)}</h2>
     <p class="blog-dek">${escapeHtml(post.dek)}</p>
+    ${post.update_note ? `<div class="blog-update-note">${post.update_note}</div>` : ""}
     <p class="summary-line">${post.intro}</p>
     <p class="hint">Ranked among ${post.qualifying_player_count} players who played at least ${post.min_minutes} minutes in gameweek ${post.gameweek}, by actual points minus predicted xP. Average surprise across that pool: ${fmtSigned(post.mean_surprise)} (std. dev. ${post.stdev_surprise.toFixed(2)}).</p>
     ${post.players.map((p) => renderBlogPlayerCard(p, slugById)).join("\n")}

@@ -74,12 +74,7 @@ header.top {
 }
 
 .brand-pitch { color: var(--text); }
-.brand-metric {
-  background: linear-gradient(90deg, var(--accent), var(--analytics));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+.brand-metric { color: var(--accent); }
 
 header.top > p {
   margin: 2px 0 18px;
@@ -613,7 +608,7 @@ ul.flags li {
 
 .chip-card .chip-name { font-weight: 700; font-size: 0.88rem; }
 .chip-card .chip-horizon { color: var(--text-dim); font-size: 0.72rem; margin-left: 6px; }
-.chip-card .chip-lift { font-size: 1.4rem; margin: 4px 0; font-family: var(--display); }
+.chip-card .chip-lift { font-size: 1.4rem; margin: 4px 0; font-family: var(--display); font-weight: 700; }
 .chip-card .chip-note { color: var(--text-dim); font-size: 0.76rem; line-height: 1.4; }
 .chip-card .btn { margin-top: 10px; padding: 6px 12px; font-size: 0.78rem; }
 
@@ -762,7 +757,7 @@ ul.flags li {
 }
 .blog-index-card:hover { border-color: var(--accent-dim); }
 .blog-index-card .blog-index-meta { color: var(--text-dim); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
-.blog-index-card h3 { margin: 0 0 6px; font-family: var(--display); font-size: 1.15rem; color: var(--analytics); }
+.blog-index-card h3 { margin: 0 0 6px; font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--analytics); }
 .blog-index-card p { margin: 0; color: var(--text-dim); font-size: 0.88rem; line-height: 1.55; }
 
 .blog-post-meta { color: var(--text-dim); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 6px; }
@@ -848,6 +843,21 @@ ul.flags li {
 }
 .blog-callout p { font-size: 0.87rem; line-height: 1.6; margin: 0 0 10px; }
 .blog-callout p:last-child { margin-bottom: 0; }
+
+/* A later editorial note on an older post (e.g. "the model changed since this was written") --
+   informational, not a caution, so it gets the neutral accent tint rather than blog-callout's
+   warning color. */
+.blog-update-note {
+  background: var(--tint-accent);
+  border: 1px solid var(--panel-border);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 16px 0 20px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.blog-update-note b { color: var(--accent); }
 
 /* ---------- Deep Research posts (long-form article body, not a gameweek-surprise recap) ---------- */
 

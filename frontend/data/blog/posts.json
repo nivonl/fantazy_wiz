@@ -172,7 +172,8 @@
         },
         "analysis": "Two assists and a clean sheet in a 3-0 win over Spurs, from a midfielder who — like literally everyone else in the league that weekend — had no current-season form behind him yet, so the model priced him at a flat 1.95 points regardless of who he actually was. His 0.33 expected assists is the most encouraging underlying number on this list relative to the actual return — genuine chance creation, not just a stat-line that happened to him. Worth revisiting once he's built up a real run of matches for the model to actually learn from."
       }
-    ]
+    ],
+    "update_note": "<b>Update (added after publishing):</b> We since shipped a change to how the model handles players with little or no track record — it now leans on a player’s price as a stand-in for reputation, transfer fee, and form from a previous club or league, fading out once real current-season form exists to replace it (see the <a href=\"/blog/testing-the-price-and-squad-depth-update\">full write-up and backtest</a>). Gameweek 1 is the one week that update makes <i>zero</i> difference to — every prediction below is exactly what it always was. That’s not an oversight: with literally no player having kicked a ball yet, there’s no population of established players within the season for a price-to-output relationship to be learned from in the first place. See <a href=\"/blog/gameweek-2-fantasy-surprises\">Gameweek 2’s post</a> for where that changes."
   },
   {
     "slug": "gameweek-2-fantasy-surprises",
@@ -182,8 +183,8 @@
     "published": "2026-09-04",
     "qualifying_player_count": 231,
     "min_minutes": 30,
-    "mean_surprise": 0.96,
-    "stdev_surprise": 3.9,
+    "mean_surprise": 1.19,
+    "stdev_surprise": 3.52,
     "intro": "Same method as Gameweek 1 — every player below played at least 30 minutes, and is ranked by actual points minus PitchMetric's predicted xP for that fixture. The difference this time is that the model is no longer working from a blank slate: every returning player now has one gameweek of real 2026-27 output behind their goal and assist rates, and it shows in who tops this list and why. See the <a href=\"/methodology\">methodology</a> for exactly how a player's rate is computed from real per-match history rather than an assumption.",
     "closing": "Compare the underlying expected-goals numbers across this list and two different stories emerge. Bruno Fernandes's 2.02 xG very nearly explains his hat-trick outright — his performance was mostly signal, a genuine chance-quality outburst the model just had no prior data to anticipate. Haaland (0.66 xG for two goals) and Groß (0.05 xG for a goal) leaned much more on finishing than on chance quality — closer to variance than to a repeatable pattern. Rayan Cherki's case is different again: the model actively discounted him (start probability capped at 0.3) for having zero starts to his name after Gameweek 1, which was reasonable caution right up until he played 81 minutes and scored twice. None of that is a flaw exactly — it's what a model honestly built from observed history looks like in only its second week of data.",
     "players": [
@@ -222,39 +223,6 @@
       },
       {
         "rank": 2,
-        "name": "Rayan Cherki",
-        "element_id": 399,
-        "team": "Man City",
-        "position": "MID",
-        "opponent": "Crystal Palace",
-        "was_home": false,
-        "minutes": 81,
-        "value": 7.7,
-        "actual_points": 14,
-        "predicted_xp": 0.74,
-        "surprise": 13.26,
-        "percentile": 99.6,
-        "z_score": 3.16,
-        "goals": 2,
-        "assists": 0,
-        "clean_sheets": 0,
-        "goals_conceded": 1,
-        "bonus": 3,
-        "bps": 60,
-        "expected_goals": 0.35,
-        "expected_assists": 0.55,
-        "ict_index": 17.2,
-        "photo": "rayan-cherki.jpg",
-        "photo_credit": {
-          "name": "Bryan Berlin",
-          "license": "CC BY-SA 4.0",
-          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-          "source_url": "https://commons.wikimedia.org/wiki/File:Rayan_Cherki_France_v_Norway_26_June_26-114.jpg"
-        },
-        "analysis": "The lowest predicted score in either week's top five, and it's easy to see why in plain terms. Cherki only joined Manchester City this summer, arriving from Lyon having just topped the entire French league for assists — so there's no Premier League track record for him anywhere, in any season, for the model to draw on. He didn't even start Gameweek 1, coming on for roughly the final half hour — though he made the most of it, setting up two goals in that cameo alone. None of that mattered going into this prediction: a player only counts as having a scoring record once he's actually started a match, so with zero starts on the books the model treated him as a complete unknown, the same as any untested academy player, and had him down for a bare 0.74 points. He then started this one, played 81 minutes away at Crystal Palace in a match City won 4-1, and scored twice himself. The 0.35 expected goals behind those two finishes says this was more clinical finishing than a string of clear-cut chances — the kind of return that's genuinely hard to have seen coming from where the data stood a week ago."
-      },
-      {
-        "rank": 3,
         "name": "Morgan Gibbs-White",
         "element_id": 480,
         "team": "Nott'm Forest",
@@ -287,7 +255,7 @@
         "analysis": "Gibbs-White has been one of Nottingham Forest's most important attacking players for a couple of seasons now, and he played every minute of Gameweek 1 too — he just didn't score or set one up, so there was no current-season product for the model to price him on beyond a modest 1.72 points. Then came a goal and an assist away at Liverpool, in a match that finished 2-2, worth 13 points. The 0.79 expected goals behind his own finish is a reasonable, presentable chance rather than a wild outlier — the assist is the bigger surprise, with only 0.04 expected assists suggesting the pass that created it wasn't a high-probability chance-creation moment by the underlying numbers."
       },
       {
-        "rank": 4,
+        "rank": 3,
         "name": "Erling Haaland",
         "element_id": 411,
         "team": "Man City",
@@ -318,6 +286,39 @@
           "source_url": "https://commons.wikimedia.org/wiki/File:Erling_Haaland_Morocco_v_Norway_7_June_2026-51.jpg"
         },
         "analysis": "The most expensive player on either list, and still a double-digit surprise. Even the league's most prolific striker has games where nothing goes in — Haaland played all 90 minutes of Gameweek 1 without scoring, and with no goals on the board yet this season, the model had nothing personal to build on and started him from the same generic 2.17-point floor as everyone else. Two goals away at Crystal Palace, in the same 4-1 win as Cherki above, from just 0.66 combined expected goals is a big finishing overperformance on the underlying chances, not a case where the model missed obviously high-quality opportunities."
+      },
+      {
+        "rank": 4,
+        "name": "Rayan Cherki",
+        "element_id": 399,
+        "team": "Man City",
+        "position": "MID",
+        "opponent": "Crystal Palace",
+        "was_home": false,
+        "minutes": 81,
+        "value": 7.7,
+        "actual_points": 14,
+        "predicted_xp": 3.56,
+        "surprise": 10.44,
+        "percentile": 98.7,
+        "z_score": 2.63,
+        "goals": 2,
+        "assists": 0,
+        "clean_sheets": 0,
+        "goals_conceded": 1,
+        "bonus": 3,
+        "bps": 60,
+        "expected_goals": 0.35,
+        "expected_assists": 0.55,
+        "ict_index": 17.2,
+        "photo": "rayan-cherki.jpg",
+        "photo_credit": {
+          "name": "Bryan Berlin",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Rayan_Cherki_France_v_Norway_26_June_26-114.jpg"
+        },
+        "analysis": "Rewind to when this post first went up and the model had him at a bare 0.74 points — the lowest prediction on either week's list at the time. We've since fixed exactly the gap that caused it: the model used to count goals and assists per <i>start</i> only, so a substitute appearance couldn't move a prediction at all, no matter what actually happened in it. Cherki's 2 assists in 27 minutes off the bench in Gameweek 1 were real, meaningful output the old version simply threw away. Weighing by minutes actually played instead pushes his prediction up to 3.56 — still well short of what he actually delivered, but a far more defensible number than treating him as a total unknown. He started this game, played 81 minutes away at Crystal Palace in a match City won 4-1, and scored twice himself. The 0.35 expected goals behind those two finishes says this was more clinical finishing than a string of clear-cut chances — genuinely hard to have called exactly, but no longer starting from a number that ignored evidence the model already had."
       },
       {
         "rank": 5,
@@ -352,7 +353,8 @@
         },
         "analysis": "Groß only returned to Brighton in January, back from a spell at Borussia Dortmund, and has quickly become the club's main penalty and set-piece taker — exactly the kind of role that can produce a goal or an assist out of nothing. None of that reached the prediction, though: he'd played the full 90 in Gameweek 1 without a goal or assist, so the model had no personal scoring history to draw on, and its 2.60-point prediction (the highest of this week's five, but driven by Brighton's own fixture rather than anything specific to him) still wasn't close to enough. Brighton conceded four goals away at Chelsea and lost 4-3, but Groß personally returned a goal and an assist worth 13 points on his own. The 0.05 expected goals behind that goal is about as low as the underlying numbers get for an actual finish — the kind of moment a box score just can't explain, whatever it looked like on the pitch."
       }
-    ]
+    ],
+    "update_note": "<b>Update (added after publishing):</b> We've since shipped a change to how the model treats players without much of a current-season track record — <a href=\"/blog/testing-the-price-and-squad-depth-update\">full write-up and backtest</a>. Two things changed: predictions no longer discard a substitute appearance's output just because it wasn't a start (the model weighs by minutes actually played instead), and a separate part of the update blends in a player's price as a stand-in for reputation, transfer fee, or form from a previous club or league once there isn't enough current-season evidence to trust on its own. That second part honestly hasn't had a real chance to matter yet this early in the season — it needs a pool of players with several matches under their belt before it can learn a price-to-output relationship from anyone, and this early on nobody's there yet. Below, Rayan Cherki's prediction has moved from 0.74 to 3.56 points as a direct result of the first change, and his write-up is updated to match. The rest of this list was already using real per-match evidence and is unchanged."
   },
   {
     "type": "deep_research",
@@ -3185,6 +3187,186 @@
       {
         "type": "paragraph",
         "html": "Momentum as a short-term recency multiplier didn’t hold up — that doesn’t mean recent form is worthless, only that our first attempt at capturing it wasn’t. A more careful, properly-lagged version of the same idea is worth another look before we write it off entirely. We’re also keeping an eye on whether the price-based estimate’s benefit holds up the same way once a second season of results exists to test it against — one season, however thoroughly tested, is still one season. If you want to see the current model in action, <a href=\"/fpl-predictions\">Predictions</a> and <a href=\"/fpl-transfer-finder\">Transfer Finder</a> are both running on exactly what’s described here — and see <a href=\"/methodology\">Methodology</a> for the plain-language version of how it all fits together."
+      }
+    ]
+  },
+  {
+    "slug": "gameweek-3-fantasy-surprises",
+    "gameweek": 3,
+    "title": "Gameweek 3's Biggest Fantasy Surprises",
+    "dek": "Two of this week's five biggest surprises came from the exact same match — one from each side. The first surprise post built entirely on our updated model.",
+    "published": "2026-09-07",
+    "qualifying_player_count": 228,
+    "min_minutes": 30,
+    "mean_surprise": 1.22,
+    "stdev_surprise": 2.93,
+    "intro": "Same method as Gameweeks <a href=\"/blog/gameweek-1-fantasy-surprises\">1</a> and <a href=\"/blog/gameweek-2-fantasy-surprises\">2</a> — every player below played at least 30 minutes, ranked by actual points minus PitchMetric's predicted xP for that fixture. This is the first list built entirely on the <a href=\"/blog/testing-the-price-and-squad-depth-update\">updated model</a> — though as it turns out, the update's headline piece (leaning on price when there's not much track record yet) still hasn't had real players to work with this early in the season; it needs a few matches' worth of established players before it can learn anything, and nobody's quite there yet. What's below instead reflects the model's fixture-level read, or the same minutes-not-starts fix already visible in last week's Cherki case. One honest caveat: Gameweek 3 hadn't been officially finalized by FPL at the time of writing (bonus points can shift slightly in the day or two afterward), so treat the numbers below as very likely final rather than certainly final.",
+    "closing": "Brighton's home draw with Leeds produced two of these five on its own, from opposite ends of the same ninety minutes — proof that “surprise” doesn't mean the model was clueless about the match, just wrong about a specific name within it. Compare that to Isak's case: the least surprising kind of surprise, a proven talent simply having a very good day against a prediction that already knew he was decent, just not decent enough to see two goals coming.",
+    "players": [
+      {
+        "rank": 1,
+        "name": "Jayden Bogle",
+        "element_id": 330,
+        "team": "Leeds",
+        "position": "DEF",
+        "opponent": "Brighton",
+        "was_home": false,
+        "minutes": 60,
+        "value": 4.5,
+        "actual_points": 14,
+        "predicted_xp": 0.12,
+        "surprise": 13.88,
+        "percentile": 100.0,
+        "z_score": 4.32,
+        "goals": 1,
+        "assists": 0,
+        "clean_sheets": 1,
+        "goals_conceded": 0,
+        "bonus": 3,
+        "bps": 30,
+        "expected_goals": 0.9,
+        "expected_assists": 0.02,
+        "ict_index": 0.0,
+        "photo": "jayden-bogle.jpg",
+        "photo_credit": {
+          "name": "Timmy96",
+          "license": "CC0",
+          "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Jayden_Bogle_13092025_(4).jpg"
+        },
+        "analysis": "The single biggest surprise of the round, and one that isn't really about Bogle personally at all — it's a fixture-level miss. Leeds went away to a Brighton side that had just put four past Aston Villa and beaten Manchester United, and the model's underlying read gave a Leeds defender very little credit for keeping anything out that day. Bogle, an established first-choice right-back rather than an unknown quantity, broke that read on his own: he scored, and personally kept a clean sheet for the 60 minutes he was on the pitch, before Brighton's equalizer arrived after he'd already been substituted, in a match that finished 1-1. The model had a real opinion here — it was just wrong."
+      },
+      {
+        "rank": 2,
+        "name": "Tyrick Mitchell",
+        "element_id": 204,
+        "team": "Crystal Palace",
+        "position": "DEF",
+        "opponent": "Fulham",
+        "was_home": false,
+        "minutes": 73,
+        "value": 4.5,
+        "actual_points": 15,
+        "predicted_xp": 1.51,
+        "surprise": 13.49,
+        "percentile": 99.6,
+        "z_score": 4.19,
+        "goals": 2,
+        "assists": 0,
+        "clean_sheets": 0,
+        "goals_conceded": 2,
+        "bonus": 2,
+        "bps": 31,
+        "expected_goals": 0.66,
+        "expected_assists": 0.01,
+        "ict_index": 0.0,
+        "photo": "tyrick-mitchell.jpg",
+        "photo_credit": {
+          "name": "Ardfern",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Tyrick_Mitchell,_Manchester_United_v_Crystal_Palace,_5_December_2021_(cropped).jpg"
+        },
+        "analysis": "An established regular at left-back for Palace, not someone the model had no history on — the surprise here is the kind of return, not the player. Palace won 3-2 away at Fulham with both sides trading goals throughout, and Mitchell personally scored twice at the other end of a game his own team conceded two in — no clean-sheet bonus propping this one up, just pure goal threat from a full-back. Attacking returns from a defender, however established, are inherently harder for a model built on clean-sheet probability and a player's usual scoring rate to see coming than defensive ones are."
+      },
+      {
+        "rank": 3,
+        "name": "Harvey Barnes",
+        "element_id": 453,
+        "team": "Newcastle",
+        "position": "MID",
+        "opponent": "Bournemouth",
+        "was_home": true,
+        "minutes": 90,
+        "value": 6.0,
+        "actual_points": 12,
+        "predicted_xp": 1.53,
+        "surprise": 10.47,
+        "percentile": 99.1,
+        "z_score": 3.16,
+        "goals": 1,
+        "assists": 1,
+        "clean_sheets": 0,
+        "goals_conceded": 2,
+        "bonus": 2,
+        "bps": 37,
+        "expected_goals": 0.11,
+        "expected_assists": 0.03,
+        "ict_index": 0.0,
+        "photo": "harvey-barnes.jpg",
+        "photo_credit": {
+          "name": "Pottercomuneo",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Harvey_Barnes_2022_(cropped).jpg"
+        },
+        "analysis": "An established Newcastle winger with a real track record, who simply had an excellent day at exactly the moment the model wasn't banking on one: a goal and an assist at home in a 2-2 draw with Bournemouth, worth 12 points against a 1.53 prediction. Nothing structurally unusual about this miss — just good, in-form football beating a modest, evidence-based baseline on the day."
+      },
+      {
+        "rank": 4,
+        "name": "Luka Vušković",
+        "element_id": 504,
+        "team": "Brighton",
+        "position": "DEF",
+        "opponent": "Leeds",
+        "was_home": true,
+        "minutes": 90,
+        "value": 5.0,
+        "actual_points": 12,
+        "predicted_xp": 1.75,
+        "surprise": 10.26,
+        "percentile": 98.7,
+        "z_score": 3.09,
+        "goals": 1,
+        "assists": 0,
+        "clean_sheets": 0,
+        "goals_conceded": 1,
+        "bonus": 2,
+        "bps": 27,
+        "expected_goals": 0.19,
+        "expected_assists": 0.01,
+        "ict_index": 0.0,
+        "photo": "luka-vuskovic.jpg",
+        "photo_credit": {
+          "name": "Bryan Berlin",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Luka_Vuskovic_Croatia_v_Portugal_2_July_2026-020.jpg"
+        },
+        "analysis": "The same Brighton-Leeds match as Bogle above, seen from the other side. Vušković is a brand-new arrival at Brighton — a club-record transfer worth up to £50m from Tottenham this summer, after a breakout loan season at Hamburg that won him the Bundesliga's Rookie of the Year award — so there's a real, defensible reason the model had comparatively little of his own to go on, on top of how tough it read the fixture for either side that day. His goal proved to be Brighton's equalizer, canceling out Bogle's earlier one for Leeds in a match that finished 1-1. Two of this week's five biggest surprises, from a combined 150 minutes of the same game."
+      },
+      {
+        "rank": 5,
+        "name": "Alexander Isak",
+        "element_id": 379,
+        "team": "Liverpool",
+        "position": "FWD",
+        "opponent": "Ipswich Town",
+        "was_home": false,
+        "minutes": 63,
+        "value": 9.0,
+        "actual_points": 13,
+        "predicted_xp": 3.77,
+        "surprise": 9.23,
+        "percentile": 98.2,
+        "z_score": 2.74,
+        "goals": 2,
+        "assists": 0,
+        "clean_sheets": 1,
+        "goals_conceded": 0,
+        "bonus": 3,
+        "bps": 61,
+        "expected_goals": 0.21,
+        "expected_assists": 0.05,
+        "ict_index": 0.0,
+        "photo": "alexander-isak.jpg",
+        "photo_credit": {
+          "name": "Mikael Hervestad",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Alexander_Isak_-_Sweden_-_Greece21_(cropped).jpg"
+        },
+        "analysis": "Isak needs no introduction as a talent — Liverpool paid a British transfer record (£125m) for him roughly a year before this season kicked off — but reputation alone was never what fed this prediction. What mattered is that after a blank in Gameweek 1, he'd already opened his account with a goal in Gameweek 2, and that real, if thin, current-season record is what the model was actually working from: 3.77 points predicted, well above a total unknown's floor. He doubled up with a brace away at Ipswich Town in a 2-0 win, worth 13 points. At just 0.21 combined expected goals for two actual finishes, this was clinical finishing well ahead of the underlying chance quality — the smallest, most ordinary kind of surprise on this list: a proven forward simply having a very good day."
       }
     ]
   }
