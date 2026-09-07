@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 
-const SITE_URL = "https://pitchmetricai.com";
+// www, not the bare apex -- GoDaddy (where this domain's DNS is managed) doesn't allow a CNAME
+// record at the root, so the apex just 301-redirects to www via GoDaddy's domain forwarding
+// rather than pointing at Railway directly. www is the actual serving domain and the one every
+// canonical/OG/sitemap URL needs to agree on (see the matching constant in
+// scripts/lib/render-page.mjs).
+const SITE_URL = "https://www.pitchmetricai.com";
 
 function upsertMeta(attr, value, content) {
   let el = document.querySelector(`meta[${attr}="${value}"]`);

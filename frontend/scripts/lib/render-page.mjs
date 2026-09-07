@@ -1,6 +1,11 @@
 // Must match src/hooks/useDocumentHead.js's SITE_URL -- duplicated rather than imported since
 // this is a plain Node build script, not part of the client bundle.
-export const SITE_URL = "https://pitchmetricai.com";
+//
+// www, not the bare apex -- GoDaddy (where this domain's DNS is managed) doesn't allow a CNAME
+// record at the root, so the apex just 301-redirects to www via GoDaddy's domain forwarding
+// rather than pointing at Railway directly. www is the actual serving domain and the one every
+// canonical/OG/sitemap URL needs to agree on.
+export const SITE_URL = "https://www.pitchmetricai.com";
 
 const NAV_LINKS = [
   { href: "/fpl-team-analyzer", label: "Team Analyzer" },
