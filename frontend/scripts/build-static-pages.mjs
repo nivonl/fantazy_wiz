@@ -20,6 +20,7 @@ import { renderPointsBarChart, renderPriceLineChart } from "./lib/chart.mjs";
 import { renderRadarChart, formatCategoryDetail } from "../src/charts/radarChart.js";
 import { renderHBarChart, renderDivergingBarChart, renderScatterChart } from "./lib/research-charts.mjs";
 import { teamColor } from "../src/team-colors.js";
+import { seasonLabel } from "./lib/season.mjs";
 
 // A player's own page gets a subtle background wash of their club's color (see
 // team-colors.js) -- deliberately not a dot scattered on every team mention across every
@@ -409,7 +410,7 @@ export function renderBlogIndexBody(posts) {
       ${posts
         .map(
           (post) => `
-      <a class="blog-index-card" href="/blog/${post.slug}/">
+      <a class="blog-index-card" href="/blog/${post.urlSlug}/">
         <p class="blog-index-meta">${post.type === "deep_research" ? escapeHtml(post.category) : `Gameweek ${post.gameweek}`}</p>
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.dek)}</p>
@@ -523,22 +524,28 @@ async function main() {
   }
   console.log(`Found ${pastGameweeks.length} committed past-gameweek snapshot(s) (excluding the current one).`);
 
+  // Every snapshot carries the season it was captured in (see snapshot-current-gameweek.mjs);
+  // the live current-gameweek dataset isn't a snapshot file, so its season is today's.
   const gameweekDatasets = [
-    ...pastGameweeks.map((snap) => ({ event: snap.event, players: snap.players, isCurrent: false })),
-    { event: currentEvent, players, isCurrent: true },
+    ...pastGameweeks.map((snap) => ({ event: snap.event, season: snap.season, players: snap.players, isCurrent: false })),
+    { event: currentEvent, season: seasonLabel(), players, isCurrent: true },
   ];
 
   for (const gw of gameweekDatasets) {
-    const path = `/fpl-predictions/gameweek-${gw.event}/`;
+    // Nested under the season (not just a season-prefixed slug, unlike blog posts) since every
+    // one of these pages is inherently season-scoped -- there's no evergreen sibling content
+    // sharing this namespace the way Deep Research posts share /blog/, so a real hierarchy pays
+    // for itself: a future /fpl-predictions/{season}/ index page becomes possible for free.
+    const path = `/fpl-predictions/${gw.season}/gameweek-${gw.event}/`;
     const html = renderPage({
-      title: `Best FPL Players & Predictions for Gameweek ${gw.event}`,
-      description: `PitchMetric's predicted points for gameweek ${gw.event}: top goalkeepers, defenders, midfielders and forwards, from a Poisson model fit on real Premier League results.`,
+      title: `Best FPL Players & Predictions for Gameweek ${gw.event} (${gw.season})`,
+      description: `PitchMetric's predicted points for ${gw.season} gameweek ${gw.event}: top goalkeepers, defenders, midfielders and forwards, from a Poisson model fit on real Premier League results.`,
       path,
       cssHref,
       breadcrumbs: [
         { name: "Home", path: "/" },
         { name: "Predictions", path: "/fpl-predictions" },
-        { name: `Gameweek ${gw.event}`, path },
+        { name: `${gw.season} Gameweek ${gw.event}`, path },
       ],
       bodyHtml: renderGameweekBody(gw.event, gw.players, { isCurrent: gw.isCurrent }),
     });
@@ -550,6 +557,17 @@ async function main() {
   if (existsSync(BLOG_POSTS_PATH)) {
     const posts = JSON.parse(readFileSync(BLOG_POSTS_PATH, "utf-8"));
     console.log(`Found ${posts.length} committed blog post(s).`);
+
+    // Weekly gameweek-surprise posts get their season prefixed onto the URL (derived from the
+    // post's own `published` date, permanent once written -- never recomputed from "today" at a
+    // later build, so an old post's URL can't silently relabel itself after a season rolls
+    // over). "Deep Research" posts are evergreen, not tied to any one gameweek, so their slug is
+    // used as-is. Computed once here and reused by both the index card links and each post's own
+    // page below, so they can never disagree.
+    for (const post of posts) {
+      post.urlSlug =
+        post.type === "deep_research" ? post.slug : `${seasonLabel(new Date(`${post.published}T00:00:00Z`))}-${post.slug}`;
+    }
 
     const blogIndexHtml = renderPage({
       title: "Blog — Fantasy Gameweek Surprises",
@@ -565,7 +583,7 @@ async function main() {
     generatedPaths.push(writePage("/blog/", blogIndexHtml));
 
     for (const post of posts) {
-      const path = `/blog/${post.slug}/`;
+      const path = `/blog/${post.urlSlug}/`;
       const html = renderPage({
         title: post.title,
         description: post.dek,

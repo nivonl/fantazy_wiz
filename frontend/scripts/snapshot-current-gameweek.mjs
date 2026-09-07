@@ -11,6 +11,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { warmUpBackend, fetchJson } from "./lib/fetch-api.mjs";
+import { seasonLabel } from "./lib/season.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const GAMEWEEKS_DIR = join(__dirname, "..", "data", "gameweeks");
@@ -25,9 +26,14 @@ async function main() {
     return;
   }
 
+  // Captured now, at the gameweek's own moment, rather than derived later from "today" at build
+  // time -- once a season rolls over, a later build must not silently relabel an old gameweek's
+  // URL as belonging to the new season just because "now" changed.
+  const snapshot = { ...data, season: seasonLabel() };
+
   mkdirSync(GAMEWEEKS_DIR, { recursive: true });
-  writeFileSync(path, JSON.stringify(data, null, 2), "utf-8");
-  console.log(`Snapshotted gameweek ${data.event} (${data.players.length} players) to ${path}`);
+  writeFileSync(path, JSON.stringify(snapshot, null, 2), "utf-8");
+  console.log(`Snapshotted gameweek ${data.event} (${data.players.length} players, season ${snapshot.season}) to ${path}`);
 }
 
 main().catch((err) => {
