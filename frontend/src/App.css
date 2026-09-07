@@ -844,20 +844,31 @@ ul.flags li {
 .blog-callout p { font-size: 0.87rem; line-height: 1.6; margin: 0 0 10px; }
 .blog-callout p:last-child { margin-bottom: 0; }
 
-/* A later editorial note on an older post (e.g. "the model changed since this was written") --
-   informational, not a caution, so it gets the neutral accent tint rather than blog-callout's
-   warning color. */
-.blog-update-note {
+/* A one-line "this post now reflects a newer model version" indicator -- deliberately a slim
+   pill + inline text, not a paragraph callout: the actual before/after belongs on the specific
+   stat that changed (.blog-stat-revised-old below), not restated in prose above the fold. */
+.blog-model-tag { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 4px 0 18px; font-size: 0.8rem; color: var(--text-dim); }
+.blog-model-pill {
+  display: inline-block;
   background: var(--tint-accent);
-  border: 1px solid var(--panel-border);
-  border-left: 3px solid var(--accent);
-  border-radius: 10px;
-  padding: 14px 18px;
-  margin: 16px 0 20px;
-  font-size: 0.85rem;
-  line-height: 1.6;
+  color: var(--accent);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
 }
-.blog-update-note b { color: var(--accent); }
+.blog-model-pill-unchanged { background: var(--panel-border); color: var(--text-dim); }
+
+/* Inline "v1 -> v2" diff on a single stat, e.g. Predicted or Surprise -- the old value struck
+   through and dimmed, an arrow, then the current value at full weight. Only rendered on the
+   specific players/stats a model update actually moved. */
+.blog-stat-revised-old { color: var(--text-dim); text-decoration: line-through; font-weight: 500; margin-right: 4px; }
+.blog-stat-revised-arrow { color: var(--text-dim); margin: 0 3px; font-weight: 400; }
+.blog-stat-revised-tag { font-size: 0.62rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.03em; margin-top: 2px; }
+
+.blog-rank-was { color: var(--text-dim); font-size: 0.72rem; font-weight: 500; }
 
 /* ---------- Deep Research posts (long-form article body, not a gameweek-surprise recap) ---------- */
 

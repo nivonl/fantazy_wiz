@@ -173,7 +173,10 @@
         "analysis": "Two assists and a clean sheet in a 3-0 win over Spurs, from a midfielder who — like literally everyone else in the league that weekend — had no current-season form behind him yet, so the model priced him at a flat 1.95 points regardless of who he actually was. His 0.33 expected assists is the most encouraging underlying number on this list relative to the actual return — genuine chance creation, not just a stat-line that happened to him. Worth revisiting once he's built up a real run of matches for the model to actually learn from."
       }
     ],
-    "update_note": "<b>Update (added after publishing):</b> We since shipped a change to how the model handles players with little or no track record — it now leans on a player’s price as a stand-in for reputation, transfer fee, and form from a previous club or league, fading out once real current-season form exists to replace it (see the <a href=\"/blog/testing-the-price-and-squad-depth-update\">full write-up and backtest</a>). Gameweek 1 is the one week that update makes <i>zero</i> difference to — every prediction below is exactly what it always was. That’s not an oversight: with literally no player having kicked a ball yet, there’s no population of established players within the season for a price-to-output relationship to be learned from in the first place. See <a href=\"/blog/gameweek-2-fantasy-surprises\">Gameweek 2’s post</a> for where that changes."
+    "model_tag": {
+      "unchanged": true,
+      "html": "&mdash; identical to v1 for this gameweek. There's no current-season data for anyone yet in the season opener, so v2's price-based signal has nothing to work with (<a href=\"/blog/testing-the-price-and-squad-depth-update\">what changed in v2</a>)."
+    }
   },
   {
     "slug": "gameweek-2-fantasy-surprises",
@@ -186,7 +189,7 @@
     "mean_surprise": 1.19,
     "stdev_surprise": 3.52,
     "intro": "Same method as Gameweek 1 — every player below played at least 30 minutes, and is ranked by actual points minus PitchMetric's predicted xP for that fixture. The difference this time is that the model is no longer working from a blank slate: every returning player now has one gameweek of real 2026-27 output behind their goal and assist rates, and it shows in who tops this list and why. See the <a href=\"/methodology\">methodology</a> for exactly how a player's rate is computed from real per-match history rather than an assumption.",
-    "closing": "Compare the underlying expected-goals numbers across this list and two different stories emerge. Bruno Fernandes's 2.02 xG very nearly explains his hat-trick outright — his performance was mostly signal, a genuine chance-quality outburst the model just had no prior data to anticipate. Haaland (0.66 xG for two goals) and Groß (0.05 xG for a goal) leaned much more on finishing than on chance quality — closer to variance than to a repeatable pattern. Rayan Cherki's case is different again: the model actively discounted him (start probability capped at 0.3) for having zero starts to his name after Gameweek 1, which was reasonable caution right up until he played 81 minutes and scored twice. None of that is a flaw exactly — it's what a model honestly built from observed history looks like in only its second week of data.",
+    "closing": "Compare the underlying expected-goals numbers across this list and two different stories emerge. Bruno Fernandes’s 2.02 xG very nearly explains his hat-trick outright — his performance was mostly signal, a genuine chance-quality outburst the model just had no prior data to anticipate. Haaland (0.66 xG for two goals) and Groß (0.05 xG for a goal) leaned much more on finishing than on chance quality — closer to variance than to a repeatable pattern. Rayan Cherki’s case is the odd one out for a different reason: it’s the one entry on this list whose prediction has genuinely moved since we first published it, once the model stopped discarding a substitute appearance’s output outright. None of the rest is a flaw exactly — it’s what a model honestly built from observed history looks like in only its second week of data.",
     "players": [
       {
         "rank": 1,
@@ -318,7 +321,10 @@
           "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
           "source_url": "https://commons.wikimedia.org/wiki/File:Rayan_Cherki_France_v_Norway_26_June_26-114.jpg"
         },
-        "analysis": "Rewind to when this post first went up and the model had him at a bare 0.74 points — the lowest prediction on either week's list at the time. We've since fixed exactly the gap that caused it: the model used to count goals and assists per <i>start</i> only, so a substitute appearance couldn't move a prediction at all, no matter what actually happened in it. Cherki's 2 assists in 27 minutes off the bench in Gameweek 1 were real, meaningful output the old version simply threw away. Weighing by minutes actually played instead pushes his prediction up to 3.56 — still well short of what he actually delivered, but a far more defensible number than treating him as a total unknown. He started this game, played 81 minutes away at Crystal Palace in a match City won 4-1, and scored twice himself. The 0.35 expected goals behind those two finishes says this was more clinical finishing than a string of clear-cut chances — genuinely hard to have called exactly, but no longer starting from a number that ignored evidence the model already had."
+        "analysis": "The model's read on this one moved after we fixed a real gap: it used to count goals and assists per <i>start</i> only, so Cherki's 2 assists in 27 minutes off the bench in Gameweek 1 — real, meaningful output — simply didn't count toward anything, because a substitute appearance wasn't a start. Weighing by minutes actually played instead (v2, above) values that cameo as real evidence, not nothing. He started this game, played 81 minutes away at Crystal Palace in a match City won 4-1, and scored twice himself. The 0.35 expected goals behind those two finishes says this was more clinical finishing than a string of clear-cut chances — genuinely hard to have called exactly, even now.",
+        "v1_predicted_xp": 0.74,
+        "v1_surprise": 13.26,
+        "v1_rank": 2
       },
       {
         "rank": 5,
@@ -354,7 +360,10 @@
         "analysis": "Groß only returned to Brighton in January, back from a spell at Borussia Dortmund, and has quickly become the club's main penalty and set-piece taker — exactly the kind of role that can produce a goal or an assist out of nothing. None of that reached the prediction, though: he'd played the full 90 in Gameweek 1 without a goal or assist, so the model had no personal scoring history to draw on, and its 2.60-point prediction (the highest of this week's five, but driven by Brighton's own fixture rather than anything specific to him) still wasn't close to enough. Brighton conceded four goals away at Chelsea and lost 4-3, but Groß personally returned a goal and an assist worth 13 points on his own. The 0.05 expected goals behind that goal is about as low as the underlying numbers get for an actual finish — the kind of moment a box score just can't explain, whatever it looked like on the pitch."
       }
     ],
-    "update_note": "<b>Update (added after publishing):</b> We've since shipped a change to how the model treats players without much of a current-season track record — <a href=\"/blog/testing-the-price-and-squad-depth-update\">full write-up and backtest</a>. Two things changed: predictions no longer discard a substitute appearance's output just because it wasn't a start (the model weighs by minutes actually played instead), and a separate part of the update blends in a player's price as a stand-in for reputation, transfer fee, or form from a previous club or league once there isn't enough current-season evidence to trust on its own. That second part honestly hasn't had a real chance to matter yet this early in the season — it needs a pool of players with several matches under their belt before it can learn a price-to-output relationship from anyone, and this early on nobody's there yet. Below, Rayan Cherki's prediction has moved from 0.74 to 3.56 points as a direct result of the first change, and his write-up is updated to match. The rest of this list was already using real per-match evidence and is unchanged."
+    "model_tag": {
+      "unchanged": false,
+      "html": "&mdash; 1 of 5 predictions revised from v1 (Rayan Cherki, below) — <a href=\"/blog/testing-the-price-and-squad-depth-update\">what changed in v2</a>."
+    }
   },
   {
     "type": "deep_research",

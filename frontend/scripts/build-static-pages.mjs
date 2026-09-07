@@ -274,20 +274,33 @@ function renderBlogPlayerCard(p, slugById) {
   const slug = p.element_id != null ? slugById.get(String(p.element_id)) : undefined;
   const nameHtml = slug ? `<a href="/fpl/player/${slug}/">${escapeHtml(p.name)}</a>` : escapeHtml(p.name);
 
+  // A model update can move a specific player's numbers after a post already went up -- shown
+  // as an inline "old value struck through -> current value" right on the stat itself
+  // (v1_predicted_xp / v1_surprise / v1_rank in posts.json), not as separate prose restating
+  // what changed. Most players on most posts have none of these fields, so this is a no-op.
+  const predictedHtml = p.v1_predicted_xp != null
+    ? `<span class="blog-stat-revised-old">${p.v1_predicted_xp.toFixed(2)}</span><span class="blog-stat-revised-arrow">&rarr;</span>${p.predicted_xp.toFixed(2)}`
+    : p.predicted_xp.toFixed(2);
+  const surpriseHtml = p.v1_surprise != null
+    ? `<span class="blog-stat-revised-old">${fmtSigned(p.v1_surprise)}</span><span class="blog-stat-revised-arrow">&rarr;</span>${fmtSigned(p.surprise)}`
+    : fmtSigned(p.surprise);
+  const revisedTag = p.v1_predicted_xp != null ? `<div class="blog-stat-revised-tag">v1 &rarr; v2</div>` : "";
+  const rankWasHtml = p.v1_rank != null && p.v1_rank !== p.rank ? ` <span class="blog-rank-was">(was #${p.v1_rank})</span>` : "";
+
   return `
     <div class="blog-player-card">
       <div class="blog-player-photo-wrap">${photoBlock}</div>
       <div class="blog-player-body">
         <div class="blog-player-name-row">
-          <span class="blog-player-rank">#${p.rank}</span>
+          <span class="blog-player-rank">#${p.rank}</span>${rankWasHtml}
           <span class="blog-player-name">${nameHtml}</span>
           <span class="blog-rarity-tag">${rarityLabel(p.percentile)}</span>
         </div>
         <p class="blog-player-meta">${POS_LABEL_LONG[p.position] || p.position} &middot; ${escapeHtml(p.team)} &middot; ${p.value.toFixed(1)}m &middot; ${fixtureLine} &middot; ${p.minutes}&prime;</p>
         <div class="blog-stat-row">
-          <div><div class="blog-stat-label">Predicted</div><div class="blog-stat-value">${p.predicted_xp.toFixed(2)}</div></div>
+          <div><div class="blog-stat-label">Predicted</div><div class="blog-stat-value">${predictedHtml}</div>${revisedTag}</div>
           <div><div class="blog-stat-label">Actual</div><div class="blog-stat-value">${p.actual_points}</div></div>
-          <div><div class="blog-stat-label">Surprise</div><div class="blog-stat-value" style="color:var(--good)">${fmtSigned(p.surprise)}</div></div>
+          <div><div class="blog-stat-label">Surprise</div><div class="blog-stat-value" style="color:var(--good)">${surpriseHtml}</div></div>
           <div><div class="blog-stat-label">Percentile</div><div class="blog-stat-value">${p.percentile.toFixed(1)}</div></div>
         </div>
         <p class="blog-boxscore"><b>Box score:</b> ${boxscoreParts.length ? escapeHtml(boxscoreParts.join(", ")) : "&mdash;"} &middot; xG ${p.expected_goals.toFixed(2)}, xA ${p.expected_assists.toFixed(2)}${
@@ -306,7 +319,7 @@ function renderGameweekSurpriseBody(post, slugById) {
     <p class="blog-post-meta">Gameweek ${post.gameweek} &middot; ${dateLabel}</p>
     <h2>${escapeHtml(post.title)}</h2>
     <p class="blog-dek">${escapeHtml(post.dek)}</p>
-    ${post.update_note ? `<div class="blog-update-note">${post.update_note}</div>` : ""}
+    ${post.model_tag ? `<p class="blog-model-tag"><span class="blog-model-pill${post.model_tag.unchanged ? " blog-model-pill-unchanged" : ""}">Model v2</span> ${post.model_tag.html}</p>` : ""}
     <p class="summary-line">${post.intro}</p>
     <p class="hint">Ranked among ${post.qualifying_player_count} players who played at least ${post.min_minutes} minutes in gameweek ${post.gameweek}, by actual points minus predicted xP. Average surprise across that pool: ${fmtSigned(post.mean_surprise)} (std. dev. ${post.stdev_surprise.toFixed(2)}).</p>
     ${post.players.map((p) => renderBlogPlayerCard(p, slugById)).join("\n")}
