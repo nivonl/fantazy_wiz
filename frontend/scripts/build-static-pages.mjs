@@ -312,20 +312,23 @@ function renderBlogPlayerCard(p, slugById) {
     </div>`;
 }
 
-function renderGameweekSurpriseBody(post, slugById) {
+function renderGameweekSurpriseBody(post, slugById, path) {
   const dateLabel = new Date(post.published + "T00:00:00Z").toLocaleDateString("en-GB", {
     year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
   });
+  const shareBar = renderShareBar(`${SITE_URL}${path}`, post.title);
   return `
     <p class="blog-post-meta">Gameweek ${post.gameweek} &middot; ${dateLabel}</p>
     <h2>${escapeHtml(post.title)}</h2>
     <p class="blog-dek">${escapeHtml(post.dek)}</p>
     ${post.model_tag ? `<p class="blog-model-tag"><span class="blog-model-pill${post.model_tag.unchanged ? " blog-model-pill-unchanged" : ""}">Model v2</span> ${post.model_tag.html}</p>` : ""}
+    ${shareBar}
     <p class="summary-line">${post.intro}</p>
     <p class="hint">Ranked among ${post.qualifying_player_count} players who played at least ${post.min_minutes} minutes in gameweek ${post.gameweek}, by actual points minus predicted xP. Average surprise across that pool: ${fmtSigned(post.mean_surprise)} (std. dev. ${post.stdev_surprise.toFixed(2)}).</p>
     ${post.players.map((p) => renderBlogPlayerCard(p, slugById)).join("\n")}
     <p class="summary-line">${post.closing}</p>
     ${post.model_notes ? `<div class="blog-callout"><p class="blog-callout-heading">Where the model should improve</p>${post.model_notes}</div>` : ""}
+    ${shareBar}
     <p><a href="/blog/">&larr; All posts</a> &middot; <a href="/methodology">How predictions work</a></p>
   `;
 }
@@ -388,24 +391,48 @@ function renderDeepResearchBlock(block) {
   }
 }
 
-function renderDeepResearchBody(post) {
+// Share row -- LinkedIn/Facebook/WhatsApp/Telegram each just need the canonical URL (and title,
+// for the ones that use it) URL-encoded into their own share-intent link; no SDK or app id needed
+// for any of them. Copy-link is the one interactive piece on an otherwise static page -- it's a
+// <button> rather than an <a>, identified by data-copy-url for the shared delegated listener in
+// render-page.mjs's SHARE_SCRIPT (same pattern as the chart tooltips' data-tooltip).
+function renderShareBar(url, title) {
+  const encodedUrl = encodeURIComponent(url);
+  const encodedTitle = encodeURIComponent(title);
+  return `
+    <div class="blog-share-bar">
+      <span class="blog-share-label">Share</span>
+      <a class="blog-share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      <a class="blog-share-btn" href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" target="_blank" rel="noopener noreferrer">Facebook</a>
+      <a class="blog-share-btn" href="https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <a class="blog-share-btn" href="https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}" target="_blank" rel="noopener noreferrer">Telegram</a>
+      <button type="button" class="blog-share-btn" data-copy-url="${escapeHtml(url)}">Copy link</button>
+    </div>`;
+}
+
+function renderDeepResearchBody(post, path) {
   const dateLabel = new Date(post.published + "T00:00:00Z").toLocaleDateString("en-GB", {
     year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
   });
+  const shareBar = renderShareBar(`${SITE_URL}${path}`, post.title);
   return `
     <p class="blog-post-meta"><span class="blog-category-tag">${escapeHtml(post.category)}</span> &middot; ${dateLabel}</p>
     <h2>${escapeHtml(post.title)}</h2>
     <p class="blog-dek">${escapeHtml(post.dek)}</p>
+    ${shareBar}
+    ${post.tldr ? `<div class="blog-tldr"><p class="blog-tldr-label">TL;DR</p><p>${post.tldr}</p></div>` : ""}
+    ${post.keyTakeaways ? `<div class="blog-takeaways"><p class="blog-takeaways-label">Key takeaways</p><ul>${post.keyTakeaways.map((t) => `<li>${t}</li>`).join("")}</ul></div>` : ""}
     <p class="blog-lede">${post.lede}</p>
     <div class="blog-post-body">
       ${post.blocks.map(renderDeepResearchBlock).join("\n")}
     </div>
+    ${shareBar}
     <p><a href="/blog/">&larr; All posts</a> &middot; <a href="/methodology">How predictions work</a></p>
   `;
 }
 
-export function renderBlogPostBody(post, slugById) {
-  return post.type === "deep_research" ? renderDeepResearchBody(post) : renderGameweekSurpriseBody(post, slugById);
+export function renderBlogPostBody(post, slugById, path) {
+  return post.type === "deep_research" ? renderDeepResearchBody(post, path) : renderGameweekSurpriseBody(post, slugById, path);
 }
 
 export function renderBlogIndexBody(posts) {
@@ -612,7 +639,7 @@ async function main() {
             author: { "@type": "Organization", name: "PitchMetric" },
           },
         ],
-        bodyHtml: renderBlogPostBody(post, slugById),
+        bodyHtml: renderBlogPostBody(post, slugById, path),
       });
       generatedPaths.push(writePage(path, html));
     }

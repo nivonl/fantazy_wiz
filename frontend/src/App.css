@@ -886,6 +886,50 @@ ul.flags li {
 
 .blog-lede { font-size: 1rem; line-height: 1.7; margin: 0 0 18px; }
 
+/* TL;DR + key takeaways -- a skimmable summary block sitting between the dek and the full lede,
+   present on every Deep Research post. Teal-tinted (--tint-analytics) rather than the callout's
+   amber, so the two read as different things: a callout is "worth pausing on", this is "the
+   short version of everything below". */
+.blog-tldr, .blog-takeaways {
+  background: var(--tint-analytics);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 0 0 14px;
+}
+.blog-tldr-label, .blog-takeaways-label {
+  margin: 0 0 6px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--analytics);
+}
+.blog-tldr p { margin: 0; font-size: 0.92rem; line-height: 1.6; }
+.blog-takeaways ul { margin: 0; padding-left: 1.15em; }
+.blog-takeaways li { font-size: 0.9rem; line-height: 1.6; margin-bottom: 4px; }
+.blog-takeaways li:last-child { margin-bottom: 0; }
+
+/* Share row -- plain text-label pills (not brand-logo SVGs) to match this site's otherwise
+   icon-light chrome. Appears once above the fold and again after the post body. */
+.blog-share-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 4px 0 18px; }
+.blog-share-label { font-size: 0.78rem; color: var(--text-dim); margin-right: 2px; }
+.blog-share-btn {
+  display: inline-block;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+.blog-share-btn:hover { border-color: var(--analytics); color: var(--analytics); }
+
 .blog-figure {
   margin: 22px 0;
   padding: 0;

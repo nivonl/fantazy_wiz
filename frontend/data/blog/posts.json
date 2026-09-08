@@ -3069,6 +3069,13 @@
         "type": "paragraph",
         "html": "If you want the numbers behind your own squad, head to <a href=\"/fpl-transfer-finder\">Transfer Finder</a> or <a href=\"/fpl-predictions\">Predictions</a> &mdash; both are built on the same &ldquo;trust the underlying output&rdquo; philosophy this research validated."
       }
+    ],
+    "tldr": "We tested three ways to forecast a player's Transfermarkt market value (time-series, momentum, Bayesian updating) plus a blended model, on ~187,000 real valuation snapshots across ~9,000 players. The blended model won, but only for players with real history — and market value turned out to be a weaker fantasy-points signal than a player's own recent output.",
+    "keyTakeaways": [
+      "A blended momentum + Bayesian-updating model beat both of its own ingredients on held-out data, with ~14–15% typical error for players with a rich track record.",
+      "A real bug in our first time-series test made that approach look usable when it wasn't — fixing it cut error by ~13%, which mattered more than any modeling choice.",
+      "For fantasy points specifically, recent on-pitch output predicts better than market value does — price is a lagging, noisier echo of output, not an independent edge.",
+      "FPL's own in-game price barely predicts real transfer value — it's deliberately compressed for game balance, not a fine-grained valuation."
     ]
   },
   {
@@ -3197,6 +3204,12 @@
         "type": "paragraph",
         "html": "Momentum as a short-term recency multiplier didn’t hold up — that doesn’t mean recent form is worthless, only that our first attempt at capturing it wasn’t. A more careful, properly-lagged version of the same idea is worth another look before we write it off entirely. We’re also keeping an eye on whether the price-based estimate’s benefit holds up the same way once a second season of results exists to test it against — one season, however thoroughly tested, is still one season. If you want to see the current model in action, <a href=\"/fpl-predictions\">Predictions</a> and <a href=\"/fpl-transfer-finder\">Transfer Finder</a> are both running on exactly what’s described here — and see <a href=\"/methodology\">Methodology</a> for the plain-language version of how it all fits together."
       }
+    ],
+    "tldr": "We backtested our price-and-squad-depth model update across an entire season, gameweek by gameweek, with players held out entirely to check it wasn't just memorizing. The update helped exactly where designed — players with thin current-season history — and a bundled “momentum” idea didn't survive testing, so we reverted it before it shipped.",
+    "keyTakeaways": [
+      "Season-wide error fell ~3% on average, but that hides the real story: players with zero current-season history saw error drop ~15%, fading to near-zero for established players.",
+      "A short-term momentum adjustment made established players' predictions worse, not better — we pulled it rather than ship something the data argued against.",
+      "Rebuilding the price-based estimate with different players held out each time produced almost the same accuracy as the ordinary fit — evidence it's learning something general, not memorizing specific players."
     ]
   },
   {
@@ -6416,6 +6429,14 @@
         "type": "paragraph",
         "html": "The honest summary: &ldquo;pressing is taking over&rdquo; is a catchier headline than what the last five full seasons of data actually show. Total pressing volume is flat-to-down, not up. Possession still predicts winning better than pressing does, and that gap hasn't closed. What <i>has</i> genuinely changed is more specific and more interesting than the popular version — pressing has gotten more efficient, concentrated closer to the opponent's goal, and spread out across more of the team rather than resting on the forwards alone. See <a href=\"/methodology\">Methodology</a> for how PitchMetric's actual predictions work, and <a href=\"/blog/\">the rest of the blog</a> for our other research posts."
       }
+    ],
+    "tldr": "We tested the “football presses harder every year now” claim with real event data across the top 5 European leagues, 2017/18–2021/22. Total pressing volume is actually flat-to-declining, not rising — but pressing has become more efficient and more concentrated in the attacking third, and “high pressing” turns out to mean very different things for rich teams versus poor ones.",
+    "keyTakeaways": [
+      "Pressure events per 90 minutes fell significantly over five seasons (p=7×10⁻⁸), the opposite of the popular narrative — four of five leagues show their own significant decline.",
+      "Press success rate and the share of pressing happening in the attacking third both rose significantly — pressing got smarter, not more frequent.",
+      "Possession still predicts league points far more strongly than pressing volume does, and that gap widened over the five seasons, not closed.",
+      "Rich, table-topping teams press less overall but higher up the pitch; poor teams press more overall but mostly deep in their own third — two different things both get called “high pressing.”",
+      "Forwards' share of a team's attacking-third pressing fell from 64% to 59% — the high press has become a whole-team job, not a forwards-only one."
     ]
   },
   {
@@ -7223,6 +7244,13 @@
         "type": "paragraph",
         "html": "See our <a href=\"/blog/is-high-pressing-actually-rising/\">first pressing post</a> for the full pressing-volume analysis this one extends, and <a href=\"/methodology\">Methodology</a> for how PitchMetric's actual predictions work — none of the clustering or correlation work here feeds the live model today."
       }
+    ],
+    "tldr": "Following up on reader questions: yes, more recent data exists (through 2024/25), but the core pressing-event stat is confirmed gone for good post-2022 — our attempt to build a substitute failed its own validation test. What we could add instead: real k-means clustering of 96 teams' attacking styles, and a genuine correlation heatmap across nine style metrics and results.",
+    "keyTakeaways": [
+      "A PPDA-style proxy built to extend the pressing trend past 2021/22 failed validation against the real metric (r=−0.07, p=0.11) — reported as a negative result rather than shipped.",
+      "Unsupervised clustering on 18 style features mostly recovered one quality/dominance spectrum, not sharp tactical tribes — the elite cluster it found unprompted matches Europe's actual superclubs almost exactly.",
+      "A second, independent style axis did emerge: crossing/switching-heavy play (Inter, Stuttgart) versus through-ball/carrying combination play (Man City, Bayern) — quality and style aren't the same dimension.",
+      "Across 898 team-seasons, most “sophisticated” attacking metrics are so tightly inter-correlated they're really one factor in disguise — except crossing frequency, which correlates with almost nothing, including winning."
     ]
   }
 ]

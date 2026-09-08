@@ -117,7 +117,7 @@ export function renderPage({ title, description, path, bodyHtml, cssHref, breadc
         </div>
       </main>
     </div>
-    <script>${CHART_TOOLTIP_SCRIPT}</script>
+    <script>${CHART_TOOLTIP_SCRIPT}${SHARE_SCRIPT}</script>
   </body>
 </html>
 `;
@@ -194,5 +194,32 @@ const CHART_TOOLTIP_SCRIPT = `
     },
     { passive: true }
   );
+})();
+`;
+
+// Delegated click handler for any [data-copy-url] button (currently the blog share bar's "Copy
+// link" button -- see build-static-pages.mjs's renderShareBar). navigator.clipboard needs a
+// secure context, which every real deployment of this site is (https); the try/catch falls back
+// to a no-op rather than throwing on an old browser or a local non-https preview.
+const SHARE_SCRIPT = `
+(function () {
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest && e.target.closest("[data-copy-url]");
+    if (!el) return;
+    var url = el.getAttribute("data-copy-url");
+    var reset = function () {
+      el.textContent = el.getAttribute("data-original-label") || "Copy link";
+    };
+    if (!el.getAttribute("data-original-label")) el.setAttribute("data-original-label", el.textContent);
+    function done(ok) {
+      el.textContent = ok ? "Copied!" : "Couldn't copy";
+      setTimeout(reset, 1600);
+    }
+    try {
+      navigator.clipboard.writeText(url).then(function () { done(true); }, function () { done(false); });
+    } catch (err) {
+      done(false);
+    }
+  });
 })();
 `;
