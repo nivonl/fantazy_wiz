@@ -7252,5 +7252,3270 @@
       "A second, independent style axis did emerge: crossing/switching-heavy play (Inter, Stuttgart) versus through-ball/carrying combination play (Man City, Bayern) — quality and style aren't the same dimension.",
       "Across 898 team-seasons, most “sophisticated” attacking metrics are so tightly inter-correlated they're really one factor in disguise — except crossing frequency, which correlates with almost nothing, including winning."
     ]
+  },
+  {
+    "type": "deep_research",
+    "slug": "does-crossing-actually-happen-more-now",
+    "category": "Deep Research",
+    "title": "Has Crossing Actually Gotten More Popular? Testing the Wide-Overlap Narrative With Real Data",
+    "dek": "Overlapping fullbacks, inverted wingers, whipped-in crosses from the byline — wide play gets talked about as football's growth area. We pulled eight seasons of real passing and touch data across the top 5 leagues to check, and caught a data bug along the way that would have quietly wrecked the answer.",
+    "published": "2026-09-08",
+    "tldr": "Crossing volume has not risen — it's declined significantly across the top 5 leagues since 2017/18, and both fullbacks and wingers are recording fewer progressive carries and crosses per 90 than they were seven years ago. We also found no real team-level relationship between how much a team's fullbacks cross and how much its wingers cross, which undercuts the specific “overlapping partnership” story.",
+    "keyTakeaways": [
+      "Team crossing volume fell significantly from 2017/18 to 2024/25 (p<0.001) — the most recent three seasons average meaningfully lower than the first three.",
+      "Fullbacks' progressive carries per 90 fell from 2.31 to 2.04 (p<0.001), and their crossing volume fell too — the opposite of a growing overlap trend.",
+      "Wingers show the same decline in progressive carrying and crossing over the same window, with a partial late recovery in 2023/24.",
+      "A zone-based touch profile confirms the expected pitch hierarchy by role (centre-backs deepest, wingers most advanced) but shows no shift toward wider or more advanced zones over time.",
+      "Across 589 team-seasons, a team's fullback crossing volume doesn't correlate with its winger crossing volume (r=−0.03, not significant) — no sign of a real “fullback overlaps, winger cuts inside” structural signature in the aggregate numbers.",
+      "We caught a real data-quality issue in the newest season before publishing — see the callout below."
+    ],
+    "lede": "“Fullbacks bomb forward, wingers tuck inside, crosses rain into the box” is a specific, testable claim about how the modern game has changed. We had the data to actually check it: passing types, progressive carries, and touch zones for every player in the top 5 leagues, cross-referenced against Transfermarkt's own position labels (which, unlike the raw stats site, distinguish a left-back from a right winger) so we could isolate fullbacks and wingers specifically rather than lumping every defender and attacker together.",
+    "blocks": [
+      {
+        "type": "heading",
+        "text": "Team crossing volume: down, not up"
+      },
+      {
+        "type": "paragraph",
+        "html": "Across all five leagues, crosses attempted per 90 minutes fell from 18.6 in 2017/18 to 17.5 in 2024/25 — a small-looking number that's nonetheless a real, statistically significant decline (slope = −0.17 crosses/90 per season, p = 7×10<sup>−5</sup>, n = 780 team-seasons). Comparing the first three seasons directly against the most recent three makes it concrete: 18.50 crosses/90 then, 17.53 now (p = 4×10<sup>−5</sup>)."
+      },
+      {
+        "type": "chart",
+        "chartType": "line",
+        "series": [
+          {
+            "label": "Crosses attempted per 90 (all 5 leagues)",
+            "color": "var(--analytics)",
+            "points": [
+              {
+                "x": "2017-18",
+                "y": 18.62
+              },
+              {
+                "x": "2018-19",
+                "y": 18.28
+              },
+              {
+                "x": "2019-20",
+                "y": 18.61
+              },
+              {
+                "x": "2020-21",
+                "y": 17.99
+              },
+              {
+                "x": "2021-22",
+                "y": 17.6
+              },
+              {
+                "x": "2022-23",
+                "y": 17.33
+              },
+              {
+                "x": "2023-24",
+                "y": 17.72
+              },
+              {
+                "x": "2024-25",
+                "y": 17.54
+              }
+            ]
+          }
+        ],
+        "yLabel": "crosses / 90",
+        "yMin": 0,
+        "caption": "League-average crosses attempted per 90, all five top leagues pooled, 2017/18–2024/25 (n=780 team-seasons). Three of five leagues (Ligue 1, Premier League, Serie A) show their own significant decline individually; Bundesliga and La Liga are flat."
+      },
+      {
+        "type": "paragraph",
+        "html": "Crosses specifically aimed into the penalty area (the more dangerous, creative subset) show no significant trend either way (p = 0.56) — so it's not that teams are crossing less overall but aiming better. Total crossing volume is simply down."
+      },
+      {
+        "type": "callout",
+        "heading": "A data problem we caught before publishing",
+        "html": "<p>Our first pass at the fullback/winger numbers below showed an alarming result: a sudden ~4x jump in crosses-into-the-box per 90 for both positions in the most recent season, and a positive fullback–winger correlation that vanished the moment we investigated. Digging in, the newest season's player rows paired very small minutes-played totals (as low as 5–8 matches' worth) with counting stats that looked like they belonged to players with 3–4x that playing time — a mismatch between how far along two different stat tables were when our source's snapshot was taken, not a real football signal. We raised our minutes threshold from 450 to 900 minutes (10 full matches) for the player-level analysis below, which fully resolved it — and which meant dropping the newest season (2024/25) from the fullback/winger breakdown entirely, since almost nothing survived that bar there. The team-level crossing trend above doesn't have this problem and keeps all eight seasons.</p>"
+      },
+      {
+        "type": "heading",
+        "text": "Fullbacks: progressing and crossing less, not more"
+      },
+      {
+        "type": "paragraph",
+        "html": "Isolating fullbacks specifically (Transfermarkt's Left-Back/Right-Back tags, matched to FBref's per-player stats by player ID, 2017/18–2023/24 after the data-quality fix above): progressive carries per 90 fell from 2.31 to 2.04 (slope = −0.058/season, p < 0.001), and crossing volume fell alongside it (slope = −0.056/season, p = 0.004). Comparing 2018–20 against 2022–24 directly: progressive carries down from 2.36 to 2.10 (p = 8×10<sup>−8</sup>)."
+      },
+      {
+        "type": "chart",
+        "chartType": "line",
+        "series": [
+          {
+            "label": "Fullbacks",
+            "color": "var(--analytics)",
+            "points": [
+              {
+                "x": "2017-18",
+                "y": 2.309
+              },
+              {
+                "x": "2018-19",
+                "y": 2.391
+              },
+              {
+                "x": "2019-20",
+                "y": 2.388
+              },
+              {
+                "x": "2020-21",
+                "y": 2.135
+              },
+              {
+                "x": "2021-22",
+                "y": 2.139
+              },
+              {
+                "x": "2022-23",
+                "y": 2.112
+              },
+              {
+                "x": "2023-24",
+                "y": 2.04
+              }
+            ]
+          },
+          {
+            "label": "Wingers",
+            "color": "var(--accent)",
+            "points": [
+              {
+                "x": "2017-18",
+                "y": 3.761
+              },
+              {
+                "x": "2018-19",
+                "y": 3.71
+              },
+              {
+                "x": "2019-20",
+                "y": 3.786
+              },
+              {
+                "x": "2020-21",
+                "y": 3.232
+              },
+              {
+                "x": "2021-22",
+                "y": 3.159
+              },
+              {
+                "x": "2022-23",
+                "y": 3.276
+              },
+              {
+                "x": "2023-24",
+                "y": 3.543
+              }
+            ]
+          }
+        ],
+        "yLabel": "progressive carries / 90",
+        "yMin": 0,
+        "caption": "Progressive carries per 90 for fullbacks and wingers (Transfermarkt position tags matched to FBref per-player stats, min. 900 minutes played, 2017/18–2023/24). Both positions decline significantly over the window, with wingers partially recovering in the final season shown."
+      },
+      {
+        "type": "paragraph",
+        "html": "Wingers show an almost identical shape: progressive carries down from 3.76 to 3.28 across the same first-three-vs-last-three comparison (p = 9×10<sup>−7</sup>), crossing volume down too (p = 0.05, right at the edge of significance). If a wide-overlap revolution were genuinely intensifying, both of these lines should point up. They point down."
+      },
+      {
+        "type": "heading",
+        "text": "Where each position actually touches the ball"
+      },
+      {
+        "type": "paragraph",
+        "html": "A genuine pitch heatmap needs raw x/y event coordinates we don't have access to — same limitation as our pressing research. What we do have is each position's share of touches by pitch third, which gives an honest zone-based proxy for how advanced each role's average position really is."
+      },
+      {
+        "type": "chart",
+        "chartType": "stacked_hbar",
+        "data": [
+          {
+            "label": "Winger",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 12.73,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 38.82,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 48.46,
+                "color": "var(--good)"
+              }
+            ]
+          },
+          {
+            "label": "Wide midfield",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 19.31,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 40.87,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 39.82,
+                "color": "var(--good)"
+              }
+            ]
+          },
+          {
+            "label": "Fullback",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 29.52,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 44.6,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 25.89,
+                "color": "var(--good)"
+              }
+            ]
+          },
+          {
+            "label": "Centre-back",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 46.31,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 47.49,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 6.2,
+                "color": "var(--good)"
+              }
+            ]
+          }
+        ],
+        "segmentLabels": [
+          {
+            "name": "Defensive third",
+            "color": "var(--bad)"
+          },
+          {
+            "name": "Middle third",
+            "color": "var(--accent)"
+          },
+          {
+            "name": "Attacking third",
+            "color": "var(--good)"
+          }
+        ],
+        "caption": "Share of touches by pitch third, 2023/24 (the most recent season with reliable player-level data — see the callout above). The hierarchy is exactly what you'd expect — winger most advanced, centre-back least — and fullbacks sit roughly a quarter of their touches into the attacking third, a meaningful step up from centre-backs but well short of a true wide attacker."
+      },
+      {
+        "type": "heading",
+        "text": "Is there a real fullback–winger “overlap” signature in the numbers?"
+      },
+      {
+        "type": "paragraph",
+        "html": "The classic wide-overlap picture has a fullback and a winger on the same flank both contributing to crossing — one underlapping or overlapping the other. If that's a real, common structural choice, teams whose fullbacks cross a lot should tend to also have wingers who cross a lot (both committed to the same wide-combination approach), or possibly the reverse (one crosses instead of the other, trading off). We tested it directly: for each team-season, average fullback crossing volume against average winger crossing volume."
+      },
+      {
+        "type": "chart",
+        "chartType": "scatter",
+        "data": [
+          {
+            "x": 2.86,
+            "y": 3.75,
+            "label": "Bayern Munich 2017-18"
+          },
+          {
+            "x": 2.14,
+            "y": 3.65,
+            "label": "Dortmund 2017-18"
+          },
+          {
+            "x": 4.03,
+            "y": 2.96,
+            "label": "Eint Frankfurt 2017-18"
+          },
+          {
+            "x": 2.95,
+            "y": 2.46,
+            "label": "Hamburger SV 2017-18"
+          },
+          {
+            "x": 2.28,
+            "y": 2.11,
+            "label": "Hannover 96 2017-18"
+          },
+          {
+            "x": 3.81,
+            "y": 1.01,
+            "label": "Hertha BSC 2017-18"
+          },
+          {
+            "x": 3.79,
+            "y": 1.62,
+            "label": "Hoffenheim 2017-18"
+          },
+          {
+            "x": 2.72,
+            "y": 6.19,
+            "label": "Leverkusen 2017-18"
+          },
+          {
+            "x": 3.15,
+            "y": 3.54,
+            "label": "M'Gladbach 2017-18"
+          },
+          {
+            "x": 4.43,
+            "y": 2.79,
+            "label": "Mainz 05 2017-18"
+          },
+          {
+            "x": 1.74,
+            "y": 3.76,
+            "label": "RB Leipzig 2017-18"
+          },
+          {
+            "x": 6.36,
+            "y": 5.67,
+            "label": "Schalke 04 2017-18"
+          },
+          {
+            "x": 1.74,
+            "y": 1.15,
+            "label": "Stuttgart 2017-18"
+          },
+          {
+            "x": 2.17,
+            "y": 3.57,
+            "label": "Werder Bremen 2017-18"
+          },
+          {
+            "x": 2.52,
+            "y": 3.42,
+            "label": "Alavés 2017-18"
+          },
+          {
+            "x": 2.85,
+            "y": 5.22,
+            "label": "Athletic Club 2017-18"
+          },
+          {
+            "x": 3.04,
+            "y": 2.4,
+            "label": "Atlético Madrid 2017-18"
+          },
+          {
+            "x": 1.21,
+            "y": 3.16,
+            "label": "Barcelona 2017-18"
+          },
+          {
+            "x": 2.69,
+            "y": 2.29,
+            "label": "Betis 2017-18"
+          },
+          {
+            "x": 1.73,
+            "y": 2.54,
+            "label": "Celta Vigo 2017-18"
+          },
+          {
+            "x": 5.73,
+            "y": 7.12,
+            "label": "Eibar 2017-18"
+          },
+          {
+            "x": 4.1,
+            "y": 7.51,
+            "label": "Espanyol 2017-18"
+          },
+          {
+            "x": 3.88,
+            "y": 0.86,
+            "label": "Getafe 2017-18"
+          },
+          {
+            "x": 5.53,
+            "y": 2.16,
+            "label": "Girona 2017-18"
+          },
+          {
+            "x": 2.93,
+            "y": 3.38,
+            "label": "La Coruña 2017-18"
+          },
+          {
+            "x": 4.19,
+            "y": 3.67,
+            "label": "Leganés 2017-18"
+          },
+          {
+            "x": 2.87,
+            "y": 4.17,
+            "label": "Levante 2017-18"
+          },
+          {
+            "x": 3.72,
+            "y": 4.43,
+            "label": "Málaga 2017-18"
+          },
+          {
+            "x": 4.22,
+            "y": 4.26,
+            "label": "Real Madrid 2017-18"
+          },
+          {
+            "x": 4.23,
+            "y": 2.14,
+            "label": "Real Sociedad 2017-18"
+          },
+          {
+            "x": 3.46,
+            "y": 2.88,
+            "label": "Sevilla 2017-18"
+          },
+          {
+            "x": 2.52,
+            "y": 1.92,
+            "label": "Valencia 2017-18"
+          },
+          {
+            "x": 2.07,
+            "y": 3.2,
+            "label": "Villarreal 2017-18"
+          },
+          {
+            "x": 1.91,
+            "y": 2.25,
+            "label": "Amiens 2017-18"
+          },
+          {
+            "x": 2.17,
+            "y": 1.15,
+            "label": "Angers 2017-18"
+          },
+          {
+            "x": 4.13,
+            "y": 4.32,
+            "label": "Bordeaux 2017-18"
+          },
+          {
+            "x": 5.13,
+            "y": 2.22,
+            "label": "Caen 2017-18"
+          },
+          {
+            "x": 2.28,
+            "y": 3,
+            "label": "Dijon 2017-18"
+          },
+          {
+            "x": 3.11,
+            "y": 4.6,
+            "label": "Guingamp 2017-18"
+          },
+          {
+            "x": 2.62,
+            "y": 3.51,
+            "label": "Lille 2017-18"
+          },
+          {
+            "x": 2.66,
+            "y": 2.01,
+            "label": "Lyon 2017-18"
+          },
+          {
+            "x": 2.77,
+            "y": 3.67,
+            "label": "Marseille 2017-18"
+          },
+          {
+            "x": 2.16,
+            "y": 4.92,
+            "label": "Metz 2017-18"
+          },
+          {
+            "x": 2.65,
+            "y": 3.49,
+            "label": "Monaco 2017-18"
+          },
+          {
+            "x": 4.32,
+            "y": 2.5,
+            "label": "Montpellier 2017-18"
+          },
+          {
+            "x": 1.8,
+            "y": 2.8,
+            "label": "Nice 2017-18"
+          },
+          {
+            "x": 3.4,
+            "y": 4.32,
+            "label": "Paris S-G 2017-18"
+          },
+          {
+            "x": 2.1,
+            "y": 1.7,
+            "label": "Rennes 2017-18"
+          },
+          {
+            "x": 2.59,
+            "y": 2.61,
+            "label": "Saint-Étienne 2017-18"
+          },
+          {
+            "x": 2.04,
+            "y": 1.13,
+            "label": "Strasbourg 2017-18"
+          },
+          {
+            "x": 2.09,
+            "y": 6.87,
+            "label": "Toulouse 2017-18"
+          },
+          {
+            "x": 1.87,
+            "y": 2.87,
+            "label": "Troyes 2017-18"
+          },
+          {
+            "x": 1.63,
+            "y": 2.11,
+            "label": "Arsenal 2017-18"
+          },
+          {
+            "x": 2.43,
+            "y": 4.75,
+            "label": "Bournemouth 2017-18"
+          },
+          {
+            "x": 2.42,
+            "y": 2.34,
+            "label": "Brighton 2017-18"
+          },
+          {
+            "x": 2.44,
+            "y": 4.51,
+            "label": "Burnley 2017-18"
+          },
+          {
+            "x": 4.03,
+            "y": 3.11,
+            "label": "Chelsea 2017-18"
+          },
+          {
+            "x": 1.57,
+            "y": 3.88,
+            "label": "Crystal Palace 2017-18"
+          },
+          {
+            "x": 2.7,
+            "y": 3.52,
+            "label": "Everton 2017-18"
+          },
+          {
+            "x": 4.04,
+            "y": 2.86,
+            "label": "Huddersfield 2017-18"
+          },
+          {
+            "x": 2.77,
+            "y": 4.68,
+            "label": "Leicester City 2017-18"
+          },
+          {
+            "x": 4.51,
+            "y": 2.9,
+            "label": "Liverpool 2017-18"
+          },
+          {
+            "x": 1.71,
+            "y": 2.41,
+            "label": "Manchester City 2017-18"
+          },
+          {
+            "x": 3.53,
+            "y": 3.87,
+            "label": "Manchester Utd 2017-18"
+          },
+          {
+            "x": 2.79,
+            "y": 3,
+            "label": "Newcastle Utd 2017-18"
+          },
+          {
+            "x": 4.16,
+            "y": 3.35,
+            "label": "Southampton 2017-18"
+          },
+          {
+            "x": 2.4,
+            "y": 3.55,
+            "label": "Stoke City 2017-18"
+          },
+          {
+            "x": 3.25,
+            "y": 1.52,
+            "label": "Swansea City 2017-18"
+          },
+          {
+            "x": 5.26,
+            "y": 1.98,
+            "label": "Tottenham 2017-18"
+          },
+          {
+            "x": 4.85,
+            "y": 3.16,
+            "label": "Watford 2017-18"
+          },
+          {
+            "x": 2.89,
+            "y": 7.04,
+            "label": "West Brom 2017-18"
+          },
+          {
+            "x": 2.91,
+            "y": 2.61,
+            "label": "Benevento 2017-18"
+          },
+          {
+            "x": 1.11,
+            "y": 2.2,
+            "label": "Bologna 2017-18"
+          },
+          {
+            "x": 4.4,
+            "y": 1.96,
+            "label": "Cagliari 2017-18"
+          },
+          {
+            "x": 3.39,
+            "y": 3.88,
+            "label": "Crotone 2017-18"
+          },
+          {
+            "x": 3.9,
+            "y": 3.28,
+            "label": "Fiorentina 2017-18"
+          },
+          {
+            "x": 3.06,
+            "y": 4.97,
+            "label": "Juventus 2017-18"
+          },
+          {
+            "x": 4.17,
+            "y": 5.74,
+            "label": "Lazio 2017-18"
+          },
+          {
+            "x": 3.65,
+            "y": 5.14,
+            "label": "Milan 2017-18"
+          },
+          {
+            "x": 4.07,
+            "y": 3.91,
+            "label": "Napoli 2017-18"
+          },
+          {
+            "x": 6.21,
+            "y": 4.19,
+            "label": "Roma 2017-18"
+          },
+          {
+            "x": 2.76,
+            "y": 5.29,
+            "label": "Sassuolo 2017-18"
+          },
+          {
+            "x": 2.71,
+            "y": 3.99,
+            "label": "Torino 2017-18"
+          },
+          {
+            "x": 4.86,
+            "y": 2.84,
+            "label": "Augsburg 2018-19"
+          },
+          {
+            "x": 1.4,
+            "y": 2.46,
+            "label": "Bayern Munich 2018-19"
+          },
+          {
+            "x": 2.68,
+            "y": 2.97,
+            "label": "Dortmund 2018-19"
+          },
+          {
+            "x": 2.62,
+            "y": 1.87,
+            "label": "Düsseldorf 2018-19"
+          },
+          {
+            "x": 3.44,
+            "y": 1.95,
+            "label": "Eint Frankfurt 2018-19"
+          },
+          {
+            "x": 3.17,
+            "y": 4.09,
+            "label": "Freiburg 2018-19"
+          },
+          {
+            "x": 2.1,
+            "y": 1.66,
+            "label": "Hannover 96 2018-19"
+          },
+          {
+            "x": 4.52,
+            "y": 1.78,
+            "label": "Hertha BSC 2018-19"
+          },
+          {
+            "x": 2.52,
+            "y": 6.52,
+            "label": "Leverkusen 2018-19"
+          },
+          {
+            "x": 2.42,
+            "y": 3.73,
+            "label": "M'Gladbach 2018-19"
+          },
+          {
+            "x": 4.36,
+            "y": 2.32,
+            "label": "Nürnberg 2018-19"
+          },
+          {
+            "x": 3.96,
+            "y": 3.53,
+            "label": "RB Leipzig 2018-19"
+          },
+          {
+            "x": 5.82,
+            "y": 5.85,
+            "label": "Schalke 04 2018-19"
+          },
+          {
+            "x": 1.21,
+            "y": 3.02,
+            "label": "Stuttgart 2018-19"
+          },
+          {
+            "x": 2.54,
+            "y": 6.69,
+            "label": "Werder Bremen 2018-19"
+          },
+          {
+            "x": 3.91,
+            "y": 2.68,
+            "label": "Wolfsburg 2018-19"
+          },
+          {
+            "x": 2,
+            "y": 6.33,
+            "label": "Alavés 2018-19"
+          },
+          {
+            "x": 2.86,
+            "y": 3.79,
+            "label": "Athletic Club 2018-19"
+          },
+          {
+            "x": 1.26,
+            "y": 3.07,
+            "label": "Barcelona 2018-19"
+          },
+          {
+            "x": 2.97,
+            "y": 3.7,
+            "label": "Betis 2018-19"
+          },
+          {
+            "x": 3.3,
+            "y": 3.36,
+            "label": "Celta Vigo 2018-19"
+          },
+          {
+            "x": 5.92,
+            "y": 3.65,
+            "label": "Eibar 2018-19"
+          },
+          {
+            "x": 2.67,
+            "y": 0.67,
+            "label": "Espanyol 2018-19"
+          },
+          {
+            "x": 3.49,
+            "y": 1.4,
+            "label": "Getafe 2018-19"
+          },
+          {
+            "x": 5.04,
+            "y": 2.3,
+            "label": "Girona 2018-19"
+          },
+          {
+            "x": 2.6,
+            "y": 5.79,
+            "label": "Huesca 2018-19"
+          },
+          {
+            "x": 4.79,
+            "y": 3.55,
+            "label": "Leganés 2018-19"
+          },
+          {
+            "x": 2.8,
+            "y": 3.44,
+            "label": "Levante 2018-19"
+          },
+          {
+            "x": 2.08,
+            "y": 6.71,
+            "label": "Rayo Vallecano 2018-19"
+          },
+          {
+            "x": 3.18,
+            "y": 3.74,
+            "label": "Real Madrid 2018-19"
+          },
+          {
+            "x": 2.78,
+            "y": 3.56,
+            "label": "Real Sociedad 2018-19"
+          },
+          {
+            "x": 4.44,
+            "y": 4.75,
+            "label": "Sevilla 2018-19"
+          },
+          {
+            "x": 2.35,
+            "y": 4.1,
+            "label": "Valencia 2018-19"
+          },
+          {
+            "x": 3.39,
+            "y": 3.41,
+            "label": "Valladolid 2018-19"
+          },
+          {
+            "x": 2.81,
+            "y": 1.28,
+            "label": "Villarreal 2018-19"
+          },
+          {
+            "x": 2.12,
+            "y": 3.11,
+            "label": "Amiens 2018-19"
+          },
+          {
+            "x": 3.23,
+            "y": 4.28,
+            "label": "Bordeaux 2018-19"
+          },
+          {
+            "x": 2.65,
+            "y": 1.9,
+            "label": "Caen 2018-19"
+          },
+          {
+            "x": 2.64,
+            "y": 3.7,
+            "label": "Dijon 2018-19"
+          },
+          {
+            "x": 4.43,
+            "y": 4.85,
+            "label": "Guingamp 2018-19"
+          },
+          {
+            "x": 2.6,
+            "y": 1.28,
+            "label": "Lille 2018-19"
+          },
+          {
+            "x": 3.72,
+            "y": 1.97,
+            "label": "Lyon 2018-19"
+          },
+          {
+            "x": 2.99,
+            "y": 3.32,
+            "label": "Marseille 2018-19"
+          },
+          {
+            "x": 3.29,
+            "y": 5.44,
+            "label": "Monaco 2018-19"
+          },
+          {
+            "x": 3.91,
+            "y": 3.07,
+            "label": "Nantes 2018-19"
+          },
+          {
+            "x": 2.23,
+            "y": 1.6,
+            "label": "Nice 2018-19"
+          },
+          {
+            "x": 1.73,
+            "y": 2.37,
+            "label": "Nîmes 2018-19"
+          },
+          {
+            "x": 2.41,
+            "y": 3.31,
+            "label": "Paris S-G 2018-19"
+          },
+          {
+            "x": 1.93,
+            "y": 2.02,
+            "label": "Reims 2018-19"
+          },
+          {
+            "x": 1.95,
+            "y": 2.82,
+            "label": "Rennes 2018-19"
+          },
+          {
+            "x": 3.31,
+            "y": 2.11,
+            "label": "Saint-Étienne 2018-19"
+          },
+          {
+            "x": 1.58,
+            "y": 5.03,
+            "label": "Toulouse 2018-19"
+          },
+          {
+            "x": 2.24,
+            "y": 2.6,
+            "label": "Arsenal 2018-19"
+          },
+          {
+            "x": 1.56,
+            "y": 4.08,
+            "label": "Bournemouth 2018-19"
+          },
+          {
+            "x": 1.82,
+            "y": 3.64,
+            "label": "Brighton 2018-19"
+          },
+          {
+            "x": 2.76,
+            "y": 4.81,
+            "label": "Burnley 2018-19"
+          },
+          {
+            "x": 0.91,
+            "y": 2.52,
+            "label": "Cardiff City 2018-19"
+          },
+          {
+            "x": 3.16,
+            "y": 4.93,
+            "label": "Chelsea 2018-19"
+          },
+          {
+            "x": 0.98,
+            "y": 2.96,
+            "label": "Crystal Palace 2018-19"
+          },
+          {
+            "x": 5.68,
+            "y": 2.21,
+            "label": "Everton 2018-19"
+          },
+          {
+            "x": 3.01,
+            "y": 2.49,
+            "label": "Fulham 2018-19"
+          },
+          {
+            "x": 3.82,
+            "y": 3.09,
+            "label": "Huddersfield 2018-19"
+          },
+          {
+            "x": 3.33,
+            "y": 2.35,
+            "label": "Leicester City 2018-19"
+          },
+          {
+            "x": 5.56,
+            "y": 2.23,
+            "label": "Liverpool 2018-19"
+          },
+          {
+            "x": 3.35,
+            "y": 4.02,
+            "label": "Manchester City 2018-19"
+          },
+          {
+            "x": 4.38,
+            "y": 2.12,
+            "label": "Manchester Utd 2018-19"
+          },
+          {
+            "x": 3.63,
+            "y": 2.53,
+            "label": "Newcastle Utd 2018-19"
+          },
+          {
+            "x": 4.11,
+            "y": 2.09,
+            "label": "Southampton 2018-19"
+          },
+          {
+            "x": 4.62,
+            "y": 1.5,
+            "label": "Tottenham 2018-19"
+          },
+          {
+            "x": 2.46,
+            "y": 5.25,
+            "label": "West Ham 2018-19"
+          },
+          {
+            "x": 1.64,
+            "y": 2.74,
+            "label": "Wolves 2018-19"
+          },
+          {
+            "x": 2.61,
+            "y": 3.87,
+            "label": "Bologna 2018-19"
+          },
+          {
+            "x": 4.09,
+            "y": 2.63,
+            "label": "Chievo 2018-19"
+          },
+          {
+            "x": 4.95,
+            "y": 1.2,
+            "label": "Empoli 2018-19"
+          },
+          {
+            "x": 5.74,
+            "y": 3.5,
+            "label": "Fiorentina 2018-19"
+          },
+          {
+            "x": 5.08,
+            "y": 1.12,
+            "label": "Frosinone 2018-19"
+          },
+          {
+            "x": 3.84,
+            "y": 5.06,
+            "label": "Juventus 2018-19"
+          },
+          {
+            "x": 2.39,
+            "y": 4.31,
+            "label": "Milan 2018-19"
+          },
+          {
+            "x": 5.1,
+            "y": 3.93,
+            "label": "Napoli 2018-19"
+          },
+          {
+            "x": 1.79,
+            "y": 1.79,
+            "label": "Parma 2018-19"
+          },
+          {
+            "x": 4.6,
+            "y": 3.4,
+            "label": "Roma 2018-19"
+          },
+          {
+            "x": 3.71,
+            "y": 2.15,
+            "label": "Sassuolo 2018-19"
+          },
+          {
+            "x": 4.72,
+            "y": 5.16,
+            "label": "Torino 2018-19"
+          },
+          {
+            "x": 1.63,
+            "y": 2.31,
+            "label": "Udinese 2018-19"
+          },
+          {
+            "x": 3.65,
+            "y": 1.55,
+            "label": "Augsburg 2019-20"
+          },
+          {
+            "x": 2.47,
+            "y": 3.32,
+            "label": "Bayern Munich 2019-20"
+          },
+          {
+            "x": 2.31,
+            "y": 3.66,
+            "label": "Dortmund 2019-20"
+          },
+          {
+            "x": 5.65,
+            "y": 4.43,
+            "label": "Freiburg 2019-20"
+          },
+          {
+            "x": 3.68,
+            "y": 2.41,
+            "label": "Hertha BSC 2019-20"
+          },
+          {
+            "x": 4.11,
+            "y": 5.17,
+            "label": "Hoffenheim 2019-20"
+          },
+          {
+            "x": 2.37,
+            "y": 9.83,
+            "label": "Köln 2019-20"
+          },
+          {
+            "x": 1.81,
+            "y": 5.94,
+            "label": "Leverkusen 2019-20"
+          },
+          {
+            "x": 3.09,
+            "y": 4.03,
+            "label": "M'Gladbach 2019-20"
+          },
+          {
+            "x": 2.07,
+            "y": 4.6,
+            "label": "Paderborn 07 2019-20"
+          },
+          {
+            "x": 3.39,
+            "y": 1.89,
+            "label": "RB Leipzig 2019-20"
+          },
+          {
+            "x": 3.17,
+            "y": 2.76,
+            "label": "Schalke 04 2019-20"
+          },
+          {
+            "x": 3.45,
+            "y": 5.2,
+            "label": "Werder Bremen 2019-20"
+          },
+          {
+            "x": 3.64,
+            "y": 2.56,
+            "label": "Wolfsburg 2019-20"
+          },
+          {
+            "x": 2.26,
+            "y": 3.13,
+            "label": "Alavés 2019-20"
+          },
+          {
+            "x": 3.24,
+            "y": 2.28,
+            "label": "Athletic Club 2019-20"
+          },
+          {
+            "x": 3.73,
+            "y": 0.51,
+            "label": "Atlético Madrid 2019-20"
+          },
+          {
+            "x": 1.44,
+            "y": 2.7,
+            "label": "Barcelona 2019-20"
+          },
+          {
+            "x": 2.74,
+            "y": 4.24,
+            "label": "Betis 2019-20"
+          },
+          {
+            "x": 3.71,
+            "y": 2.62,
+            "label": "Celta Vigo 2019-20"
+          },
+          {
+            "x": 4.5,
+            "y": 5.19,
+            "label": "Eibar 2019-20"
+          },
+          {
+            "x": 2.84,
+            "y": 3.28,
+            "label": "Espanyol 2019-20"
+          },
+          {
+            "x": 3.68,
+            "y": 6.72,
+            "label": "Getafe 2019-20"
+          },
+          {
+            "x": 2.82,
+            "y": 4.85,
+            "label": "Granada 2019-20"
+          },
+          {
+            "x": 4.93,
+            "y": 2.13,
+            "label": "Leganés 2019-20"
+          },
+          {
+            "x": 2.8,
+            "y": 3.32,
+            "label": "Levante 2019-20"
+          },
+          {
+            "x": 3.83,
+            "y": 2.75,
+            "label": "Mallorca 2019-20"
+          },
+          {
+            "x": 2.69,
+            "y": 5.97,
+            "label": "Osasuna 2019-20"
+          },
+          {
+            "x": 3.63,
+            "y": 2.66,
+            "label": "Real Madrid 2019-20"
+          },
+          {
+            "x": 3.19,
+            "y": 4.01,
+            "label": "Real Sociedad 2019-20"
+          },
+          {
+            "x": 4.89,
+            "y": 2.16,
+            "label": "Sevilla 2019-20"
+          },
+          {
+            "x": 2.73,
+            "y": 3.19,
+            "label": "Valencia 2019-20"
+          },
+          {
+            "x": 3.32,
+            "y": 3.71,
+            "label": "Valladolid 2019-20"
+          },
+          {
+            "x": 2.86,
+            "y": 1.63,
+            "label": "Villarreal 2019-20"
+          },
+          {
+            "x": 1.85,
+            "y": 2.33,
+            "label": "Amiens 2019-20"
+          },
+          {
+            "x": 2.47,
+            "y": 3.1,
+            "label": "Angers 2019-20"
+          },
+          {
+            "x": 2.54,
+            "y": 1.99,
+            "label": "Bordeaux 2019-20"
+          },
+          {
+            "x": 3.4,
+            "y": 3.55,
+            "label": "Brest 2019-20"
+          },
+          {
+            "x": 2.61,
+            "y": 2.55,
+            "label": "Dijon 2019-20"
+          },
+          {
+            "x": 3.81,
+            "y": 1.64,
+            "label": "Lille 2019-20"
+          },
+          {
+            "x": 3.98,
+            "y": 4.18,
+            "label": "Lyon 2019-20"
+          },
+          {
+            "x": 3.45,
+            "y": 0.59,
+            "label": "Metz 2019-20"
+          },
+          {
+            "x": 3.51,
+            "y": 3.44,
+            "label": "Monaco 2019-20"
+          },
+          {
+            "x": 1.75,
+            "y": 3.15,
+            "label": "Nantes 2019-20"
+          },
+          {
+            "x": 2.11,
+            "y": 4.24,
+            "label": "Nice 2019-20"
+          },
+          {
+            "x": 2.77,
+            "y": 5.25,
+            "label": "Paris S-G 2019-20"
+          },
+          {
+            "x": 2.67,
+            "y": 2.56,
+            "label": "Reims 2019-20"
+          },
+          {
+            "x": 2.64,
+            "y": 3.34,
+            "label": "Rennes 2019-20"
+          },
+          {
+            "x": 2.39,
+            "y": 2.93,
+            "label": "Saint-Étienne 2019-20"
+          },
+          {
+            "x": 2.07,
+            "y": 5.35,
+            "label": "Toulouse 2019-20"
+          },
+          {
+            "x": 2.54,
+            "y": 4.89,
+            "label": "Arsenal 2019-20"
+          },
+          {
+            "x": 3.24,
+            "y": 3.9,
+            "label": "Aston Villa 2019-20"
+          },
+          {
+            "x": 2.87,
+            "y": 4.74,
+            "label": "Bournemouth 2019-20"
+          },
+          {
+            "x": 2.09,
+            "y": 3.36,
+            "label": "Brighton 2019-20"
+          },
+          {
+            "x": 2.56,
+            "y": 6.93,
+            "label": "Burnley 2019-20"
+          },
+          {
+            "x": 4.69,
+            "y": 3.93,
+            "label": "Chelsea 2019-20"
+          },
+          {
+            "x": 1.94,
+            "y": 3.26,
+            "label": "Crystal Palace 2019-20"
+          },
+          {
+            "x": 4.49,
+            "y": 2.73,
+            "label": "Everton 2019-20"
+          },
+          {
+            "x": 8.45,
+            "y": 1.51,
+            "label": "Liverpool 2019-20"
+          },
+          {
+            "x": 3.6,
+            "y": 2.87,
+            "label": "Manchester City 2019-20"
+          },
+          {
+            "x": 2.98,
+            "y": 1.86,
+            "label": "Manchester Utd 2019-20"
+          },
+          {
+            "x": 2.8,
+            "y": 2.17,
+            "label": "Newcastle Utd 2019-20"
+          },
+          {
+            "x": 1.41,
+            "y": 3.84,
+            "label": "Norwich City 2019-20"
+          },
+          {
+            "x": 3.86,
+            "y": 1.69,
+            "label": "Southampton 2019-20"
+          },
+          {
+            "x": 3.2,
+            "y": 2.42,
+            "label": "Tottenham 2019-20"
+          },
+          {
+            "x": 4.14,
+            "y": 4.4,
+            "label": "Watford 2019-20"
+          },
+          {
+            "x": 2.99,
+            "y": 4.46,
+            "label": "West Ham 2019-20"
+          },
+          {
+            "x": 1.56,
+            "y": 4.15,
+            "label": "Wolves 2019-20"
+          },
+          {
+            "x": 1.39,
+            "y": 5.13,
+            "label": "Bologna 2019-20"
+          },
+          {
+            "x": 3.93,
+            "y": 1.38,
+            "label": "Fiorentina 2019-20"
+          },
+          {
+            "x": 5.46,
+            "y": 3.88,
+            "label": "Inter 2019-20"
+          },
+          {
+            "x": 2.42,
+            "y": 3.14,
+            "label": "Juventus 2019-20"
+          },
+          {
+            "x": 3,
+            "y": 9.77,
+            "label": "Lazio 2019-20"
+          },
+          {
+            "x": 2.19,
+            "y": 4.38,
+            "label": "Milan 2019-20"
+          },
+          {
+            "x": 3.22,
+            "y": 4.78,
+            "label": "Napoli 2019-20"
+          },
+          {
+            "x": 2.14,
+            "y": 1.22,
+            "label": "Parma 2019-20"
+          },
+          {
+            "x": 4.17,
+            "y": 1.37,
+            "label": "Roma 2019-20"
+          },
+          {
+            "x": 2.99,
+            "y": 2.98,
+            "label": "SPAL 2019-20"
+          },
+          {
+            "x": 2.66,
+            "y": 2.47,
+            "label": "Sassuolo 2019-20"
+          },
+          {
+            "x": 4.38,
+            "y": 3.4,
+            "label": "Torino 2019-20"
+          },
+          {
+            "x": 1.61,
+            "y": 2.73,
+            "label": "Arminia 2020-21"
+          },
+          {
+            "x": 2.67,
+            "y": 2.65,
+            "label": "Augsburg 2020-21"
+          },
+          {
+            "x": 2.49,
+            "y": 4.07,
+            "label": "Bayern Munich 2020-21"
+          },
+          {
+            "x": 2.89,
+            "y": 4.59,
+            "label": "Dortmund 2020-21"
+          },
+          {
+            "x": 4.86,
+            "y": 3.85,
+            "label": "Freiburg 2020-21"
+          },
+          {
+            "x": 3.16,
+            "y": 1.36,
+            "label": "Hertha BSC 2020-21"
+          },
+          {
+            "x": 4.83,
+            "y": 5.66,
+            "label": "Hoffenheim 2020-21"
+          },
+          {
+            "x": 2.84,
+            "y": 3.02,
+            "label": "Köln 2020-21"
+          },
+          {
+            "x": 1.69,
+            "y": 5.58,
+            "label": "Leverkusen 2020-21"
+          },
+          {
+            "x": 2.31,
+            "y": 6.98,
+            "label": "M'Gladbach 2020-21"
+          },
+          {
+            "x": 4.11,
+            "y": 2.4,
+            "label": "RB Leipzig 2020-21"
+          },
+          {
+            "x": 4.89,
+            "y": 1.28,
+            "label": "Stuttgart 2020-21"
+          },
+          {
+            "x": 5.31,
+            "y": 2.9,
+            "label": "Werder Bremen 2020-21"
+          },
+          {
+            "x": 3.6,
+            "y": 2.79,
+            "label": "Wolfsburg 2020-21"
+          },
+          {
+            "x": 2.46,
+            "y": 2.96,
+            "label": "Alavés 2020-21"
+          },
+          {
+            "x": 3.09,
+            "y": 5.97,
+            "label": "Athletic Club 2020-21"
+          },
+          {
+            "x": 4.59,
+            "y": 4.59,
+            "label": "Atlético Madrid 2020-21"
+          },
+          {
+            "x": 2.64,
+            "y": 3.78,
+            "label": "Barcelona 2020-21"
+          },
+          {
+            "x": 2.63,
+            "y": 2.55,
+            "label": "Betis 2020-21"
+          },
+          {
+            "x": 3.2,
+            "y": 1.37,
+            "label": "Celta Vigo 2020-21"
+          },
+          {
+            "x": 2.81,
+            "y": 4.23,
+            "label": "Cádiz 2020-21"
+          },
+          {
+            "x": 4.76,
+            "y": 7.4,
+            "label": "Eibar 2020-21"
+          },
+          {
+            "x": 3.34,
+            "y": 4.1,
+            "label": "Elche 2020-21"
+          },
+          {
+            "x": 2.18,
+            "y": 3.5,
+            "label": "Granada 2020-21"
+          },
+          {
+            "x": 4.54,
+            "y": 5.93,
+            "label": "Huesca 2020-21"
+          },
+          {
+            "x": 3.97,
+            "y": 4.07,
+            "label": "Levante 2020-21"
+          },
+          {
+            "x": 1.97,
+            "y": 4.95,
+            "label": "Osasuna 2020-21"
+          },
+          {
+            "x": 2.88,
+            "y": 3.33,
+            "label": "Real Madrid 2020-21"
+          },
+          {
+            "x": 3.03,
+            "y": 4.31,
+            "label": "Real Sociedad 2020-21"
+          },
+          {
+            "x": 5.02,
+            "y": 2.93,
+            "label": "Sevilla 2020-21"
+          },
+          {
+            "x": 3.36,
+            "y": 2.99,
+            "label": "Valencia 2020-21"
+          },
+          {
+            "x": 3.71,
+            "y": 4.23,
+            "label": "Valladolid 2020-21"
+          },
+          {
+            "x": 2.91,
+            "y": 2.12,
+            "label": "Villarreal 2020-21"
+          },
+          {
+            "x": 2.73,
+            "y": 1.79,
+            "label": "Angers 2020-21"
+          },
+          {
+            "x": 1.46,
+            "y": 2.72,
+            "label": "Bordeaux 2020-21"
+          },
+          {
+            "x": 3.42,
+            "y": 6.78,
+            "label": "Brest 2020-21"
+          },
+          {
+            "x": 2.57,
+            "y": 1.86,
+            "label": "Dijon 2020-21"
+          },
+          {
+            "x": 3.16,
+            "y": 2.1,
+            "label": "Lille 2020-21"
+          },
+          {
+            "x": 2.57,
+            "y": 2.99,
+            "label": "Lorient 2020-21"
+          },
+          {
+            "x": 4.29,
+            "y": 2.36,
+            "label": "Lyon 2020-21"
+          },
+          {
+            "x": 2.04,
+            "y": 6.71,
+            "label": "Marseille 2020-21"
+          },
+          {
+            "x": 3.52,
+            "y": 2.11,
+            "label": "Metz 2020-21"
+          },
+          {
+            "x": 4.5,
+            "y": 2.13,
+            "label": "Monaco 2020-21"
+          },
+          {
+            "x": 2.73,
+            "y": 1.33,
+            "label": "Montpellier 2020-21"
+          },
+          {
+            "x": 3.09,
+            "y": 3.97,
+            "label": "Nantes 2020-21"
+          },
+          {
+            "x": 3.47,
+            "y": 3.53,
+            "label": "Nice 2020-21"
+          },
+          {
+            "x": 3.25,
+            "y": 4.69,
+            "label": "Paris S-G 2020-21"
+          },
+          {
+            "x": 1.9,
+            "y": 2.95,
+            "label": "Reims 2020-21"
+          },
+          {
+            "x": 3.88,
+            "y": 1.42,
+            "label": "Rennes 2020-21"
+          },
+          {
+            "x": 3.71,
+            "y": 2.94,
+            "label": "Saint-Étienne 2020-21"
+          },
+          {
+            "x": 3.61,
+            "y": 4.92,
+            "label": "Arsenal 2020-21"
+          },
+          {
+            "x": 3.47,
+            "y": 3.49,
+            "label": "Aston Villa 2020-21"
+          },
+          {
+            "x": 2.49,
+            "y": 2.86,
+            "label": "Brighton 2020-21"
+          },
+          {
+            "x": 2.57,
+            "y": 4.57,
+            "label": "Burnley 2020-21"
+          },
+          {
+            "x": 3.64,
+            "y": 3.36,
+            "label": "Chelsea 2020-21"
+          },
+          {
+            "x": 1.58,
+            "y": 3.79,
+            "label": "Crystal Palace 2020-21"
+          },
+          {
+            "x": 4.59,
+            "y": 4.04,
+            "label": "Everton 2020-21"
+          },
+          {
+            "x": 3.44,
+            "y": 3.46,
+            "label": "Fulham 2020-21"
+          },
+          {
+            "x": 2.2,
+            "y": 4.41,
+            "label": "Leeds United 2020-21"
+          },
+          {
+            "x": 8.32,
+            "y": 1.41,
+            "label": "Liverpool 2020-21"
+          },
+          {
+            "x": 2.45,
+            "y": 2.24,
+            "label": "Manchester City 2020-21"
+          },
+          {
+            "x": 4.09,
+            "y": 1.53,
+            "label": "Manchester Utd 2020-21"
+          },
+          {
+            "x": 2.78,
+            "y": 4.82,
+            "label": "Newcastle Utd 2020-21"
+          },
+          {
+            "x": 2.01,
+            "y": 1.26,
+            "label": "Southampton 2020-21"
+          },
+          {
+            "x": 2.23,
+            "y": 2.71,
+            "label": "Tottenham 2020-21"
+          },
+          {
+            "x": 2.77,
+            "y": 3.36,
+            "label": "West Brom 2020-21"
+          },
+          {
+            "x": 4.48,
+            "y": 3.56,
+            "label": "West Ham 2020-21"
+          },
+          {
+            "x": 3.09,
+            "y": 4.69,
+            "label": "Wolves 2020-21"
+          },
+          {
+            "x": 3.02,
+            "y": 2.81,
+            "label": "Benevento 2020-21"
+          },
+          {
+            "x": 1.6,
+            "y": 4.55,
+            "label": "Bologna 2020-21"
+          },
+          {
+            "x": 3.49,
+            "y": 3.26,
+            "label": "Cagliari 2020-21"
+          },
+          {
+            "x": 3.15,
+            "y": 3.26,
+            "label": "Crotone 2020-21"
+          },
+          {
+            "x": 6.03,
+            "y": 0.75,
+            "label": "Fiorentina 2020-21"
+          },
+          {
+            "x": 2.53,
+            "y": 0.25,
+            "label": "Genoa 2020-21"
+          },
+          {
+            "x": 3,
+            "y": 2.2,
+            "label": "Inter 2020-21"
+          },
+          {
+            "x": 3.6,
+            "y": 4.49,
+            "label": "Juventus 2020-21"
+          },
+          {
+            "x": 2.5,
+            "y": 2.32,
+            "label": "Milan 2020-21"
+          },
+          {
+            "x": 2.47,
+            "y": 3.72,
+            "label": "Napoli 2020-21"
+          },
+          {
+            "x": 2.9,
+            "y": 1,
+            "label": "Parma 2020-21"
+          },
+          {
+            "x": 3.53,
+            "y": 1.98,
+            "label": "Roma 2020-21"
+          },
+          {
+            "x": 2.87,
+            "y": 1.85,
+            "label": "Sampdoria 2020-21"
+          },
+          {
+            "x": 2.98,
+            "y": 2.41,
+            "label": "Sassuolo 2020-21"
+          },
+          {
+            "x": 3.45,
+            "y": 1.76,
+            "label": "Spezia 2020-21"
+          },
+          {
+            "x": 2.93,
+            "y": 2.32,
+            "label": "Arminia 2021-22"
+          },
+          {
+            "x": 2.67,
+            "y": 2.85,
+            "label": "Augsburg 2021-22"
+          },
+          {
+            "x": 1.91,
+            "y": 3.4,
+            "label": "Bayern Munich 2021-22"
+          },
+          {
+            "x": 2.74,
+            "y": 2.36,
+            "label": "Bochum 2021-22"
+          },
+          {
+            "x": 2.42,
+            "y": 3.23,
+            "label": "Dortmund 2021-22"
+          },
+          {
+            "x": 2.22,
+            "y": 0.43,
+            "label": "Eint Frankfurt 2021-22"
+          },
+          {
+            "x": 4.05,
+            "y": 4.43,
+            "label": "Freiburg 2021-22"
+          },
+          {
+            "x": 4.75,
+            "y": 3.02,
+            "label": "Hertha BSC 2021-22"
+          },
+          {
+            "x": 2.98,
+            "y": 6.77,
+            "label": "Köln 2021-22"
+          },
+          {
+            "x": 2.19,
+            "y": 1.88,
+            "label": "Leverkusen 2021-22"
+          },
+          {
+            "x": 1.56,
+            "y": 5.97,
+            "label": "M'Gladbach 2021-22"
+          },
+          {
+            "x": 3.63,
+            "y": 3.66,
+            "label": "RB Leipzig 2021-22"
+          },
+          {
+            "x": 5.2,
+            "y": 2.3,
+            "label": "Stuttgart 2021-22"
+          },
+          {
+            "x": 3.18,
+            "y": 2.34,
+            "label": "Wolfsburg 2021-22"
+          },
+          {
+            "x": 2.63,
+            "y": 2.79,
+            "label": "Alavés 2021-22"
+          },
+          {
+            "x": 2.71,
+            "y": 5.17,
+            "label": "Athletic Club 2021-22"
+          },
+          {
+            "x": 3.04,
+            "y": 4.63,
+            "label": "Atlético Madrid 2021-22"
+          },
+          {
+            "x": 4.59,
+            "y": 4.81,
+            "label": "Barcelona 2021-22"
+          },
+          {
+            "x": 2.53,
+            "y": 0.17,
+            "label": "Betis 2021-22"
+          },
+          {
+            "x": 3.72,
+            "y": 2.1,
+            "label": "Celta Vigo 2021-22"
+          },
+          {
+            "x": 3.03,
+            "y": 5.64,
+            "label": "Cádiz 2021-22"
+          },
+          {
+            "x": 3.21,
+            "y": 3.75,
+            "label": "Elche 2021-22"
+          },
+          {
+            "x": 2.76,
+            "y": 2.77,
+            "label": "Espanyol 2021-22"
+          },
+          {
+            "x": 2.27,
+            "y": 2.99,
+            "label": "Granada 2021-22"
+          },
+          {
+            "x": 2.36,
+            "y": 3.52,
+            "label": "Levante 2021-22"
+          },
+          {
+            "x": 3.34,
+            "y": 2.87,
+            "label": "Mallorca 2021-22"
+          },
+          {
+            "x": 2.3,
+            "y": 7.54,
+            "label": "Osasuna 2021-22"
+          },
+          {
+            "x": 3.49,
+            "y": 4.29,
+            "label": "Rayo Vallecano 2021-22"
+          },
+          {
+            "x": 1.89,
+            "y": 2.82,
+            "label": "Real Madrid 2021-22"
+          },
+          {
+            "x": 2.69,
+            "y": 5.32,
+            "label": "Real Sociedad 2021-22"
+          },
+          {
+            "x": 5.18,
+            "y": 2.68,
+            "label": "Sevilla 2021-22"
+          },
+          {
+            "x": 3.29,
+            "y": 3.75,
+            "label": "Valencia 2021-22"
+          },
+          {
+            "x": 3.14,
+            "y": 1.46,
+            "label": "Villarreal 2021-22"
+          },
+          {
+            "x": 1.31,
+            "y": 4.17,
+            "label": "Angers 2021-22"
+          },
+          {
+            "x": 2.48,
+            "y": 2.95,
+            "label": "Bordeaux 2021-22"
+          },
+          {
+            "x": 1.34,
+            "y": 5,
+            "label": "Brest 2021-22"
+          },
+          {
+            "x": 3.46,
+            "y": 2.23,
+            "label": "Clermont Foot 2021-22"
+          },
+          {
+            "x": 2.51,
+            "y": 2.47,
+            "label": "Lille 2021-22"
+          },
+          {
+            "x": 2.72,
+            "y": 1.64,
+            "label": "Lorient 2021-22"
+          },
+          {
+            "x": 2.93,
+            "y": 2,
+            "label": "Lyon 2021-22"
+          },
+          {
+            "x": 3.6,
+            "y": 4.71,
+            "label": "Marseille 2021-22"
+          },
+          {
+            "x": 3.41,
+            "y": 0.43,
+            "label": "Metz 2021-22"
+          },
+          {
+            "x": 3.31,
+            "y": 3.45,
+            "label": "Monaco 2021-22"
+          },
+          {
+            "x": 2.23,
+            "y": 1.02,
+            "label": "Montpellier 2021-22"
+          },
+          {
+            "x": 3.82,
+            "y": 3.89,
+            "label": "Nantes 2021-22"
+          },
+          {
+            "x": 3.17,
+            "y": 5.59,
+            "label": "Nice 2021-22"
+          },
+          {
+            "x": 1.71,
+            "y": 3.7,
+            "label": "Paris S-G 2021-22"
+          },
+          {
+            "x": 2.17,
+            "y": 4.74,
+            "label": "Reims 2021-22"
+          },
+          {
+            "x": 2.11,
+            "y": 1.69,
+            "label": "Rennes 2021-22"
+          },
+          {
+            "x": 3.56,
+            "y": 3.16,
+            "label": "Saint-Étienne 2021-22"
+          },
+          {
+            "x": 3.04,
+            "y": 0.84,
+            "label": "Troyes 2021-22"
+          },
+          {
+            "x": 3.62,
+            "y": 3.57,
+            "label": "Arsenal 2021-22"
+          },
+          {
+            "x": 4.16,
+            "y": 1.41,
+            "label": "Aston Villa 2021-22"
+          },
+          {
+            "x": 2.47,
+            "y": 2.29,
+            "label": "Brentford 2021-22"
+          },
+          {
+            "x": 3.35,
+            "y": 1.63,
+            "label": "Brighton 2021-22"
+          },
+          {
+            "x": 2.52,
+            "y": 3.63,
+            "label": "Burnley 2021-22"
+          },
+          {
+            "x": 4.48,
+            "y": 1.98,
+            "label": "Chelsea 2021-22"
+          },
+          {
+            "x": 1.5,
+            "y": 1.56,
+            "label": "Crystal Palace 2021-22"
+          },
+          {
+            "x": 3.1,
+            "y": 4.25,
+            "label": "Everton 2021-22"
+          },
+          {
+            "x": 1.91,
+            "y": 4.04,
+            "label": "Leeds United 2021-22"
+          },
+          {
+            "x": 1.47,
+            "y": 1.12,
+            "label": "Leicester City 2021-22"
+          },
+          {
+            "x": 7.76,
+            "y": 1.26,
+            "label": "Liverpool 2021-22"
+          },
+          {
+            "x": 2.64,
+            "y": 3.15,
+            "label": "Manchester City 2021-22"
+          },
+          {
+            "x": 4.42,
+            "y": 1.72,
+            "label": "Manchester Utd 2021-22"
+          },
+          {
+            "x": 3.38,
+            "y": 3.54,
+            "label": "Newcastle Utd 2021-22"
+          },
+          {
+            "x": 1.58,
+            "y": 5.16,
+            "label": "Norwich City 2021-22"
+          },
+          {
+            "x": 2.69,
+            "y": 2.11,
+            "label": "Southampton 2021-22"
+          },
+          {
+            "x": 2.51,
+            "y": 3.07,
+            "label": "Tottenham 2021-22"
+          },
+          {
+            "x": 2.15,
+            "y": 2.95,
+            "label": "Watford 2021-22"
+          },
+          {
+            "x": 4.23,
+            "y": 3.67,
+            "label": "West Ham 2021-22"
+          },
+          {
+            "x": 2.76,
+            "y": 2.85,
+            "label": "Wolves 2021-22"
+          },
+          {
+            "x": 1.95,
+            "y": 4.82,
+            "label": "Bologna 2021-22"
+          },
+          {
+            "x": 3.32,
+            "y": 0.58,
+            "label": "Cagliari 2021-22"
+          },
+          {
+            "x": 2.55,
+            "y": 2.5,
+            "label": "Empoli 2021-22"
+          },
+          {
+            "x": 4.1,
+            "y": 3.38,
+            "label": "Fiorentina 2021-22"
+          },
+          {
+            "x": 3.13,
+            "y": 3.11,
+            "label": "Juventus 2021-22"
+          },
+          {
+            "x": 1.71,
+            "y": 2.03,
+            "label": "Lazio 2021-22"
+          },
+          {
+            "x": 3.61,
+            "y": 2.83,
+            "label": "Milan 2021-22"
+          },
+          {
+            "x": 1.97,
+            "y": 4.06,
+            "label": "Napoli 2021-22"
+          },
+          {
+            "x": 2.62,
+            "y": 1.54,
+            "label": "Roma 2021-22"
+          },
+          {
+            "x": 3.2,
+            "y": 2.72,
+            "label": "Salernitana 2021-22"
+          },
+          {
+            "x": 2.99,
+            "y": 3.26,
+            "label": "Sassuolo 2021-22"
+          },
+          {
+            "x": 1.78,
+            "y": 2.93,
+            "label": "Spezia 2021-22"
+          },
+          {
+            "x": 2.7,
+            "y": 3.32,
+            "label": "Torino 2021-22"
+          },
+          {
+            "x": 1.79,
+            "y": 1.57,
+            "label": "Udinese 2021-22"
+          },
+          {
+            "x": 2.35,
+            "y": 2.61,
+            "label": "Venezia 2021-22"
+          },
+          {
+            "x": 1.96,
+            "y": 3.81,
+            "label": "Augsburg 2022-23"
+          },
+          {
+            "x": 1.94,
+            "y": 2.16,
+            "label": "Bayern Munich 2022-23"
+          },
+          {
+            "x": 1.87,
+            "y": 3.1,
+            "label": "Bochum 2022-23"
+          },
+          {
+            "x": 3.84,
+            "y": 3.57,
+            "label": "Dortmund 2022-23"
+          },
+          {
+            "x": 5.38,
+            "y": 2.03,
+            "label": "Eint Frankfurt 2022-23"
+          },
+          {
+            "x": 3.16,
+            "y": 3.1,
+            "label": "Freiburg 2022-23"
+          },
+          {
+            "x": 4.01,
+            "y": 3.23,
+            "label": "Hertha BSC 2022-23"
+          },
+          {
+            "x": 5.08,
+            "y": 5,
+            "label": "Hoffenheim 2022-23"
+          },
+          {
+            "x": 3.6,
+            "y": 5.62,
+            "label": "Köln 2022-23"
+          },
+          {
+            "x": 1.87,
+            "y": 1.78,
+            "label": "Leverkusen 2022-23"
+          },
+          {
+            "x": 1.4,
+            "y": 6.81,
+            "label": "M'Gladbach 2022-23"
+          },
+          {
+            "x": 4.03,
+            "y": 2.67,
+            "label": "RB Leipzig 2022-23"
+          },
+          {
+            "x": 6.7,
+            "y": 2.39,
+            "label": "Stuttgart 2022-23"
+          },
+          {
+            "x": 2.72,
+            "y": 2.57,
+            "label": "Wolfsburg 2022-23"
+          },
+          {
+            "x": 3.26,
+            "y": 4.51,
+            "label": "Almería 2022-23"
+          },
+          {
+            "x": 3.18,
+            "y": 6.09,
+            "label": "Athletic Club 2022-23"
+          },
+          {
+            "x": 2.27,
+            "y": 4.16,
+            "label": "Atlético Madrid 2022-23"
+          },
+          {
+            "x": 3.32,
+            "y": 4.67,
+            "label": "Barcelona 2022-23"
+          },
+          {
+            "x": 2.41,
+            "y": 1.15,
+            "label": "Betis 2022-23"
+          },
+          {
+            "x": 3.7,
+            "y": 3.45,
+            "label": "Celta Vigo 2022-23"
+          },
+          {
+            "x": 3.08,
+            "y": 4.43,
+            "label": "Cádiz 2022-23"
+          },
+          {
+            "x": 1.94,
+            "y": 3,
+            "label": "Elche 2022-23"
+          },
+          {
+            "x": 3.33,
+            "y": 2.28,
+            "label": "Espanyol 2022-23"
+          },
+          {
+            "x": 3.61,
+            "y": 4.62,
+            "label": "Getafe 2022-23"
+          },
+          {
+            "x": 2.84,
+            "y": 3.28,
+            "label": "Girona 2022-23"
+          },
+          {
+            "x": 2.75,
+            "y": 1.18,
+            "label": "Mallorca 2022-23"
+          },
+          {
+            "x": 2.64,
+            "y": 5.61,
+            "label": "Osasuna 2022-23"
+          },
+          {
+            "x": 3.52,
+            "y": 5.41,
+            "label": "Rayo Vallecano 2022-23"
+          },
+          {
+            "x": 1.47,
+            "y": 2.81,
+            "label": "Real Madrid 2022-23"
+          },
+          {
+            "x": 2.64,
+            "y": 3.14,
+            "label": "Real Sociedad 2022-23"
+          },
+          {
+            "x": 5.15,
+            "y": 3.29,
+            "label": "Sevilla 2022-23"
+          },
+          {
+            "x": 4.64,
+            "y": 4.1,
+            "label": "Valencia 2022-23"
+          },
+          {
+            "x": 3.68,
+            "y": 2.03,
+            "label": "Valladolid 2022-23"
+          },
+          {
+            "x": 2.4,
+            "y": 0.82,
+            "label": "Villarreal 2022-23"
+          },
+          {
+            "x": 2.29,
+            "y": 3.28,
+            "label": "Ajaccio 2022-23"
+          },
+          {
+            "x": 1.83,
+            "y": 1.96,
+            "label": "Angers 2022-23"
+          },
+          {
+            "x": 2.4,
+            "y": 4.76,
+            "label": "Auxerre 2022-23"
+          },
+          {
+            "x": 2.38,
+            "y": 6.99,
+            "label": "Brest 2022-23"
+          },
+          {
+            "x": 2.67,
+            "y": 2.51,
+            "label": "Clermont Foot 2022-23"
+          },
+          {
+            "x": 0.76,
+            "y": 5.05,
+            "label": "Lille 2022-23"
+          },
+          {
+            "x": 0.98,
+            "y": 2.39,
+            "label": "Lorient 2022-23"
+          },
+          {
+            "x": 3.59,
+            "y": 2.75,
+            "label": "Lyon 2022-23"
+          },
+          {
+            "x": 3.13,
+            "y": 3.45,
+            "label": "Marseille 2022-23"
+          },
+          {
+            "x": 3.97,
+            "y": 3.8,
+            "label": "Monaco 2022-23"
+          },
+          {
+            "x": 2.11,
+            "y": 1.27,
+            "label": "Montpellier 2022-23"
+          },
+          {
+            "x": 4.62,
+            "y": 5.36,
+            "label": "Nantes 2022-23"
+          },
+          {
+            "x": 2.16,
+            "y": 2.88,
+            "label": "Nice 2022-23"
+          },
+          {
+            "x": 1.43,
+            "y": 3.01,
+            "label": "Paris S-G 2022-23"
+          },
+          {
+            "x": 2.12,
+            "y": 5.69,
+            "label": "Reims 2022-23"
+          },
+          {
+            "x": 1.73,
+            "y": 1.04,
+            "label": "Rennes 2022-23"
+          },
+          {
+            "x": 1.58,
+            "y": 1.79,
+            "label": "Toulouse 2022-23"
+          },
+          {
+            "x": 2.57,
+            "y": 2.12,
+            "label": "Troyes 2022-23"
+          },
+          {
+            "x": 1.57,
+            "y": 4.49,
+            "label": "Arsenal 2022-23"
+          },
+          {
+            "x": 3,
+            "y": 2.53,
+            "label": "Aston Villa 2022-23"
+          },
+          {
+            "x": 1.29,
+            "y": 2.62,
+            "label": "Bournemouth 2022-23"
+          },
+          {
+            "x": 1.77,
+            "y": 2.71,
+            "label": "Brentford 2022-23"
+          },
+          {
+            "x": 2.17,
+            "y": 1.99,
+            "label": "Brighton 2022-23"
+          },
+          {
+            "x": 4.1,
+            "y": 2.19,
+            "label": "Chelsea 2022-23"
+          },
+          {
+            "x": 1.59,
+            "y": 1.54,
+            "label": "Crystal Palace 2022-23"
+          },
+          {
+            "x": 1.96,
+            "y": 4.5,
+            "label": "Everton 2022-23"
+          },
+          {
+            "x": 3.69,
+            "y": 2.09,
+            "label": "Fulham 2022-23"
+          },
+          {
+            "x": 1.7,
+            "y": 3.29,
+            "label": "Leeds United 2022-23"
+          },
+          {
+            "x": 7.27,
+            "y": 0.86,
+            "label": "Liverpool 2022-23"
+          },
+          {
+            "x": 1.65,
+            "y": 3.42,
+            "label": "Manchester City 2022-23"
+          },
+          {
+            "x": 1.71,
+            "y": 1.09,
+            "label": "Manchester Utd 2022-23"
+          },
+          {
+            "x": 10.59,
+            "y": 3.2,
+            "label": "Newcastle Utd 2022-23"
+          },
+          {
+            "x": 2.74,
+            "y": 1.59,
+            "label": "Southampton 2022-23"
+          },
+          {
+            "x": 3.29,
+            "y": 3.11,
+            "label": "Tottenham 2022-23"
+          },
+          {
+            "x": 4.44,
+            "y": 4.02,
+            "label": "West Ham 2022-23"
+          },
+          {
+            "x": 2.3,
+            "y": 4.63,
+            "label": "Wolves 2022-23"
+          },
+          {
+            "x": 2.22,
+            "y": 1.98,
+            "label": "Atalanta 2022-23"
+          },
+          {
+            "x": 3.97,
+            "y": 4.46,
+            "label": "Bologna 2022-23"
+          },
+          {
+            "x": 4.67,
+            "y": 6.42,
+            "label": "Cremonese 2022-23"
+          },
+          {
+            "x": 1.75,
+            "y": 2.87,
+            "label": "Empoli 2022-23"
+          },
+          {
+            "x": 6.04,
+            "y": 1.57,
+            "label": "Fiorentina 2022-23"
+          },
+          {
+            "x": 1.82,
+            "y": 6.42,
+            "label": "Juventus 2022-23"
+          },
+          {
+            "x": 1,
+            "y": 1.57,
+            "label": "Lazio 2022-23"
+          },
+          {
+            "x": 2.9,
+            "y": 4.16,
+            "label": "Lecce 2022-23"
+          },
+          {
+            "x": 2.58,
+            "y": 2.7,
+            "label": "Milan 2022-23"
+          },
+          {
+            "x": 3.03,
+            "y": 3.2,
+            "label": "Monza 2022-23"
+          },
+          {
+            "x": 3.05,
+            "y": 4.37,
+            "label": "Napoli 2022-23"
+          },
+          {
+            "x": 2.81,
+            "y": 2.24,
+            "label": "Roma 2022-23"
+          },
+          {
+            "x": 3.09,
+            "y": 2.09,
+            "label": "Sampdoria 2022-23"
+          },
+          {
+            "x": 2.17,
+            "y": 4.28,
+            "label": "Sassuolo 2022-23"
+          },
+          {
+            "x": 2.94,
+            "y": 2.76,
+            "label": "Spezia 2022-23"
+          },
+          {
+            "x": 3.45,
+            "y": 4.69,
+            "label": "Torino 2022-23"
+          },
+          {
+            "x": 3.19,
+            "y": 2.89,
+            "label": "Augsburg 2023-24"
+          },
+          {
+            "x": 1.99,
+            "y": 4.23,
+            "label": "Bayern Munich 2023-24"
+          },
+          {
+            "x": 2.67,
+            "y": 2.87,
+            "label": "Bochum 2023-24"
+          },
+          {
+            "x": 1.83,
+            "y": 2.25,
+            "label": "Darmstadt 98 2023-24"
+          },
+          {
+            "x": 1.91,
+            "y": 2.32,
+            "label": "Dortmund 2023-24"
+          },
+          {
+            "x": 3.32,
+            "y": 1.63,
+            "label": "Eint Frankfurt 2023-24"
+          },
+          {
+            "x": 2.53,
+            "y": 4.24,
+            "label": "Freiburg 2023-24"
+          },
+          {
+            "x": 2.43,
+            "y": 4.6,
+            "label": "Gladbach 2023-24"
+          },
+          {
+            "x": 2.19,
+            "y": 2.69,
+            "label": "Heidenheim 2023-24"
+          },
+          {
+            "x": 3.77,
+            "y": 5,
+            "label": "Hoffenheim 2023-24"
+          },
+          {
+            "x": 4.28,
+            "y": 3.87,
+            "label": "Köln 2023-24"
+          },
+          {
+            "x": 3.8,
+            "y": 3.72,
+            "label": "Leverkusen 2023-24"
+          },
+          {
+            "x": 3.02,
+            "y": 2.91,
+            "label": "Mainz 05 2023-24"
+          },
+          {
+            "x": 2.79,
+            "y": 3.51,
+            "label": "Stuttgart 2023-24"
+          },
+          {
+            "x": 2.06,
+            "y": 0.88,
+            "label": "Werder Bremen 2023-24"
+          },
+          {
+            "x": 2.43,
+            "y": 3.24,
+            "label": "Wolfsburg 2023-24"
+          },
+          {
+            "x": 3.44,
+            "y": 6.76,
+            "label": "Alavés 2023-24"
+          },
+          {
+            "x": 3.54,
+            "y": 3.57,
+            "label": "Almería 2023-24"
+          },
+          {
+            "x": 2.85,
+            "y": 6.95,
+            "label": "Athletic Club 2023-24"
+          },
+          {
+            "x": 2.46,
+            "y": 2.8,
+            "label": "Atlético Madrid 2023-24"
+          },
+          {
+            "x": 2.68,
+            "y": 3.5,
+            "label": "Barcelona 2023-24"
+          },
+          {
+            "x": 2.28,
+            "y": 1.63,
+            "label": "Betis 2023-24"
+          },
+          {
+            "x": 2.89,
+            "y": 2.27,
+            "label": "Celta Vigo 2023-24"
+          },
+          {
+            "x": 3.69,
+            "y": 8.03,
+            "label": "Cádiz 2023-24"
+          },
+          {
+            "x": 3.42,
+            "y": 3.61,
+            "label": "Getafe 2023-24"
+          },
+          {
+            "x": 2.61,
+            "y": 2.59,
+            "label": "Girona 2023-24"
+          },
+          {
+            "x": 2.79,
+            "y": 1.1,
+            "label": "Granada 2023-24"
+          },
+          {
+            "x": 2.13,
+            "y": 4.42,
+            "label": "Las Palmas 2023-24"
+          },
+          {
+            "x": 3.69,
+            "y": 4.22,
+            "label": "Osasuna 2023-24"
+          },
+          {
+            "x": 3.1,
+            "y": 3.9,
+            "label": "Rayo Vallecano 2023-24"
+          },
+          {
+            "x": 2.06,
+            "y": 2.3,
+            "label": "Real Madrid 2023-24"
+          },
+          {
+            "x": 2.48,
+            "y": 3.33,
+            "label": "Real Sociedad 2023-24"
+          },
+          {
+            "x": 5.93,
+            "y": 4.78,
+            "label": "Sevilla 2023-24"
+          },
+          {
+            "x": 2.73,
+            "y": 2.32,
+            "label": "Valencia 2023-24"
+          },
+          {
+            "x": 2.69,
+            "y": 3.46,
+            "label": "Villarreal 2023-24"
+          },
+          {
+            "x": 3.6,
+            "y": 9.06,
+            "label": "Brest 2023-24"
+          },
+          {
+            "x": 3.17,
+            "y": 3.01,
+            "label": "Clermont Foot 2023-24"
+          },
+          {
+            "x": 4.76,
+            "y": 2.15,
+            "label": "Le Havre 2023-24"
+          },
+          {
+            "x": 2.91,
+            "y": 2.27,
+            "label": "Lens 2023-24"
+          },
+          {
+            "x": 2.26,
+            "y": 3.67,
+            "label": "Lille 2023-24"
+          },
+          {
+            "x": 2.17,
+            "y": 3.7,
+            "label": "Lyon 2023-24"
+          },
+          {
+            "x": 4.58,
+            "y": 2.36,
+            "label": "Marseille 2023-24"
+          },
+          {
+            "x": 2.62,
+            "y": 1.52,
+            "label": "Metz 2023-24"
+          },
+          {
+            "x": 2.72,
+            "y": 2.14,
+            "label": "Monaco 2023-24"
+          },
+          {
+            "x": 2.26,
+            "y": 1.78,
+            "label": "Montpellier 2023-24"
+          },
+          {
+            "x": 4.41,
+            "y": 4.26,
+            "label": "Nantes 2023-24"
+          },
+          {
+            "x": 1.69,
+            "y": 3.96,
+            "label": "Nice 2023-24"
+          },
+          {
+            "x": 3.67,
+            "y": 3.77,
+            "label": "Paris S-G 2023-24"
+          },
+          {
+            "x": 1.67,
+            "y": 3,
+            "label": "Reims 2023-24"
+          },
+          {
+            "x": 2.71,
+            "y": 0.29,
+            "label": "Rennes 2023-24"
+          },
+          {
+            "x": 3.66,
+            "y": 3.44,
+            "label": "Strasbourg 2023-24"
+          },
+          {
+            "x": 2.04,
+            "y": 1.58,
+            "label": "Toulouse 2023-24"
+          },
+          {
+            "x": 1.33,
+            "y": 3.99,
+            "label": "Arsenal 2023-24"
+          },
+          {
+            "x": 3.53,
+            "y": 2.56,
+            "label": "Aston Villa 2023-24"
+          },
+          {
+            "x": 1.7,
+            "y": 1.99,
+            "label": "Bournemouth 2023-24"
+          },
+          {
+            "x": 4.31,
+            "y": 2.7,
+            "label": "Brentford 2023-24"
+          },
+          {
+            "x": 2.79,
+            "y": 2.87,
+            "label": "Brighton 2023-24"
+          },
+          {
+            "x": 2.35,
+            "y": 3.35,
+            "label": "Burnley 2023-24"
+          },
+          {
+            "x": 2.05,
+            "y": 2.3,
+            "label": "Chelsea 2023-24"
+          },
+          {
+            "x": 2.95,
+            "y": 5.21,
+            "label": "Everton 2023-24"
+          },
+          {
+            "x": 2.67,
+            "y": 2.57,
+            "label": "Fulham 2023-24"
+          },
+          {
+            "x": 8.41,
+            "y": 1.81,
+            "label": "Liverpool 2023-24"
+          },
+          {
+            "x": 2.06,
+            "y": 3.56,
+            "label": "Luton Town 2023-24"
+          },
+          {
+            "x": 1.92,
+            "y": 2.44,
+            "label": "Manchester City 2023-24"
+          },
+          {
+            "x": 2.02,
+            "y": 1.5,
+            "label": "Manchester Utd 2023-24"
+          },
+          {
+            "x": 4,
+            "y": 4.65,
+            "label": "Newcastle Utd 2023-24"
+          },
+          {
+            "x": 2.71,
+            "y": 2.87,
+            "label": "Nott'ham Forest 2023-24"
+          },
+          {
+            "x": 2.13,
+            "y": 2,
+            "label": "Tottenham 2023-24"
+          },
+          {
+            "x": 2.22,
+            "y": 2.24,
+            "label": "West Ham 2023-24"
+          },
+          {
+            "x": 1.64,
+            "y": 6.8,
+            "label": "Wolves 2023-24"
+          },
+          {
+            "x": 2.63,
+            "y": 3.28,
+            "label": "Atalanta 2023-24"
+          },
+          {
+            "x": 2.54,
+            "y": 3.84,
+            "label": "Bologna 2023-24"
+          },
+          {
+            "x": 2.59,
+            "y": 2.61,
+            "label": "Empoli 2023-24"
+          },
+          {
+            "x": 3.74,
+            "y": 2.09,
+            "label": "Fiorentina 2023-24"
+          },
+          {
+            "x": 2.4,
+            "y": 2.82,
+            "label": "Frosinone 2023-24"
+          },
+          {
+            "x": 5.3,
+            "y": 3.7,
+            "label": "Genoa 2023-24"
+          },
+          {
+            "x": 3.33,
+            "y": 2.11,
+            "label": "Hellas Verona 2023-24"
+          },
+          {
+            "x": 1.86,
+            "y": 4.8,
+            "label": "Juventus 2023-24"
+          },
+          {
+            "x": 1.88,
+            "y": 2.14,
+            "label": "Lazio 2023-24"
+          },
+          {
+            "x": 3.05,
+            "y": 4.84,
+            "label": "Lecce 2023-24"
+          },
+          {
+            "x": 3.34,
+            "y": 3.05,
+            "label": "Milan 2023-24"
+          },
+          {
+            "x": 3.42,
+            "y": 2.98,
+            "label": "Monza 2023-24"
+          },
+          {
+            "x": 3.23,
+            "y": 4.2,
+            "label": "Napoli 2023-24"
+          },
+          {
+            "x": 3.58,
+            "y": 2.2,
+            "label": "Roma 2023-24"
+          },
+          {
+            "x": 2.75,
+            "y": 3,
+            "label": "Salernitana 2023-24"
+          },
+          {
+            "x": 2.77,
+            "y": 4.35,
+            "label": "Sassuolo 2023-24"
+          },
+          {
+            "x": 1.94,
+            "y": 4.16,
+            "label": "Udinese 2023-24"
+          }
+        ],
+        "xLabel": "Fullback crosses / 90 (team average)",
+        "yLabel": "Winger crosses / 90 (team average)",
+        "caption": "589 team-seasons, 2017/18–2023/24. Correlation r = −0.03 (p = 0.50) — not distinguishable from zero. A team's fullbacks crossing more says essentially nothing about how much its wingers cross."
+      },
+      {
+        "type": "paragraph",
+        "html": "There isn't one. Not a positive relationship (both committing to crossing together) and not a clean negative one (one deputizing for the other) — just noise. Whatever specific tactical relationship exists between a fullback and winger on the same flank, it isn't showing up as a simple volume correlation in season-aggregated stats. That doesn't rule out real coordinated overlapping <i>within</i> matches — it just means this particular aggregate signature isn't evidence for or against it, and we'd need event-level, same-possession data to actually test the real claim."
+      },
+      {
+        "type": "heading",
+        "text": "What this data can't tell us"
+      },
+      {
+        "type": "list",
+        "items": [
+          "Touch-share by pitch third is a zone-based proxy, not a true positional heatmap — we still don't have raw x/y event coordinates for that, same limitation as our pressing research.",
+          "Transfermarkt's position tags reflect a squad's listed/primary role, not which flank a player played on in any specific match — a right-footed “Left-Back” who mostly plays inverted, or a squad's rotation between roles mid-season, isn't captured.",
+          "“Overlap” as coaches use it is a same-possession, ball-near event (a specific run timed against a specific teammate's touch) — season-aggregate crossing totals can't directly test that; the correlation test above is a reasonable but indirect proxy.",
+          "The newest season (2024/25) is missing from the fullback/winger breakdown after we caught the minutes/stats mismatch described above — we'd rather publish seven clean seasons than eight with one silently wrong."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "html": "See our <a href=\"/blog/is-high-pressing-actually-rising/\">pressing research</a> and its <a href=\"/blog/extending-the-pressing-study-style-clusters/\">follow-up</a> for the same honesty-first approach applied to a different tactical claim, and <a href=\"/methodology\">Methodology</a> for how PitchMetric's actual predictions work."
+      }
+    ]
   }
 ]
