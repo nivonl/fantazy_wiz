@@ -71,6 +71,7 @@ export function renderPage({ title, description, path, bodyHtml, cssHref, breadc
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>${THEME_SCRIPT}</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#170021" />
     <title>${escapeHtml(fullTitle)}</title>
@@ -122,6 +123,23 @@ export function renderPage({ title, description, path, bodyHtml, cssHref, breadc
 </html>
 `;
 }
+
+// Applies the visitor's already-chosen light/dark theme to this static page, reading the exact
+// same localStorage key the SPA's own useTheme()/usePersistentState("theme", ...) writes
+// (components/ui.jsx) -- same origin, so a choice made in the app is visible here too. Runs
+// synchronously as the very first thing in <head>, before the stylesheet link, so data-theme is
+// already set on <html> by the time index.css's [data-theme="light"] rules would apply -- avoids
+// a flash of the wrong theme on load. Dark needs no attribute (it's the unmarked :root default),
+// so this only ever needs to add "light"; absent/invalid/inaccessible storage silently no-ops
+// and the page renders dark, same as a first-time visitor gets in the SPA itself.
+const THEME_SCRIPT = `
+(function () {
+  try {
+    var stored = JSON.parse(localStorage.getItem("pitchmetric:theme"));
+    if (stored === "light") document.documentElement.setAttribute("data-theme", "light");
+  } catch (e) {}
+})();
+`;
 
 // Delegated hover (and tap, for touch) tooltip for any [data-tooltip] element -- currently the
 // radar and price-history charts' invisible hit-circles (see charts/radarChart.js and
