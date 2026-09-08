@@ -6417,5 +6417,812 @@
         "html": "The honest summary: &ldquo;pressing is taking over&rdquo; is a catchier headline than what the last five full seasons of data actually show. Total pressing volume is flat-to-down, not up. Possession still predicts winning better than pressing does, and that gap hasn't closed. What <i>has</i> genuinely changed is more specific and more interesting than the popular version — pressing has gotten more efficient, concentrated closer to the opponent's goal, and spread out across more of the team rather than resting on the forwards alone. See <a href=\"/methodology\">Methodology</a> for how PitchMetric's actual predictions work, and <a href=\"/blog/\">the rest of the blog</a> for our other research posts."
       }
     ]
+  },
+  {
+    "type": "deep_research",
+    "slug": "extending-the-pressing-study-style-clusters",
+    "category": "Deep Research",
+    "title": "Extending the Pressing Study: Three More Seasons, Real Style Clusters, and a Correlation Heatmap",
+    "dek": "Readers asked two fair follow-up questions on our pressing piece: is there more recent data, and can we bring in heavier tools like clustering and a proper heatmap? Both answers turned out more interesting than a simple yes.",
+    "published": "2026-09-08",
+    "lede": "Two good questions landed after our first pressing post: is there more recent data than 2021/22, and could we use more sophisticated methods — clustering to find real attacking styles, a heatmap-style matrix analysis? We went looking for both. One led somewhere useful. The other led to a dead end worth reporting honestly rather than quietly dropping.",
+    "blocks": [
+      {
+        "type": "heading",
+        "text": "The recency question, and a proxy that didn't survive its own test"
+      },
+      {
+        "type": "paragraph",
+        "html": "We found a continuously-updated version of the same public dataset behind our first post, extending team and player stats from 2021/22 through <b>2024/25</b> — three more full seasons. Good news for possession, passing, and shot-creation data, which all extend cleanly. Bad news for the specific metric the first post was built on: the raw defensive-pressure event count (&ldquo;Pressures&rdquo;) is <i>still completely absent</i> from every season since October 2022, even in this fresher pull. That's not a stale-mirror artifact — it's confirmed again, independently: the current data provider genuinely doesn't publish that stat."
+      },
+      {
+        "type": "paragraph",
+        "html": "So we tried to build a substitute: a simplified, whole-pitch PPDA-style proxy (opponent passes completed, divided by a team's own tackles + interceptions) computed from stats that <i>do</i> still exist post-2022. Before trusting it for anything, we tested it the only way that matters — does it actually agree with the real, StatsBomb-era press-event numbers on the five seasons where we have both? It doesn't: r = −0.07 (p = 0.11), not distinguishable from zero. A proxy that fails to reproduce the thing it's supposed to approximate, on data where we can actually check, isn't a substitute — it's noise wearing a pressing-shaped costume."
+      },
+      {
+        "type": "callout",
+        "heading": "A negative result is still a result",
+        "html": "<p>Real pressing intensity is about <i>where</i> on the pitch defensive actions happen, not just how many there are league-wide. A whole-pitch, unzoned proxy throws that away, and apparently throws away the signal along with it. We're reporting that it failed rather than publishing a number dressed up in confident-sounding language — the same reason we walked back momentum in an earlier piece once it didn't survive testing.</p>"
+      },
+      {
+        "type": "paragraph",
+        "html": "Net result: the specific &ldquo;is pressing volume rising&rdquo; trend from the first post still honestly ends at 2021/22. We're not able to responsibly extend it with what's publicly available to us right now. What we <i>can</i> do with the extra three seasons is broaden the question — style, not just volume."
+      },
+      {
+        "type": "heading",
+        "text": "Mapping attack style with real clustering, not vibes"
+      },
+      {
+        "type": "paragraph",
+        "html": "This is the more sophisticated method we hadn't tried yet: unsupervised clustering (k-means) on 96 teams' 2024/25 season, across 18 standardized features — possession, progressive passing and carrying, directness (long-pass accuracy, crossing, through-balls), and the <i>mix</i> of how teams create shots (open-play combination vs. individual dribbling vs. crosses vs. set pieces). No labels, no assumptions about &ldquo;possession teams&rdquo; or &ldquo;counter-attacking teams&rdquo; going in — we let the numbers group themselves."
+      },
+      {
+        "type": "paragraph",
+        "html": "We tested cluster counts from 3 to 6 using silhouette score (a standard measure of how cleanly separated clusters actually are) and k=3 won — but with a silhouette of only 0.18, which is modest. Worth being upfront about what that means: these aren't three sharply walled-off tactical tribes, they blend into each other more than they separate. What actually emerged is closer to one dominant spectrum than three distinct styles."
+      },
+      {
+        "type": "list",
+        "items": [
+          "<b>Elite tier (13 teams, 62.0% avg possession):</b> Barcelona, Bayern Munich, Real Madrid, Manchester City, Liverpool, Paris S-G, Inter, Atalanta, Leverkusen, Milan, Lille, Tottenham, Brighton. Nobody told the algorithm these were the continent's Champions League regulars — it found that grouping purely from passing, carrying and shot-creation numbers.",
+          "<b>Mid tier (39 teams, 53.2% avg possession):</b> Arsenal, Chelsea, Dortmund, Napoli, Atlético Madrid, Juventus, Manchester Utd, RB Leipzig, Roma, and most other recognizable-but-not-quite-elite sides.",
+          "<b>Lower-possession tier (44 teams, 43.6% avg possession):</b> the rest — mostly mid-table and relegation-zone sides across all five leagues."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "html": "The honest reading: this clustering mostly recovered <i>one</i> axis — call it resource, quality, or dominance — rather than genuinely distinct attacking philosophies. Possession runs 43.6% → 53.2% → 62.0% in a straight progression across the three groups, and so does almost every other feature. That's a real finding, just not the one &ldquo;style clustering&rdquo; implies at first glance."
+      },
+      {
+        "type": "paragraph",
+        "html": "A second dimension does isolate something more like genuine style, independent of quality. Principal component analysis on the same 18 features finds a first axis explaining 46% of the variance — that's the quality spectrum above — and a second, smaller axis (12%) that splits teams by <i>how</i> they create chances: heavy crossing and switches of play at one pole, through-balls and box-entry carries at the other. Crucially, elite teams sit on both ends: Manchester City and Bayern Munich anchor the through-ball/carrying pole, while Inter Milan — built around wing-back crossing — sits at the opposite, crossing-heavy pole, alongside sides like Stuttgart and Mallorca. Being elite doesn't mean playing the same way."
+      },
+      {
+        "type": "chart",
+        "chartType": "scatter",
+        "data": [
+          {
+            "x": -2.3,
+            "y": 1.46,
+            "label": "Alavés (La Liga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -2.91,
+            "y": -1.48,
+            "label": "Angers (Ligue 1)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 2.07,
+            "y": -1,
+            "label": "Arsenal (Premier League)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 0.48,
+            "y": -2.02,
+            "label": "Aston Villa (Premier League)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 3.75,
+            "y": 1.64,
+            "label": "Atalanta (Serie A)",
+            "color": "var(--good)"
+          },
+          {
+            "x": -1.6,
+            "y": -0.15,
+            "label": "Athletic Club (La Liga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -0.04,
+            "y": 0.98,
+            "label": "Atlético Madrid (La Liga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 0.91,
+            "y": 2.63,
+            "label": "Augsburg (Bundesliga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -1.1,
+            "y": 2.43,
+            "label": "Auxerre (Ligue 1)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 4.86,
+            "y": 0.38,
+            "label": "Barcelona (La Liga)",
+            "color": "var(--good)"
+          },
+          {
+            "x": 7.84,
+            "y": -2.22,
+            "label": "Bayern Munich (Bundesliga)",
+            "color": "var(--good)"
+          },
+          {
+            "x": 1.56,
+            "y": 1.02,
+            "label": "Betis (La Liga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -2.82,
+            "y": 0.14,
+            "label": "Bochum (Bundesliga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 1.82,
+            "y": 1.71,
+            "label": "Bologna (Serie A)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 0.37,
+            "y": 0.68,
+            "label": "Bournemouth (Premier League)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -0.94,
+            "y": 0.28,
+            "label": "Brentford (Premier League)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -2.94,
+            "y": 0.15,
+            "label": "Brest (Ligue 1)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 3.61,
+            "y": -0.1,
+            "label": "Brighton (Premier League)",
+            "color": "var(--good)"
+          },
+          {
+            "x": -0.74,
+            "y": 1.46,
+            "label": "Cagliari (Serie A)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 1.21,
+            "y": -0.48,
+            "label": "Celta Vigo (La Liga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 1.77,
+            "y": -2.76,
+            "label": "Chelsea (Premier League)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -0.32,
+            "y": -0.77,
+            "label": "Como (Serie A)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -0.6,
+            "y": -0.46,
+            "label": "Crystal Palace (Premier League)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 2.61,
+            "y": -0.47,
+            "label": "Dortmund (Bundesliga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -1,
+            "y": -1.34,
+            "label": "Eint Frankfurt (Bundesliga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -4.94,
+            "y": -1.63,
+            "label": "Empoli (Serie A)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -3.4,
+            "y": 0.2,
+            "label": "Espanyol (La Liga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -2.86,
+            "y": -0.77,
+            "label": "Everton (Premier League)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 0.16,
+            "y": 0.99,
+            "label": "Fiorentina (Serie A)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 0.17,
+            "y": 0.25,
+            "label": "Freiburg (Bundesliga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 1.42,
+            "y": 0.9,
+            "label": "Fulham (Premier League)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -2.99,
+            "y": 1.1,
+            "label": "Genoa (Serie A)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -3.14,
+            "y": 0.97,
+            "label": "Getafe (La Liga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 2.29,
+            "y": 1.07,
+            "label": "Girona (La Liga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 1.25,
+            "y": 0.68,
+            "label": "Gladbach (Bundesliga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -2.36,
+            "y": 0.46,
+            "label": "Heidenheim (Bundesliga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -4.07,
+            "y": -0.51,
+            "label": "Hellas Verona (Serie A)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -0.83,
+            "y": -0.62,
+            "label": "Hoffenheim (Bundesliga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -3.3,
+            "y": 0.38,
+            "label": "Holstein Kiel (Bundesliga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 4.04,
+            "y": 3.25,
+            "label": "Inter (Serie A)",
+            "color": "var(--good)"
+          },
+          {
+            "x": -3.55,
+            "y": -2.1,
+            "label": "Ipswich Town (Premier League)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 1.71,
+            "y": -0.21,
+            "label": "Juventus (Serie A)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 0.7,
+            "y": 1.16,
+            "label": "Las Palmas (La Liga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 2.34,
+            "y": 1.81,
+            "label": "Lazio (Serie A)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -2.69,
+            "y": -0.34,
+            "label": "Le Havre (Ligue 1)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -1.69,
+            "y": -0.4,
+            "label": "Lecce (Serie A)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -4.02,
+            "y": -0.33,
+            "label": "Leganés (La Liga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -3.69,
+            "y": -1.63,
+            "label": "Leicester City (Premier League)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 1.17,
+            "y": 1.4,
+            "label": "Lens (Ligue 1)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 5.73,
+            "y": 1.19,
+            "label": "Leverkusen (Bundesliga)",
+            "color": "var(--good)"
+          },
+          {
+            "x": 4.38,
+            "y": -0.27,
+            "label": "Lille (Ligue 1)",
+            "color": "var(--good)"
+          },
+          {
+            "x": 3.93,
+            "y": -1.56,
+            "label": "Liverpool (Premier League)",
+            "color": "var(--good)"
+          },
+          {
+            "x": 2.08,
+            "y": 0.48,
+            "label": "Lyon (Ligue 1)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -3.19,
+            "y": -0.12,
+            "label": "Mainz 05 (Bundesliga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -0.7,
+            "y": 3.99,
+            "label": "Mallorca (La Liga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 8.53,
+            "y": -2.93,
+            "label": "Manchester City (Premier League)",
+            "color": "var(--good)"
+          },
+          {
+            "x": 0.59,
+            "y": -2.04,
+            "label": "Manchester Utd (Premier League)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -0.17,
+            "y": -1.46,
+            "label": "Marseille (Ligue 1)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 3.77,
+            "y": -0.11,
+            "label": "Milan (Serie A)",
+            "color": "var(--good)"
+          },
+          {
+            "x": 2.66,
+            "y": -2.06,
+            "label": "Monaco (Ligue 1)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -1.59,
+            "y": 0.58,
+            "label": "Montpellier (Ligue 1)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -4.21,
+            "y": -0.7,
+            "label": "Monza (Serie A)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -0.46,
+            "y": 0.15,
+            "label": "Nantes (Ligue 1)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 1.35,
+            "y": -1.77,
+            "label": "Napoli (Serie A)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -0.49,
+            "y": -1.13,
+            "label": "Newcastle Utd (Premier League)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -1.01,
+            "y": -2.46,
+            "label": "Nice (Ligue 1)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -1.8,
+            "y": -1.33,
+            "label": "Nott'ham Forest (Premier League)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -2.52,
+            "y": 1.97,
+            "label": "Osasuna (La Liga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 6.95,
+            "y": -1.47,
+            "label": "Paris S-G (Ligue 1)",
+            "color": "var(--good)"
+          },
+          {
+            "x": -0.7,
+            "y": -2.25,
+            "label": "Parma (Serie A)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 1.32,
+            "y": -2.14,
+            "label": "RB Leipzig (Bundesliga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -1.66,
+            "y": 0.12,
+            "label": "Rayo Vallecano (La Liga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 5.96,
+            "y": -0.38,
+            "label": "Real Madrid (La Liga)",
+            "color": "var(--good)"
+          },
+          {
+            "x": 0.84,
+            "y": 0.91,
+            "label": "Real Sociedad (La Liga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -1.52,
+            "y": -0.25,
+            "label": "Reims (Ligue 1)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 0.12,
+            "y": -0.68,
+            "label": "Rennes (Ligue 1)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 3.21,
+            "y": 1.17,
+            "label": "Roma (Serie A)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -3.26,
+            "y": -1.86,
+            "label": "Saint-Étienne (Ligue 1)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -0.36,
+            "y": -0.25,
+            "label": "Sevilla (La Liga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 0.59,
+            "y": -1.59,
+            "label": "Southampton (Premier League)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -1.04,
+            "y": 0.44,
+            "label": "St. Pauli (Bundesliga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -2.63,
+            "y": -1.91,
+            "label": "Strasbourg (Ligue 1)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 2.4,
+            "y": 3.29,
+            "label": "Stuttgart (Bundesliga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -1.97,
+            "y": 0.41,
+            "label": "Torino (Serie A)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 6.31,
+            "y": -0.13,
+            "label": "Tottenham (Premier League)",
+            "color": "var(--good)"
+          },
+          {
+            "x": -1.79,
+            "y": -0.55,
+            "label": "Toulouse (Ligue 1)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -2.15,
+            "y": 2.64,
+            "label": "Udinese (Serie A)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -3.69,
+            "y": 0.56,
+            "label": "Union Berlin (Bundesliga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -2.42,
+            "y": 1.11,
+            "label": "Valencia (La Liga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -2.32,
+            "y": 1.69,
+            "label": "Valladolid (La Liga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -3.22,
+            "y": -0.99,
+            "label": "Venezia (Serie A)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": 0.85,
+            "y": 1.5,
+            "label": "Villarreal (La Liga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 0.62,
+            "y": 3.01,
+            "label": "Werder Bremen (Bundesliga)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": 0.63,
+            "y": 0.84,
+            "label": "West Ham (Premier League)",
+            "color": "var(--analytics)"
+          },
+          {
+            "x": -3.66,
+            "y": -0.41,
+            "label": "Wolfsburg (Bundesliga)",
+            "color": "var(--text-dim)"
+          },
+          {
+            "x": -1.55,
+            "y": -1,
+            "label": "Wolves (Premier League)",
+            "color": "var(--text-dim)"
+          }
+        ],
+        "xLabel": "PC1 — overall attacking dominance (46% of variance)",
+        "yLabel": "PC2 — crossing/wide play ↔ through-balls/carrying (12%)",
+        "allowNegative": true,
+        "trendline": false,
+        "legend": [
+          {
+            "label": "Elite tier",
+            "color": "var(--good)"
+          },
+          {
+            "label": "Mid tier",
+            "color": "var(--analytics)"
+          },
+          {
+            "label": "Lower-possession tier",
+            "color": "var(--text-dim)"
+          }
+        ],
+        "caption": "All 96 teams, 2024/25 season, projected onto the two main axes of attacking style. Left→right is mostly quality/dominance; top→bottom is a real style choice — crossing and switches of play (top) vs. through-balls and carries into the box (bottom) — that cuts across quality levels. Hover a point for the club."
+      },
+      {
+        "type": "heading",
+        "text": "A correlation heatmap across style and results"
+      },
+      {
+        "type": "paragraph",
+        "html": "The other tool worth bringing in properly: a real correlation matrix, rendered as a heatmap, across nine metrics — possession, progressive passing, progressive carrying, crossing, through-balls, passes into the box, long-pass accuracy, shot-creating actions, and points per game — pooled across all five leagues, 2017/18 through 2024/25 (898 team-seasons). Worth being precise about the word &ldquo;heatmap&rdquo; here: this is a statistical correlation grid, not a pitch-position heatmap — we still don't have raw x/y event coordinates for that."
+      },
+      {
+        "type": "chart",
+        "chartType": "matrix_heatmap",
+        "labels": [
+          "Possession %",
+          "Progressive passes/90",
+          "Progressive carries/90",
+          "Crosses/90",
+          "Through balls/90",
+          "Passes into box/90",
+          "Long-pass completion %",
+          "Shot-creating actions/90",
+          "Points per game"
+        ],
+        "cells": [
+          [
+            1,
+            0.891,
+            0.814,
+            0.175,
+            0.595,
+            0.81,
+            0.783,
+            0.764,
+            0.657
+          ],
+          [
+            0.891,
+            1,
+            0.837,
+            0.284,
+            0.579,
+            0.883,
+            0.768,
+            0.833,
+            0.671
+          ],
+          [
+            0.814,
+            0.837,
+            1,
+            0.194,
+            0.554,
+            0.745,
+            0.751,
+            0.791,
+            0.601
+          ],
+          [
+            0.175,
+            0.284,
+            0.194,
+            1,
+            -0.105,
+            0.272,
+            0.103,
+            0.308,
+            0.105
+          ],
+          [
+            0.595,
+            0.579,
+            0.554,
+            -0.105,
+            1,
+            0.609,
+            0.436,
+            0.568,
+            0.498
+          ],
+          [
+            0.81,
+            0.883,
+            0.745,
+            0.272,
+            0.609,
+            1,
+            0.667,
+            0.851,
+            0.668
+          ],
+          [
+            0.783,
+            0.768,
+            0.751,
+            0.103,
+            0.436,
+            0.667,
+            1,
+            0.663,
+            0.605
+          ],
+          [
+            0.764,
+            0.833,
+            0.791,
+            0.308,
+            0.568,
+            0.851,
+            0.663,
+            1,
+            0.645
+          ],
+          [
+            0.657,
+            0.671,
+            0.601,
+            0.105,
+            0.498,
+            0.668,
+            0.605,
+            0.645,
+            1
+          ]
+        ],
+        "caption": "Pearson correlation between each pair of metrics, 898 team-seasons across the top 5 leagues, 2017/18–2024/25. Darker green = stronger positive correlation, darker red = negative. Hover a cell for the exact value."
+      },
+      {
+        "type": "paragraph",
+        "html": "The matrix mostly confirms the clustering finding from a different angle: progressive passing, progressive carrying, passes into the box, shot-creating actions, and even long-pass accuracy are all tightly inter-correlated (0.6–0.9 with each other, and 0.6–0.67 with points per game) — which means they're mostly measuring the same underlying thing, not five independent skills. One metric stands apart: <b>crossing frequency correlates with almost nothing</b> — barely with possession (r=0.17), barely with points per game (r=0.10), and it's the only pair in the whole matrix with a negative sign at all (r=−0.11 against through-balls). Crossing a lot doesn't mark a team as good <i>or</i> bad — it's a genuinely independent stylistic choice, the closest thing in this data to a real tactical decision uncorrelated with quality."
+      },
+      {
+        "type": "heading",
+        "text": "What this still can't tell us"
+      },
+      {
+        "type": "list",
+        "items": [
+          "The clustering used a single season (2024/25) as a clean snapshot. Whether a team's style cluster is stable year to year — or shifts with a new manager or transfer window — is a natural next test we haven't run.",
+          "k=3 with a silhouette score of 0.18 is a soft, blended grouping, not sharply distinct tactical tribes. Read cluster membership as &ldquo;closer to this group than the others,&rdquo; not as a fixed footballing identity.",
+          "We still don't have a working substitute for real pressing-intensity data past 2021/22. Our attempt failed its own validation test, and we're leaving that gap open rather than papering over it with a fancier method.",
+          "Correlation isn't causation. Teams probably don't win <i>because</i> they complete more progressive passes — both quality and style plausibly share a common cause (squad talent, budget, coaching) that this matrix can't separate out."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "html": "See our <a href=\"/blog/is-high-pressing-actually-rising/\">first pressing post</a> for the full pressing-volume analysis this one extends, and <a href=\"/methodology\">Methodology</a> for how PitchMetric's actual predictions work — none of the clustering or correlation work here feeds the live model today."
+      }
+    ]
   }
 ]

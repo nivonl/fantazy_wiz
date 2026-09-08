@@ -78,26 +78,33 @@ export function renderDivergingBarChart(items, { width = 640, height, valueFmt =
 // Scatter plot with per-point hover tooltips (player name + both values) — used for the
 // output-vs-fantasy-points chart. `points`: [{x, y, label}]. An optional `trendline` (from a
 // simple least-squares fit) is drawn as a dashed reference line.
-export function renderScatterChart(points, { width = 640, height = 420, xLabel, yLabel, color = "var(--analytics)", trendline = true } = {}) {
-  const margin = { left: 54, right: 20, top: 16, bottom: 46 };
+export function renderScatterChart(points, { width = 640, height = 420, xLabel, yLabel, color = "var(--analytics)", trendline = true, allowNegative = false, legend } = {}) {
+  const margin = { left: 54, right: 20, top: 16, bottom: legend ? 60 : 46 };
   const plotW = width - margin.left - margin.right;
   const plotH = height - margin.top - margin.bottom;
 
   const xs = points.map((p) => p.x);
   const ys = points.map((p) => p.y);
+  // Default behaviour (allowNegative: false) is unchanged from before: axes start at 0, matching
+  // every existing caller (values that are naturally non-negative, like player output stats). A
+  // PCA-style chart with negative coordinates on both axes opts into allowNegative instead of
+  // forcing every caller to pass explicit min/max.
   const xMax = Math.max(...xs) * 1.05 || 1;
   const yMax = Math.max(...ys) * 1.08 || 1;
+  const xMin = allowNegative ? Math.min(...xs) * 1.05 : 0;
+  const yMin = allowNegative ? Math.min(...ys) * 1.08 : 0;
 
-  const px = (x) => margin.left + (x / xMax) * plotW;
-  const py = (y) => margin.top + plotH - (y / yMax) * plotH;
+  const px = (x) => margin.left + ((x - xMin) / (xMax - xMin || 1)) * plotW;
+  const py = (y) => margin.top + plotH - ((y - yMin) / (yMax - yMin || 1)) * plotH;
 
   const dots = points
     .map((p) => {
       const cx = px(p.x).toFixed(1);
       const cy = py(p.y).toFixed(1);
       const tooltip = `${escapeHtml(p.label)}: ${p.x.toFixed(2)} / ${p.y.toFixed(1)}`;
+      const dotColor = p.color || color;
       return `<circle cx="${cx}" cy="${cy}" r="7" fill="transparent" pointer-events="all" data-tooltip="${tooltip}"><title>${tooltip}</title></circle>
-    <circle cx="${cx}" cy="${cy}" r="3.5" fill="${color}" fill-opacity="0.65" pointer-events="none" />`;
+    <circle cx="${cx}" cy="${cy}" r="3.5" fill="${dotColor}" fill-opacity="0.75" pointer-events="none" />`;
     })
     .join("");
 
@@ -110,22 +117,31 @@ export function renderScatterChart(points, { width = 640, height = 420, xLabel, 
     const sumXX = points.reduce((a, p) => a + p.x * p.x, 0);
     const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX || 1);
     const intercept = (sumY - slope * sumX) / n;
-    const y0 = Math.max(0, intercept);
+    const y0 = intercept + slope * xMin;
     const y1 = intercept + slope * xMax;
-    trendPath = `<line x1="${px(0).toFixed(1)}" y1="${py(y0).toFixed(1)}" x2="${px(xMax).toFixed(1)}" y2="${py(Math.min(y1, yMax)).toFixed(1)}" stroke="var(--text-dim)" stroke-width="1.5" stroke-dasharray="5,5" />`;
+    trendPath = `<line x1="${px(xMin).toFixed(1)}" y1="${py(Math.max(yMin, Math.min(y0, yMax))).toFixed(1)}" x2="${px(xMax).toFixed(1)}" y2="${py(Math.max(yMin, Math.min(y1, yMax))).toFixed(1)}" stroke="var(--text-dim)" stroke-width="1.5" stroke-dasharray="5,5" />`;
   }
 
   // A handful of evenly-spaced axis ticks on each side.
   const xTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => {
-    const v = f * xMax;
+    const v = xMin + f * (xMax - xMin);
     return `<text x="${px(v).toFixed(1)}" y="${(height - margin.bottom + 20).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--text-dim)">${v.toFixed(1)}</text>`;
   });
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => {
-    const v = f * yMax;
+    const v = yMin + f * (yMax - yMin);
     return `
     <line x1="${margin.left}" y1="${py(v).toFixed(1)}" x2="${(width - margin.right).toFixed(1)}" y2="${py(v).toFixed(1)}" stroke="var(--panel-border)" stroke-width="1" stroke-dasharray="2,4" />
     <text x="${(margin.left - 8).toFixed(1)}" y="${(py(v) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--text-dim)">${v.toFixed(0)}</text>`;
   });
+
+  const legendSvg = legend
+    ? `<g transform="translate(${margin.left}, ${height - 16})">${legend
+        .map((s, i) => {
+          const x = i * 150;
+          return `<circle cx="${x + 5}" cy="-4" r="5" fill="${s.color}" /><text x="${x + 16}" y="0" font-size="12" fill="var(--text)">${escapeHtml(s.label)}</text>`;
+        })
+        .join("")}</g>`
+    : "";
 
   return `<svg class="research-chart" viewBox="0 0 ${width} ${height}" width="100%" height="${height}" role="img" aria-label="Scatter plot">
     ${yTicks.join("")}
@@ -134,6 +150,7 @@ export function renderScatterChart(points, { width = 640, height = 420, xLabel, 
     ${xTicks.join("")}
     ${trendPath}
     ${dots}
+    ${legendSvg}
     ${xLabel ? `<text x="${(margin.left + plotW / 2).toFixed(1)}" y="${height - 6}" text-anchor="middle" font-size="12.5" fill="var(--text-dim)">${escapeHtml(xLabel)}</text>` : ""}
     ${yLabel ? `<text x="14" y="${(margin.top + plotH / 2).toFixed(1)}" text-anchor="middle" font-size="12.5" fill="var(--text-dim)" transform="rotate(-90, 14, ${(margin.top + plotH / 2).toFixed(1)})">${escapeHtml(yLabel)}</text>` : ""}
   </svg>`;
@@ -241,4 +258,56 @@ export function renderStackedHBarChart(items, { width = 640, height, segmentLabe
     : "";
 
   return `<svg class="research-chart" viewBox="0 0 ${width} ${height}" width="100%" height="${height}" role="img" aria-label="Stacked bar chart">${rows}${legend}</svg>`;
+}
+
+// N×N correlation matrix as a colored grid — a genuine statistical heatmap (unlike the pitch-zone
+// stacked bars above, which are an honestly-labeled proxy for a positional heatmap we can't build
+// without raw x/y event data). `labels`: row/column names in order; `cells`: labels.length square
+// array of values in [-1, 1]. Diverging color scale: --bad for negative, --good for positive,
+// intensity by magnitude; diagonal (always 1) rendered at full intensity same as any other cell.
+export function renderMatrixHeatmap(labels, cells, { width = 640, cellFmt = (v) => v.toFixed(2) } = {}) {
+  const n = labels.length;
+  const labelW = Math.min(170, width * 0.28);
+  const cell = (width - labelW) / n;
+  const height = labelW + n * cell + 10;
+
+  function colorFor(v) {
+    const t = Math.min(1, Math.abs(v));
+    // Blend from the page panel color (near 0) toward --good or --bad (near +/-1) via opacity,
+    // rather than mixing hex values server-side -- keeps this correct under both themes for free.
+    return v >= 0 ? `color-mix(in srgb, var(--good) ${(t * 85).toFixed(0)}%, var(--panel))` : `color-mix(in srgb, var(--bad) ${(t * 85).toFixed(0)}%, var(--panel))`;
+  }
+
+  const colHeaders = labels
+    .map((l, j) => {
+      const x = labelW + j * cell + cell / 2;
+      return `<text x="${x.toFixed(1)}" y="${(labelW - 8).toFixed(1)}" text-anchor="start" font-size="11" fill="var(--text-dim)" transform="rotate(-40, ${x.toFixed(1)}, ${(labelW - 8).toFixed(1)})">${escapeHtml(l)}</text>`;
+    })
+    .join("");
+
+  const rowHeaders = labels
+    .map((l, i) => {
+      const y = labelW + i * cell + cell / 2 + 4;
+      return `<text x="${(labelW - 10).toFixed(1)}" y="${y.toFixed(1)}" text-anchor="end" font-size="11.5" fill="var(--text)">${escapeHtml(l)}</text>`;
+    })
+    .join("");
+
+  const rects = [];
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const v = cells[i][j];
+      const x = labelW + j * cell;
+      const y = labelW + i * cell;
+      const tooltip = `${escapeHtml(labels[i])} × ${escapeHtml(labels[j])}: ${cellFmt(v)}`;
+      const textColor = Math.abs(v) > 0.55 ? "#fff" : "var(--text)";
+      rects.push(`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(cell - 1.5).toFixed(1)}" height="${(cell - 1.5).toFixed(1)}" fill="${colorFor(v)}" data-tooltip="${tooltip}" pointer-events="all"><title>${tooltip}</title></rect>
+      <text x="${(x + cell / 2).toFixed(1)}" y="${(y + cell / 2 + 4).toFixed(1)}" text-anchor="middle" font-size="${cell > 44 ? 11 : 0}" fill="${textColor}" pointer-events="none">${cellFmt(v)}</text>`);
+    }
+  }
+
+  return `<svg class="research-chart" viewBox="0 0 ${width} ${height}" width="100%" height="${height}" role="img" aria-label="Correlation matrix heatmap">
+    ${colHeaders}
+    ${rowHeaders}
+    ${rects.join("")}
+  </svg>`;
 }

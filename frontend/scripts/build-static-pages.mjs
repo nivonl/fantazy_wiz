@@ -18,7 +18,7 @@ import { buildSlugMap } from "./lib/slugify.mjs";
 import { renderPage, SITE_URL } from "./lib/render-page.mjs";
 import { renderPointsBarChart, renderPriceLineChart } from "./lib/chart.mjs";
 import { renderRadarChart, formatCategoryDetail } from "../src/charts/radarChart.js";
-import { renderHBarChart, renderDivergingBarChart, renderScatterChart, renderLineChart, renderStackedHBarChart } from "./lib/research-charts.mjs";
+import { renderHBarChart, renderDivergingBarChart, renderScatterChart, renderLineChart, renderStackedHBarChart, renderMatrixHeatmap } from "./lib/research-charts.mjs";
 import { teamColor } from "../src/team-colors.js";
 import { seasonLabel } from "./lib/season.mjs";
 
@@ -353,11 +353,13 @@ function renderResearchChart(block) {
     case "diverging_hbar":
       return renderDivergingBarChart(block.data, { valueFmt });
     case "scatter":
-      return renderScatterChart(block.data, { xLabel: block.xLabel, yLabel: block.yLabel });
+      return renderScatterChart(block.data, { xLabel: block.xLabel, yLabel: block.yLabel, allowNegative: block.allowNegative, legend: block.legend, trendline: block.trendline });
     case "line":
       return renderLineChart(block.series, { yLabel: block.yLabel, yFmt: valueFmt, yMin: block.yMin });
     case "stacked_hbar":
       return renderStackedHBarChart(block.data, { segmentLabels: block.segmentLabels });
+    case "matrix_heatmap":
+      return renderMatrixHeatmap(block.labels, block.cells);
     default:
       return "";
   }
