@@ -138,3 +138,107 @@ export function renderScatterChart(points, { width = 640, height = 420, xLabel, 
     ${yLabel ? `<text x="14" y="${(margin.top + plotH / 2).toFixed(1)}" text-anchor="middle" font-size="12.5" fill="var(--text-dim)" transform="rotate(-90, 14, ${(margin.top + plotH / 2).toFixed(1)})">${escapeHtml(yLabel)}</text>` : ""}
   </svg>`;
 }
+
+// Multi-series line chart over a shared categorical x-axis (season labels, gameweeks, etc.) --
+// used for "how has this metric moved over several seasons" trend charts. `series`:
+// [{label, color, points: [{x: <category label>, y: number}]}]. All series share the same x
+// categories, evenly spaced. A light dot + hover tooltip marks each data point.
+export function renderLineChart(series, { width = 640, height = 320, yLabel, yFmt = (v) => v.toFixed(1), yMin } = {}) {
+  const margin = { left: 54, right: 20, top: 16, bottom: series.length > 1 ? 56 : 36 };
+  const plotW = width - margin.left - margin.right;
+  const plotH = height - margin.top - margin.bottom;
+
+  const categories = series[0]?.points.map((p) => p.x) || [];
+  const allY = series.flatMap((s) => s.points.map((p) => p.y));
+  const yMax = Math.max(...allY) * 1.08;
+  const yLo = yMin !== undefined ? yMin : Math.min(...allY, 0) * (Math.min(...allY, 0) < 0 ? 1.08 : 0.92);
+
+  const px = (i) => margin.left + (categories.length > 1 ? (i / (categories.length - 1)) * plotW : plotW / 2);
+  const py = (y) => margin.top + plotH - ((y - yLo) / (yMax - yLo || 1)) * plotH;
+
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => {
+    const v = yLo + f * (yMax - yLo);
+    return `
+    <line x1="${margin.left}" y1="${py(v).toFixed(1)}" x2="${(width - margin.right).toFixed(1)}" y2="${py(v).toFixed(1)}" stroke="var(--panel-border)" stroke-width="1" stroke-dasharray="2,4" />
+    <text x="${(margin.left - 8).toFixed(1)}" y="${(py(v) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--text-dim)">${yFmt(v)}</text>`;
+  });
+  const xTicks = categories.map((c, i) => `<text x="${px(i).toFixed(1)}" y="${(height - margin.bottom + 20).toFixed(1)}" text-anchor="middle" font-size="11.5" fill="var(--text-dim)">${escapeHtml(String(c))}</text>`);
+
+  const seriesSvg = series
+    .map((s) => {
+      const path = s.points.map((p, i) => `${i === 0 ? "M" : "L"} ${px(i).toFixed(1)} ${py(p.y).toFixed(1)}`).join(" ");
+      const dots = s.points
+        .map((p, i) => {
+          const cx = px(i).toFixed(1);
+          const cy = py(p.y).toFixed(1);
+          const tooltip = `${escapeHtml(s.label)} — ${escapeHtml(String(p.x))}: ${yFmt(p.y)}`;
+          return `<circle cx="${cx}" cy="${cy}" r="8" fill="transparent" pointer-events="all" data-tooltip="${tooltip}"><title>${tooltip}</title></circle>
+      <circle cx="${cx}" cy="${cy}" r="3.5" fill="${s.color}" />`;
+        })
+        .join("");
+      return `<path d="${path}" fill="none" stroke="${s.color}" stroke-width="2.5" />${dots}`;
+    })
+    .join("");
+
+  const legend = series.length > 1
+    ? `<g transform="translate(${margin.left}, ${height - 22})">${series
+        .map((s, i) => {
+          const x = i * 150;
+          return `<rect x="${x}" y="-9" width="11" height="11" rx="2" fill="${s.color}" /><text x="${x + 16}" y="0" font-size="12" fill="var(--text)">${escapeHtml(s.label)}</text>`;
+        })
+        .join("")}</g>`
+    : "";
+
+  return `<svg class="research-chart" viewBox="0 0 ${width} ${height}" width="100%" height="${height}" role="img" aria-label="Line chart">
+    ${yTicks.join("")}
+    <line x1="${margin.left}" y1="${(margin.top + plotH).toFixed(1)}" x2="${(width - margin.right).toFixed(1)}" y2="${(margin.top + plotH).toFixed(1)}" stroke="var(--panel-border)" stroke-width="1.5" />
+    ${xTicks.join("")}
+    ${seriesSvg}
+    ${legend}
+    ${yLabel ? `<text x="14" y="${(margin.top + plotH / 2).toFixed(1)}" text-anchor="middle" font-size="12.5" fill="var(--text-dim)" transform="rotate(-90, 14, ${(margin.top + plotH / 2).toFixed(1)})">${escapeHtml(yLabel)}</text>` : ""}
+  </svg>`;
+}
+
+// Horizontal 100%-stacked bar chart — one bar per row, split into named colored segments that
+// sum to 100%. Used as an honest proxy for a pitch-zone "heatmap": we don't have raw x/y event
+// coordinates, but we do have defensive-third / middle-third / attacking-third shares, and a
+// stacked bar communicates the same "where on the pitch" idea without overclaiming precision.
+export function renderStackedHBarChart(items, { width = 640, height, segmentLabels } = {}) {
+  const n = items.length;
+  const rowH = 40;
+  const barGap = 16;
+  const labelW = Math.min(150, width * 0.26);
+  const plotW = width - labelW - 16;
+  height = height || n * (rowH + barGap) + barGap + 30;
+
+  const rows = items
+    .map((item, i) => {
+      const y = barGap + i * (rowH + barGap);
+      const total = item.segments.reduce((a, s) => a + s.value, 0) || 1;
+      let x = labelW;
+      const segs = item.segments
+        .map((s) => {
+          const w = (s.value / total) * plotW;
+          const tooltip = `${escapeHtml(item.label)} — ${escapeHtml(s.name)}: ${s.value.toFixed(1)}%`;
+          const rect = `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${Math.max(w, 0.5).toFixed(1)}" height="${rowH}" fill="${s.color}" data-tooltip="${tooltip}" pointer-events="all"><title>${tooltip}</title></rect>${
+            w > 34 ? `<text x="${(x + w / 2).toFixed(1)}" y="${(y + rowH / 2 + 4).toFixed(1)}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">${s.value.toFixed(0)}%</text>` : ""
+          }`;
+          x += w;
+          return rect;
+        })
+        .join("");
+      return `<text x="${labelW - 10}" y="${(y + rowH / 2 + 4).toFixed(1)}" text-anchor="end" font-size="13" fill="var(--text)">${escapeHtml(item.label)}</text>${segs}`;
+    })
+    .join("");
+
+  const legend = segmentLabels
+    ? `<g transform="translate(${labelW}, ${(height - 22).toFixed(1)})">${segmentLabels
+        .map((s, i) => {
+          const x = i * 170;
+          return `<rect x="${x}" y="-9" width="11" height="11" rx="2" fill="${s.color}" /><text x="${x + 16}" y="0" font-size="12" fill="var(--text)">${escapeHtml(s.name)}</text>`;
+        })
+        .join("")}</g>`
+    : "";
+
+  return `<svg class="research-chart" viewBox="0 0 ${width} ${height}" width="100%" height="${height}" role="img" aria-label="Stacked bar chart">${rows}${legend}</svg>`;
+}

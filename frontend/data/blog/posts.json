@@ -516,12 +516,12 @@
         "chartType": "scatter",
         "data": [
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.65,
             "label": "Gary Cahill"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.54,
             "label": "Fabian Delph"
           },
@@ -546,77 +546,77 @@
             "label": "Aaron Lennon"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.88,
             "label": "Craig Cathcart"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.81,
             "label": "Jake Livermore"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.37,
             "label": "Danny Ward"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.91,
             "label": "Ben Gibson"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.87,
             "label": "Enda Stevens"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.6,
             "label": "Scott Dann"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.43,
             "label": "Darnell Furlong"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.8,
             "label": "Jamie Shackleton"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.68,
             "label": "Tom Cleverley"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.75,
             "label": "Kyle Bartley"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.94,
             "label": "Erik Pieters"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.42,
             "label": "Matt Phillips"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.81,
             "label": "Kevin Long"
           },
           {
-            "x": 0.0,
-            "y": 2.0,
+            "x": 0,
+            "y": 2,
             "label": "Romaine Sawyers"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.29,
             "label": "Karlan Grant"
           },
@@ -626,52 +626,52 @@
             "label": "Marc Albrighton"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.24,
             "label": "Tyler Roberts"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.13,
             "label": "Matthew Lowton"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.86,
             "label": "Ciaran Clark"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.76,
             "label": "David McGoldrick"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.93,
             "label": "Wes Burns"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.82,
             "label": "Reece James"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.13,
             "label": "Adam Smith"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.88,
             "label": "Steve Cook"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.14,
             "label": "James McArthur"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.43,
             "label": "Adam Forshaw"
           },
@@ -691,37 +691,37 @@
             "label": "Luke Ayling"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.57,
             "label": "Stuart Dallas"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.54,
             "label": "Juraj Kucka"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.21,
             "label": "Federico Fernández"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.61,
             "label": "Luka Milivojevic"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.6,
             "label": "Kean Bryan"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.51,
             "label": "Ryan Bertrand"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.58,
             "label": "Callum Robinson"
           },
@@ -736,7 +736,7 @@
             "label": "Patson Daka"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.08,
             "label": "Daniel Bachmann"
           },
@@ -751,47 +751,47 @@
             "label": "Joe Gelhardt"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.13,
             "label": "Aaron Connolly"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.98,
             "label": "Ibrahima Diallo"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.2,
             "label": "Nathaniel Phillips"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.6,
             "label": "Brandon Williams"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.47,
             "label": "John Fleck"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.63,
             "label": "Jeff Hendrick"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.09,
             "label": "Japhet Tanganga"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.84,
             "label": "Chris Basham"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.79,
             "label": "Rhian Brewster"
           },
@@ -801,7 +801,7 @@
             "label": "Shandon Baptiste"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.01,
             "label": "Cheikhou Kouyaté"
           },
@@ -821,7 +821,7 @@
             "label": "Jordan Clark"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.46,
             "label": "Angelo Ogbonna"
           },
@@ -836,7 +836,7 @@
             "label": "Matt Ritchie"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.86,
             "label": "Nathan Redmond"
           },
@@ -846,12 +846,12 @@
             "label": "Jack Robinson"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.1,
             "label": "Tim Krul"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.21,
             "label": "Tom Davies"
           },
@@ -881,7 +881,7 @@
             "label": "Oliver Norwood"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.19,
             "label": "Paul Dummett"
           },
@@ -891,22 +891,22 @@
             "label": "Jacob Brown"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.27,
             "label": "Marvelous Nakamba"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.51,
             "label": "Jack Cork"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.03,
             "label": "Ryan Fredericks"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.27,
             "label": "Thomas Kaminski"
           },
@@ -921,7 +921,7 @@
             "label": "Reece Burke"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.53,
             "label": "Joel Matip"
           },
@@ -946,7 +946,7 @@
             "label": "Tahith Chong"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.88,
             "label": "James Tomkins"
           },
@@ -961,7 +961,7 @@
             "label": "Max Lowe"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.9,
             "label": "Pelly Ruddock Mpanzu"
           },
@@ -986,17 +986,17 @@
             "label": "Adam Lallana"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.94,
             "label": "Craig Dawson"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.56,
             "label": "Kortney Hause"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.71,
             "label": "Joel Ward"
           },
@@ -1036,52 +1036,52 @@
             "label": "Stephy Mavididi"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.75,
             "label": "Taylor Harwood-Bellis"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.33,
             "label": "Flynn Downes"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.08,
             "label": "Luke Thomas"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.36,
             "label": "Luke Woolfenden"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.44,
             "label": "Oliver Skipp"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.42,
             "label": "Daniel Iversen"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.46,
             "label": "Charlie Taylor"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.51,
             "label": "Harry Winks"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.02,
             "label": "Cameron Archer"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.91,
             "label": "Alex McCarthy"
           },
@@ -1121,7 +1121,7 @@
             "label": "Conor Townsend"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.82,
             "label": "Harry Souttar"
           },
@@ -1131,17 +1131,17 @@
             "label": "Ben Johnson"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.72,
             "label": "Aaron Cresswell"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.54,
             "label": "Jamaal Lascelles"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.38,
             "label": "Wes Foderingham"
           },
@@ -1161,17 +1161,17 @@
             "label": "Philip Billing"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.62,
             "label": "Gavin Bazunu"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.59,
             "label": "Matt Targett"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.65,
             "label": "Nampalys Mendy"
           },
@@ -1181,7 +1181,7 @@
             "label": "Cameron Burgess"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.76,
             "label": "Dara O'Shea"
           },
@@ -1196,37 +1196,37 @@
             "label": "Ryan Manning"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.56,
             "label": "Ki-Jana Hoever"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.15,
             "label": "Jannik Vestergaard"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.29,
             "label": "Kenny McLean"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.89,
             "label": "Chris Mepham"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.68,
             "label": "John Egan"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.48,
             "label": "Bobby De Cordova-Reid"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.08,
             "label": "Isaac Hayden"
           },
@@ -1241,22 +1241,22 @@
             "label": "Jakub Kiwior"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.38,
             "label": "Kalvin Phillips"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.23,
             "label": "Joe Aribo"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.33,
             "label": "Victor Kristiansen"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.68,
             "label": "Chiedozie Ogbene"
           },
@@ -1286,7 +1286,7 @@
             "label": "Arthur Masuaku"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 5.55,
             "label": "Josh Dasilva"
           },
@@ -1321,12 +1321,12 @@
             "label": "Jérémy Doku"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.48,
             "label": "Séamus Coleman"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.87,
             "label": "Jaydee Canvot"
           },
@@ -1396,7 +1396,7 @@
             "label": "Randal Kolo Muani"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.69,
             "label": "Joe Worrall"
           },
@@ -1446,7 +1446,7 @@
             "label": "Timothy Castagne"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.32,
             "label": "Willy Boly"
           },
@@ -1461,7 +1461,7 @@
             "label": "Chris Wood"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.56,
             "label": "Dean Henderson"
           },
@@ -1471,12 +1471,12 @@
             "label": "Levi Colwill"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 5.05,
             "label": "John Stones"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.87,
             "label": "Benoît Badiashile"
           },
@@ -1487,7 +1487,7 @@
           },
           {
             "x": 0.278,
-            "y": 4.0,
+            "y": 4,
             "label": "Alexis Mac Allister"
           },
           {
@@ -1526,7 +1526,7 @@
             "label": "Tomáš Souček"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.9,
             "label": "Caoimhín Kelleher"
           },
@@ -1546,7 +1546,7 @@
             "label": "Tosin Adarabioyo"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.84,
             "label": "Kepa Arrizabalaga"
           },
@@ -1571,7 +1571,7 @@
             "label": "Lukas Nmecha"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 5.75,
             "label": "James Maddison"
           },
@@ -1591,7 +1591,7 @@
             "label": "Georginio Rutter"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.29,
             "label": "Emil Krafth"
           },
@@ -1626,7 +1626,7 @@
             "label": "Victor Lindelöf"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.26,
             "label": "Radu Drăgușin"
           },
@@ -1686,7 +1686,7 @@
             "label": "Reiss Nelson"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.25,
             "label": "Bafodé Diakité"
           },
@@ -1711,12 +1711,12 @@
             "label": "Kieran Trippier"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.46,
             "label": "Yves Bissouma"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.89,
             "label": "Robin Roefs"
           },
@@ -1746,7 +1746,7 @@
             "label": "Daichi Kamada"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.37,
             "label": "Jason Steele"
           },
@@ -1771,7 +1771,7 @@
             "label": "David Brooks"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.37,
             "label": "Lisandro Martínez"
           },
@@ -1791,7 +1791,7 @@
             "label": "Dan Ndoye"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.83,
             "label": "Daniel James"
           },
@@ -1806,7 +1806,7 @@
             "label": "Harry Wilson"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.67,
             "label": "Lukasz Fabianski"
           },
@@ -1831,12 +1831,12 @@
             "label": "Eberechi Eze"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.43,
             "label": "Martin Dúbravka"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.19,
             "label": "Nathan Patterson"
           },
@@ -1846,7 +1846,7 @@
             "label": "Nicolò Savona"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.17,
             "label": "Bart Verbruggen"
           },
@@ -1881,7 +1881,7 @@
             "label": "Mikel Merino"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.31,
             "label": "Nathan Aké"
           },
@@ -1921,7 +1921,7 @@
             "label": "Harry Maguire"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.65,
             "label": "Cristhian Mosquera"
           },
@@ -1931,17 +1931,17 @@
             "label": "Florian Wirtz"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.46,
             "label": "Bernd Leno"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.48,
             "label": "Cheick Doucouré"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.85,
             "label": "Antonín Kinský"
           },
@@ -1986,12 +1986,12 @@
             "label": "Ryan Sessegnon"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.05,
             "label": "Kevin Danso"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.28,
             "label": "Illan Meslier"
           },
@@ -2007,7 +2007,7 @@
           },
           {
             "x": 0.317,
-            "y": 5.0,
+            "y": 5,
             "label": "Harvey Elliott"
           },
           {
@@ -2026,7 +2026,7 @@
             "label": "Callum Hudson-Odoi"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.11,
             "label": "Djed Spence"
           },
@@ -2046,7 +2046,7 @@
             "label": "Vitaly Janelt"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.96,
             "label": "Zeki Amdouni"
           },
@@ -2061,7 +2061,7 @@
             "label": "Tim Iroegbunam"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.69,
             "label": "Matt Doherty"
           },
@@ -2086,7 +2086,7 @@
             "label": "Jeremie Frimpong"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.59,
             "label": "James Trafford"
           },
@@ -2101,12 +2101,12 @@
             "label": "Wataru Endo"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.02,
             "label": "Ethan Pinnock"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.55,
             "label": "Roméo Lavia"
           },
@@ -2231,7 +2231,7 @@
             "label": "Gabriel Gudmundsson"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.91,
             "label": "Connor Roberts"
           },
@@ -2256,17 +2256,17 @@
             "label": "Maxim De Cuyper"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.19,
             "label": "Jordan Beyer"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.12,
             "label": "Maxime Estève"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.48,
             "label": "Manuel Ugarte"
           },
@@ -2426,7 +2426,7 @@
             "label": "Calvin Bassey"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.88,
             "label": "Guglielmo Vicario"
           },
@@ -2441,7 +2441,7 @@
             "label": "Sven Botman"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 1.92,
             "label": "Sam Byram"
           },
@@ -2481,7 +2481,7 @@
             "label": "Lyle Foster"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.5,
             "label": "Tyler Dibling"
           },
@@ -2496,12 +2496,12 @@
             "label": "Andrew Robertson"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.7,
             "label": "Jordan Pickford"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.32,
             "label": "Rico Henry"
           },
@@ -2536,12 +2536,12 @@
             "label": "Anton Stach"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.7,
             "label": "Dejan Kulusevski"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.11,
             "label": "Karl Darlow"
           },
@@ -2571,7 +2571,7 @@
             "label": "Bertrand Traoré"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.07,
             "label": "Fraser Forster"
           },
@@ -2596,7 +2596,7 @@
             "label": "Armando Broja"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.22,
             "label": "Mark Travers"
           },
@@ -2626,7 +2626,7 @@
             "label": "Carlos Alcaraz"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.73,
             "label": "Lamare Bogarde"
           },
@@ -2641,7 +2641,7 @@
             "label": "Alexander Isak"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.78,
             "label": "Abdukodir Khusanov"
           },
@@ -2671,7 +2671,7 @@
             "label": "Tijjani Reijnders"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.46,
             "label": "Matz Sels"
           },
@@ -2687,7 +2687,7 @@
           },
           {
             "x": 0.14,
-            "y": 3.0,
+            "y": 3,
             "label": "Nathaniel Clyne"
           },
           {
@@ -2706,7 +2706,7 @@
             "label": "Adama Traoré"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 4.01,
             "label": "Tyrell Malacia"
           },
@@ -2741,7 +2741,7 @@
             "label": "Adam Wharton"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.46,
             "label": "Aaron Ramsdale"
           },
@@ -2786,7 +2786,7 @@
             "label": "Josh Laurent"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.08,
             "label": "Maximilian Kilman"
           },
@@ -2806,7 +2806,7 @@
             "label": "Justin Devenny"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 2.83,
             "label": "Carlos Baleba"
           },
@@ -2846,12 +2846,12 @@
             "label": "Eddie Nketiah"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.47,
             "label": "Daniel Bentley"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.97,
             "label": "Gianluigi Donnarumma"
           },
@@ -2886,7 +2886,7 @@
             "label": "Fabian Schär"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 5.11,
             "label": "Solly March"
           },
@@ -2901,7 +2901,7 @@
             "label": "Alphonse Areola"
           },
           {
-            "x": 0.0,
+            "x": 0,
             "y": 3.18,
             "label": "Adam Webster"
           },
@@ -3032,7 +3032,7 @@
           },
           {
             "x": 0.228,
-            "y": 3.0,
+            "y": 3,
             "label": "Guido Rodríguez"
           }
         ],
@@ -3107,7 +3107,7 @@
           },
           {
             "label": "1–2 matches of history",
-            "value": 9.0
+            "value": 9
           },
           {
             "label": "3–5 matches of history",
@@ -3225,7 +3225,7 @@
         "actual_points": 14,
         "predicted_xp": 0.12,
         "surprise": 13.88,
-        "percentile": 100.0,
+        "percentile": 100,
         "z_score": 4.32,
         "goals": 1,
         "assists": 0,
@@ -3235,7 +3235,7 @@
         "bps": 30,
         "expected_goals": 0.9,
         "expected_assists": 0.02,
-        "ict_index": 0.0,
+        "ict_index": 0,
         "photo": "jayden-bogle.jpg",
         "photo_credit": {
           "name": "Timmy96",
@@ -3268,7 +3268,7 @@
         "bps": 31,
         "expected_goals": 0.66,
         "expected_assists": 0.01,
-        "ict_index": 0.0,
+        "ict_index": 0,
         "photo": "tyrick-mitchell.jpg",
         "photo_credit": {
           "name": "Ardfern",
@@ -3287,7 +3287,7 @@
         "opponent": "Bournemouth",
         "was_home": true,
         "minutes": 90,
-        "value": 6.0,
+        "value": 6,
         "actual_points": 12,
         "predicted_xp": 1.53,
         "surprise": 10.47,
@@ -3301,7 +3301,7 @@
         "bps": 37,
         "expected_goals": 0.11,
         "expected_assists": 0.03,
-        "ict_index": 0.0,
+        "ict_index": 0,
         "photo": "harvey-barnes.jpg",
         "photo_credit": {
           "name": "Pottercomuneo",
@@ -3320,7 +3320,7 @@
         "opponent": "Leeds",
         "was_home": true,
         "minutes": 90,
-        "value": 5.0,
+        "value": 5,
         "actual_points": 12,
         "predicted_xp": 1.75,
         "surprise": 10.26,
@@ -3334,7 +3334,7 @@
         "bps": 27,
         "expected_goals": 0.19,
         "expected_assists": 0.01,
-        "ict_index": 0.0,
+        "ict_index": 0,
         "photo": "luka-vuskovic.jpg",
         "photo_credit": {
           "name": "Bryan Berlin",
@@ -3353,7 +3353,7 @@
         "opponent": "Ipswich Town",
         "was_home": false,
         "minutes": 63,
-        "value": 9.0,
+        "value": 9,
         "actual_points": 13,
         "predicted_xp": 3.77,
         "surprise": 9.23,
@@ -3367,7 +3367,7 @@
         "bps": 61,
         "expected_goals": 0.21,
         "expected_assists": 0.05,
-        "ict_index": 0.0,
+        "ict_index": 0,
         "photo": "alexander-isak.jpg",
         "photo_credit": {
           "name": "Mikael Hervestad",
@@ -3376,6 +3376,3045 @@
           "source_url": "https://commons.wikimedia.org/wiki/File:Alexander_Isak_-_Sweden_-_Greece21_(cropped).jpg"
         },
         "analysis": "Isak needs no introduction as a talent — Liverpool paid a British transfer record (£125m) for him roughly a year before this season kicked off — but reputation alone was never what fed this prediction. What mattered is that after a blank in Gameweek 1, he'd already opened his account with a goal in Gameweek 2, and that real, if thin, current-season record is what the model was actually working from: 3.77 points predicted, well above a total unknown's floor. He doubled up with a brace away at Ipswich Town in a 2-0 win, worth 13 points. At just 0.21 combined expected goals for two actual finishes, this was clinical finishing well ahead of the underlying chance quality — the smallest, most ordinary kind of surprise on this list: a proven forward simply having a very good day."
+      }
+    ]
+  },
+  {
+    "type": "deep_research",
+    "slug": "is-high-pressing-actually-rising",
+    "category": "Deep Research",
+    "title": "Is High Pressing Actually Taking Over Football? Five Seasons of Data From Europe's Top Five Leagues",
+    "dek": "“Everyone presses now” is one of modern football's most repeated claims. We pulled team and player event data across the Premier League, La Liga, Bundesliga, Serie A and Ligue 1 to actually test it — and the honest answer is more interesting than a straight yes.",
+    "published": "2026-09-08",
+    "lede": "Commentators have been saying it for a decade: the modern game presses harder, higher, and more relentlessly than ever, and possession football is on the way out. It's a good story. We wanted to know if it's a <i>true</i> one — not the vibe, the actual numbers, tested for statistical significance rather than eyeballed off a couple of famous teams.",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "html": "So we built a dataset: team and player-level defensive-pressure event counts, possession shares, and final league standings across all five of Europe's traditional top leagues, covering as many recent seasons as we could reliably get real data for. Then we asked four specific questions — is pressing volume actually rising, has it come at the expense of possession, does it look different for rich clubs than poor ones, and what's the actual role forwards play in it — and let the data answer each one on its own, even where that meant walking back the premise."
+      },
+      {
+        "type": "heading",
+        "text": "An honest limitation, up front"
+      },
+      {
+        "type": "paragraph",
+        "html": "Team-level defensive-pressure event data (the &ldquo;Pressures&rdquo; stat behind most of this piece) comes from a public research mirror of a well-known football-stats site, sourced from event-tracking data. That provider changed hands industry-wide in October 2022, and pressure-event counts specifically stopped being published in our source from the 2022/23 season onward under the new provider's different tracking methodology. Rather than splice two incompatible counting methods into one line and pretend it's a clean trend, we've scoped the pressing-specific analysis to the five full seasons where the same counting method applies throughout: <b>2017/18 through 2021/22</b>, roughly 490 team-seasons across the five leagues. Possession shares and league tables don't have this problem, so those extend one season further, through 2022/23."
+      },
+      {
+        "type": "callout",
+        "heading": "Why we're not just re-scraping past October 2022",
+        "html": "<p>The site itself blocks automated access outright, and re-building years of positional/event data from scratch wasn't realistic for this piece. We'd rather publish five clean, honestly-sourced seasons than stretch a shakier one on top and let a data-provider switch masquerade as a tactical trend — that mistake alone would make a fascinating (wrong) headline.</p>"
+      },
+      {
+        "type": "heading",
+        "text": "Is the total volume of pressing actually rising?"
+      },
+      {
+        "type": "paragraph",
+        "html": "Short answer: no — if anything, it's gone slightly the other way. Averaged across all five leagues, the number of defensive-pressure events per 90 minutes peaked in 2018/19 and was <i>lower</i> in 2021/22 than it was at the start of our window."
+      },
+      {
+        "type": "chart",
+        "chartType": "line",
+        "series": [
+          {
+            "label": "Pressure events per 90 (all 5 leagues)",
+            "color": "var(--analytics)",
+            "points": [
+              {
+                "x": "2017-18",
+                "y": 152.7
+              },
+              {
+                "x": "2018-19",
+                "y": 161.7
+              },
+              {
+                "x": "2019-20",
+                "y": 157.5
+              },
+              {
+                "x": "2020-21",
+                "y": 143.1
+              },
+              {
+                "x": "2021-22",
+                "y": 149.3
+              }
+            ]
+          }
+        ],
+        "yLabel": "events / 90",
+        "caption": "League-average defensive-pressure events per 90 minutes, all five top leagues pooled, 2017/18–2021/22 (n≈490 team-seasons). 2020/21's dip lines up with the Covid-disrupted, fixture-congested season — but the overall five-season slope is still a statistically significant decline, not just that one year."
+      },
+      {
+        "type": "paragraph",
+        "html": "Running a straight regression of press events per 90 against season year, pooled across all ~490 team-seasons, gives a slope of <b>−2.5 events/90 per season</b> (r = −0.24, p = 7×10<sup>−8</sup>) — small in absolute terms, but about as far from statistical noise as this kind of data gets. It isn't one outlier league dragging the average down, either: four of the five leagues show their own significant downward slope on their own."
+      },
+      {
+        "type": "chart",
+        "chartType": "diverging_hbar",
+        "data": [
+          {
+            "label": "La Liga (p<0.001)",
+            "value": -5.44
+          },
+          {
+            "label": "Serie A (p<0.001)",
+            "value": -3.47
+          },
+          {
+            "label": "Premier League (p=0.008)",
+            "value": -2.72
+          },
+          {
+            "label": "Bundesliga (p=0.034)",
+            "value": -1.96
+          },
+          {
+            "label": "Ligue 1 (p=0.42, not significant)",
+            "value": 1
+          }
+        ],
+        "valueFmt": "correlation",
+        "caption": "Per-league trend in pressure events per 90, in events/90 per season, 2017/18–2021/22. Four of five leagues decline significantly; Ligue 1 is the one league where the five-season slope isn't distinguishable from flat."
+      },
+      {
+        "type": "paragraph",
+        "html": "If your mental model of &ldquo;the pressing revolution&rdquo; is <i>more of it, every year, everywhere</i> — that's the part of the popular story the data doesn't support, at least not in raw event-count terms."
+      },
+      {
+        "type": "heading",
+        "text": "But raw volume is hiding two real, and more interesting, trends"
+      },
+      {
+        "type": "paragraph",
+        "html": "Total volume falling doesn't mean nothing changed. Two things move in the opposite direction, and both are statistically real:"
+      },
+      {
+        "type": "list",
+        "items": [
+          "<b>Pressing is getting more efficient.</b> The share of pressure events that actually win the ball back rose from 28.6% in 2017/18 to 29.9% in 2021/22 (slope +0.53 points/season, p = 1×10<sup>−13</sup>).",
+          "<b>What pressing remains is shifting higher up the pitch.</b> The share of a team's pressure events happening in the attacking third — as opposed to their own defensive or middle third — rose from 21.5% to 23.4% over the same five seasons (p = 2×10<sup>−7</sup>). Attacking-third pressing volume itself is roughly flat (p = 0.09, not quite significant) even while total volume falls, meaning teams are cutting pressing everywhere <i>except</i> up near the opponent's goal."
+        ]
+      },
+      {
+        "type": "chart",
+        "chartType": "line",
+        "series": [
+          {
+            "label": "Attacking-third share of all pressing",
+            "color": "var(--good)",
+            "points": [
+              {
+                "x": "2017-18",
+                "y": 21.46
+              },
+              {
+                "x": "2018-19",
+                "y": 21.04
+              },
+              {
+                "x": "2019-20",
+                "y": 22.22
+              },
+              {
+                "x": "2020-21",
+                "y": 22.69
+              },
+              {
+                "x": "2021-22",
+                "y": 23.38
+              }
+            ]
+          },
+          {
+            "label": "Press success rate",
+            "color": "var(--accent)",
+            "points": [
+              {
+                "x": "2017-18",
+                "y": 28.62
+              },
+              {
+                "x": "2018-19",
+                "y": 26.81
+              },
+              {
+                "x": "2019-20",
+                "y": 28.53
+              },
+              {
+                "x": "2020-21",
+                "y": 29.52
+              },
+              {
+                "x": "2021-22",
+                "y": 29.92
+              }
+            ]
+          }
+        ],
+        "yLabel": "%",
+        "yMin": 0,
+        "caption": "Two real five-season trends hiding inside a falling total: pressing has become more concentrated near the opponent's goal, and more likely to actually win the ball, even as the raw event count declines."
+      },
+      {
+        "type": "paragraph",
+        "html": "Put together, the honest one-line summary isn't &ldquo;pressing is rising&rdquo; — it's <b>pressing is getting smarter, not more frequent</b>: less pressing overall, concentrated where it does the most damage, and landing more often when it happens."
+      },
+      {
+        "type": "heading",
+        "text": "Did pressing actually replace possession?"
+      },
+      {
+        "type": "paragraph",
+        "html": "This one needs care, because league-average possession is mechanically stuck near 50% — it's zero-sum within any match, so an aggregate &ldquo;did average possession fall over time&rdquo; test is meaningless by construction (and, confirming that, our five-league average sits at 50.0–50.1% every single season). The real question is a cross-sectional one: <i>within</i> a season, do the teams that press more tend to be the teams with less of the ball?"
+      },
+      {
+        "type": "chart",
+        "chartType": "scatter",
+        "data": [
+          {
+            "x": 39.8,
+            "y": 165,
+            "label": "Alavés 2017-18"
+          },
+          {
+            "x": 43.3,
+            "y": 128,
+            "label": "Amiens 2017-18"
+          },
+          {
+            "x": 44.7,
+            "y": 136,
+            "label": "Angers 2017-18"
+          },
+          {
+            "x": 61.5,
+            "y": 143,
+            "label": "Arsenal 2017-18"
+          },
+          {
+            "x": 55.2,
+            "y": 164,
+            "label": "Atalanta 2017-18"
+          },
+          {
+            "x": 49.7,
+            "y": 178,
+            "label": "Athletic Club 2017-18"
+          },
+          {
+            "x": 47.3,
+            "y": 172,
+            "label": "Atlético Madrid 2017-18"
+          },
+          {
+            "x": 45.6,
+            "y": 156,
+            "label": "Augsburg 2017-18"
+          },
+          {
+            "x": 63.1,
+            "y": 160,
+            "label": "Barcelona 2017-18"
+          },
+          {
+            "x": 65.9,
+            "y": 138,
+            "label": "Bayern Munich 2017-18"
+          },
+          {
+            "x": 47.7,
+            "y": 148,
+            "label": "Benevento 2017-18"
+          },
+          {
+            "x": 57.7,
+            "y": 141,
+            "label": "Betis 2017-18"
+          },
+          {
+            "x": 47.2,
+            "y": 164,
+            "label": "Bologna 2017-18"
+          },
+          {
+            "x": 50.5,
+            "y": 133,
+            "label": "Bordeaux 2017-18"
+          },
+          {
+            "x": 47.8,
+            "y": 148,
+            "label": "Bournemouth 2017-18"
+          },
+          {
+            "x": 43.7,
+            "y": 162,
+            "label": "Brighton 2017-18"
+          },
+          {
+            "x": 43.9,
+            "y": 157,
+            "label": "Burnley 2017-18"
+          },
+          {
+            "x": 45.5,
+            "y": 154,
+            "label": "Caen 2017-18"
+          },
+          {
+            "x": 45.2,
+            "y": 154,
+            "label": "Cagliari 2017-18"
+          },
+          {
+            "x": 56.1,
+            "y": 144,
+            "label": "Celta Vigo 2017-18"
+          },
+          {
+            "x": 55.4,
+            "y": 139,
+            "label": "Chelsea 2017-18"
+          },
+          {
+            "x": 44.3,
+            "y": 164,
+            "label": "Chievo 2017-18"
+          },
+          {
+            "x": 40.1,
+            "y": 165,
+            "label": "Crotone 2017-18"
+          },
+          {
+            "x": 45.3,
+            "y": 149,
+            "label": "Crystal Palace 2017-18"
+          },
+          {
+            "x": 48.4,
+            "y": 141,
+            "label": "Dijon 2017-18"
+          },
+          {
+            "x": 59,
+            "y": 153,
+            "label": "Dortmund 2017-18"
+          },
+          {
+            "x": 52.4,
+            "y": 163,
+            "label": "Eibar 2017-18"
+          },
+          {
+            "x": 48.4,
+            "y": 175,
+            "label": "Eint Frankfurt 2017-18"
+          },
+          {
+            "x": 46.8,
+            "y": 163,
+            "label": "Espanyol 2017-18"
+          },
+          {
+            "x": 45.9,
+            "y": 174,
+            "label": "Everton 2017-18"
+          },
+          {
+            "x": 52.6,
+            "y": 161,
+            "label": "Fiorentina 2017-18"
+          },
+          {
+            "x": 44.5,
+            "y": 178,
+            "label": "Freiburg 2017-18"
+          },
+          {
+            "x": 46.3,
+            "y": 159,
+            "label": "Genoa 2017-18"
+          },
+          {
+            "x": 39.4,
+            "y": 171,
+            "label": "Getafe 2017-18"
+          },
+          {
+            "x": 46.8,
+            "y": 162,
+            "label": "Girona 2017-18"
+          },
+          {
+            "x": 49.8,
+            "y": 128,
+            "label": "Guingamp 2017-18"
+          },
+          {
+            "x": 49.1,
+            "y": 170,
+            "label": "Hamburger SV 2017-18"
+          },
+          {
+            "x": 47.1,
+            "y": 172,
+            "label": "Hannover 96 2017-18"
+          },
+          {
+            "x": 41.8,
+            "y": 149,
+            "label": "Hellas Verona 2017-18"
+          },
+          {
+            "x": 45.9,
+            "y": 181,
+            "label": "Hertha BSC 2017-18"
+          },
+          {
+            "x": 51.3,
+            "y": 178,
+            "label": "Hoffenheim 2017-18"
+          },
+          {
+            "x": 45.7,
+            "y": 173,
+            "label": "Huddersfield 2017-18"
+          },
+          {
+            "x": 56.9,
+            "y": 153,
+            "label": "Inter 2017-18"
+          },
+          {
+            "x": 57.1,
+            "y": 136,
+            "label": "Juventus 2017-18"
+          },
+          {
+            "x": 47.5,
+            "y": 164,
+            "label": "Köln 2017-18"
+          },
+          {
+            "x": 46.6,
+            "y": 166,
+            "label": "La Coruña 2017-18"
+          },
+          {
+            "x": 55.1,
+            "y": 142,
+            "label": "Las Palmas 2017-18"
+          },
+          {
+            "x": 51.1,
+            "y": 146,
+            "label": "Lazio 2017-18"
+          },
+          {
+            "x": 42.5,
+            "y": 174,
+            "label": "Leganés 2017-18"
+          },
+          {
+            "x": 47.9,
+            "y": 159,
+            "label": "Leicester City 2017-18"
+          },
+          {
+            "x": 42.5,
+            "y": 158,
+            "label": "Levante 2017-18"
+          },
+          {
+            "x": 54.6,
+            "y": 164,
+            "label": "Leverkusen 2017-18"
+          },
+          {
+            "x": 54.2,
+            "y": 122,
+            "label": "Lille 2017-18"
+          },
+          {
+            "x": 60.5,
+            "y": 150,
+            "label": "Liverpool 2017-18"
+          },
+          {
+            "x": 55.9,
+            "y": 162,
+            "label": "Lyon 2017-18"
+          },
+          {
+            "x": 52,
+            "y": 151,
+            "label": "M'Gladbach 2017-18"
+          },
+          {
+            "x": 44.3,
+            "y": 173,
+            "label": "Mainz 05 2017-18"
+          },
+          {
+            "x": 44,
+            "y": 174,
+            "label": "Málaga 2017-18"
+          },
+          {
+            "x": 71.1,
+            "y": 124,
+            "label": "Manchester City 2017-18"
+          },
+          {
+            "x": 54.8,
+            "y": 152,
+            "label": "Manchester Utd 2017-18"
+          },
+          {
+            "x": 58.3,
+            "y": 120,
+            "label": "Marseille 2017-18"
+          },
+          {
+            "x": 45.3,
+            "y": 121,
+            "label": "Metz 2017-18"
+          },
+          {
+            "x": 55.9,
+            "y": 144,
+            "label": "Milan 2017-18"
+          },
+          {
+            "x": 51.2,
+            "y": 139,
+            "label": "Monaco 2017-18"
+          },
+          {
+            "x": 46.9,
+            "y": 138,
+            "label": "Montpellier 2017-18"
+          },
+          {
+            "x": 43.4,
+            "y": 132,
+            "label": "Nantes 2017-18"
+          },
+          {
+            "x": 63.2,
+            "y": 159,
+            "label": "Napoli 2017-18"
+          },
+          {
+            "x": 41.7,
+            "y": 169,
+            "label": "Newcastle Utd 2017-18"
+          },
+          {
+            "x": 58.3,
+            "y": 123,
+            "label": "Nice 2017-18"
+          },
+          {
+            "x": 66.8,
+            "y": 116,
+            "label": "Paris S-G 2017-18"
+          },
+          {
+            "x": 54.9,
+            "y": 157,
+            "label": "RB Leipzig 2017-18"
+          },
+          {
+            "x": 60.5,
+            "y": 156,
+            "label": "Real Madrid 2017-18"
+          },
+          {
+            "x": 56.8,
+            "y": 152,
+            "label": "Real Sociedad 2017-18"
+          },
+          {
+            "x": 50.2,
+            "y": 137,
+            "label": "Rennes 2017-18"
+          },
+          {
+            "x": 58,
+            "y": 133,
+            "label": "Roma 2017-18"
+          },
+          {
+            "x": 51.2,
+            "y": 130,
+            "label": "Saint-Étienne 2017-18"
+          },
+          {
+            "x": 53.4,
+            "y": 152,
+            "label": "Sampdoria 2017-18"
+          },
+          {
+            "x": 43.2,
+            "y": 165,
+            "label": "Sassuolo 2017-18"
+          },
+          {
+            "x": 46.7,
+            "y": 169,
+            "label": "Schalke 04 2017-18"
+          },
+          {
+            "x": 54.5,
+            "y": 152,
+            "label": "Sevilla 2017-18"
+          },
+          {
+            "x": 51.5,
+            "y": 153,
+            "label": "Southampton 2017-18"
+          },
+          {
+            "x": 45.1,
+            "y": 141,
+            "label": "SPAL 2017-18"
+          },
+          {
+            "x": 41.3,
+            "y": 158,
+            "label": "Stoke City 2017-18"
+          },
+          {
+            "x": 49.2,
+            "y": 119,
+            "label": "Strasbourg 2017-18"
+          },
+          {
+            "x": 46.7,
+            "y": 177,
+            "label": "Stuttgart 2017-18"
+          },
+          {
+            "x": 45.2,
+            "y": 161,
+            "label": "Swansea City 2017-18"
+          },
+          {
+            "x": 51,
+            "y": 149,
+            "label": "Torino 2017-18"
+          },
+          {
+            "x": 61.9,
+            "y": 135,
+            "label": "Tottenham 2017-18"
+          },
+          {
+            "x": 45.6,
+            "y": 130,
+            "label": "Toulouse 2017-18"
+          },
+          {
+            "x": 42.4,
+            "y": 154,
+            "label": "Troyes 2017-18"
+          },
+          {
+            "x": 44.7,
+            "y": 161,
+            "label": "Udinese 2017-18"
+          },
+          {
+            "x": 48.9,
+            "y": 167,
+            "label": "Valencia 2017-18"
+          },
+          {
+            "x": 50.5,
+            "y": 140,
+            "label": "Villarreal 2017-18"
+          },
+          {
+            "x": 49.6,
+            "y": 157,
+            "label": "Watford 2017-18"
+          },
+          {
+            "x": 47.5,
+            "y": 157,
+            "label": "Werder Bremen 2017-18"
+          },
+          {
+            "x": 40.6,
+            "y": 149,
+            "label": "West Brom 2017-18"
+          },
+          {
+            "x": 45,
+            "y": 155,
+            "label": "West Ham 2017-18"
+          },
+          {
+            "x": 49.2,
+            "y": 152,
+            "label": "Wolfsburg 2017-18"
+          },
+          {
+            "x": 42.7,
+            "y": 154,
+            "label": "Alavés 2018-19"
+          },
+          {
+            "x": 46.3,
+            "y": 161,
+            "label": "Amiens 2018-19"
+          },
+          {
+            "x": 43,
+            "y": 196,
+            "label": "Angers 2018-19"
+          },
+          {
+            "x": 58,
+            "y": 149,
+            "label": "Arsenal 2018-19"
+          },
+          {
+            "x": 57.8,
+            "y": 155,
+            "label": "Atalanta 2018-19"
+          },
+          {
+            "x": 50.1,
+            "y": 154,
+            "label": "Athletic Club 2018-19"
+          },
+          {
+            "x": 49.4,
+            "y": 184,
+            "label": "Atlético Madrid 2018-19"
+          },
+          {
+            "x": 46.6,
+            "y": 161,
+            "label": "Augsburg 2018-19"
+          },
+          {
+            "x": 64.2,
+            "y": 164,
+            "label": "Barcelona 2018-19"
+          },
+          {
+            "x": 65.5,
+            "y": 131,
+            "label": "Bayern Munich 2018-19"
+          },
+          {
+            "x": 61.7,
+            "y": 137,
+            "label": "Betis 2018-19"
+          },
+          {
+            "x": 44.7,
+            "y": 181,
+            "label": "Bologna 2018-19"
+          },
+          {
+            "x": 50.1,
+            "y": 178,
+            "label": "Bordeaux 2018-19"
+          },
+          {
+            "x": 46.8,
+            "y": 148,
+            "label": "Bournemouth 2018-19"
+          },
+          {
+            "x": 42.6,
+            "y": 158,
+            "label": "Brighton 2018-19"
+          },
+          {
+            "x": 41.2,
+            "y": 148,
+            "label": "Burnley 2018-19"
+          },
+          {
+            "x": 43.9,
+            "y": 168,
+            "label": "Caen 2018-19"
+          },
+          {
+            "x": 50,
+            "y": 151,
+            "label": "Cagliari 2018-19"
+          },
+          {
+            "x": 35.6,
+            "y": 179,
+            "label": "Cardiff City 2018-19"
+          },
+          {
+            "x": 51.7,
+            "y": 174,
+            "label": "Celta Vigo 2018-19"
+          },
+          {
+            "x": 62.8,
+            "y": 144,
+            "label": "Chelsea 2018-19"
+          },
+          {
+            "x": 43.1,
+            "y": 192,
+            "label": "Chievo 2018-19"
+          },
+          {
+            "x": 45,
+            "y": 161,
+            "label": "Crystal Palace 2018-19"
+          },
+          {
+            "x": 47.9,
+            "y": 167,
+            "label": "Dijon 2018-19"
+          },
+          {
+            "x": 58,
+            "y": 149,
+            "label": "Dortmund 2018-19"
+          },
+          {
+            "x": 43.1,
+            "y": 174,
+            "label": "Düsseldorf 2018-19"
+          },
+          {
+            "x": 54.1,
+            "y": 160,
+            "label": "Eibar 2018-19"
+          },
+          {
+            "x": 47.3,
+            "y": 173,
+            "label": "Eint Frankfurt 2018-19"
+          },
+          {
+            "x": 47.9,
+            "y": 163,
+            "label": "Empoli 2018-19"
+          },
+          {
+            "x": 49.5,
+            "y": 163,
+            "label": "Espanyol 2018-19"
+          },
+          {
+            "x": 51.5,
+            "y": 162,
+            "label": "Everton 2018-19"
+          },
+          {
+            "x": 50.7,
+            "y": 145,
+            "label": "Fiorentina 2018-19"
+          },
+          {
+            "x": 44.2,
+            "y": 154,
+            "label": "Freiburg 2018-19"
+          },
+          {
+            "x": 41.1,
+            "y": 174,
+            "label": "Frosinone 2018-19"
+          },
+          {
+            "x": 48.6,
+            "y": 155,
+            "label": "Fulham 2018-19"
+          },
+          {
+            "x": 43.1,
+            "y": 165,
+            "label": "Genoa 2018-19"
+          },
+          {
+            "x": 40.8,
+            "y": 188,
+            "label": "Getafe 2018-19"
+          },
+          {
+            "x": 48,
+            "y": 164,
+            "label": "Girona 2018-19"
+          },
+          {
+            "x": 43.9,
+            "y": 181,
+            "label": "Guingamp 2018-19"
+          },
+          {
+            "x": 46.3,
+            "y": 158,
+            "label": "Hannover 96 2018-19"
+          },
+          {
+            "x": 48.1,
+            "y": 161,
+            "label": "Hertha BSC 2018-19"
+          },
+          {
+            "x": 53.6,
+            "y": 146,
+            "label": "Hoffenheim 2018-19"
+          },
+          {
+            "x": 47,
+            "y": 173,
+            "label": "Huddersfield 2018-19"
+          },
+          {
+            "x": 44.7,
+            "y": 165,
+            "label": "Huesca 2018-19"
+          },
+          {
+            "x": 59.6,
+            "y": 157,
+            "label": "Inter 2018-19"
+          },
+          {
+            "x": 56.2,
+            "y": 149,
+            "label": "Juventus 2018-19"
+          },
+          {
+            "x": 50.8,
+            "y": 152,
+            "label": "Lazio 2018-19"
+          },
+          {
+            "x": 42.8,
+            "y": 168,
+            "label": "Leganés 2018-19"
+          },
+          {
+            "x": 51.1,
+            "y": 160,
+            "label": "Leicester City 2018-19"
+          },
+          {
+            "x": 45.6,
+            "y": 156,
+            "label": "Levante 2018-19"
+          },
+          {
+            "x": 59.9,
+            "y": 148,
+            "label": "Leverkusen 2018-19"
+          },
+          {
+            "x": 51.5,
+            "y": 155,
+            "label": "Lille 2018-19"
+          },
+          {
+            "x": 61.7,
+            "y": 150,
+            "label": "Liverpool 2018-19"
+          },
+          {
+            "x": 60.8,
+            "y": 154,
+            "label": "Lyon 2018-19"
+          },
+          {
+            "x": 53.1,
+            "y": 152,
+            "label": "M'Gladbach 2018-19"
+          },
+          {
+            "x": 46.1,
+            "y": 163,
+            "label": "Mainz 05 2018-19"
+          },
+          {
+            "x": 67.8,
+            "y": 132,
+            "label": "Manchester City 2018-19"
+          },
+          {
+            "x": 54.5,
+            "y": 150,
+            "label": "Manchester Utd 2018-19"
+          },
+          {
+            "x": 55.5,
+            "y": 170,
+            "label": "Marseille 2018-19"
+          },
+          {
+            "x": 54.2,
+            "y": 171,
+            "label": "Milan 2018-19"
+          },
+          {
+            "x": 49.8,
+            "y": 170,
+            "label": "Monaco 2018-19"
+          },
+          {
+            "x": 47.8,
+            "y": 174,
+            "label": "Montpellier 2018-19"
+          },
+          {
+            "x": 50.1,
+            "y": 178,
+            "label": "Nantes 2018-19"
+          },
+          {
+            "x": 59.4,
+            "y": 165,
+            "label": "Napoli 2018-19"
+          },
+          {
+            "x": 40.4,
+            "y": 175,
+            "label": "Newcastle Utd 2018-19"
+          },
+          {
+            "x": 55.6,
+            "y": 158,
+            "label": "Nice 2018-19"
+          },
+          {
+            "x": 45.4,
+            "y": 169,
+            "label": "Nîmes 2018-19"
+          },
+          {
+            "x": 42.3,
+            "y": 159,
+            "label": "Nürnberg 2018-19"
+          },
+          {
+            "x": 64.1,
+            "y": 167,
+            "label": "Paris S-G 2018-19"
+          },
+          {
+            "x": 37.3,
+            "y": 177,
+            "label": "Parma 2018-19"
+          },
+          {
+            "x": 48.7,
+            "y": 151,
+            "label": "Rayo Vallecano 2018-19"
+          },
+          {
+            "x": 49.3,
+            "y": 167,
+            "label": "RB Leipzig 2018-19"
+          },
+          {
+            "x": 60,
+            "y": 150,
+            "label": "Real Madrid 2018-19"
+          },
+          {
+            "x": 51.6,
+            "y": 169,
+            "label": "Real Sociedad 2018-19"
+          },
+          {
+            "x": 43.3,
+            "y": 186,
+            "label": "Reims 2018-19"
+          },
+          {
+            "x": 50.7,
+            "y": 166,
+            "label": "Rennes 2018-19"
+          },
+          {
+            "x": 51.7,
+            "y": 155,
+            "label": "Roma 2018-19"
+          },
+          {
+            "x": 52.7,
+            "y": 157,
+            "label": "Saint-Étienne 2018-19"
+          },
+          {
+            "x": 55.3,
+            "y": 162,
+            "label": "Sampdoria 2018-19"
+          },
+          {
+            "x": 54,
+            "y": 145,
+            "label": "Sassuolo 2018-19"
+          },
+          {
+            "x": 45.4,
+            "y": 168,
+            "label": "Schalke 04 2018-19"
+          },
+          {
+            "x": 52.2,
+            "y": 152,
+            "label": "Sevilla 2018-19"
+          },
+          {
+            "x": 43.9,
+            "y": 168,
+            "label": "Southampton 2018-19"
+          },
+          {
+            "x": 50.6,
+            "y": 148,
+            "label": "SPAL 2018-19"
+          },
+          {
+            "x": 50.2,
+            "y": 165,
+            "label": "Strasbourg 2018-19"
+          },
+          {
+            "x": 45.9,
+            "y": 157,
+            "label": "Stuttgart 2018-19"
+          },
+          {
+            "x": 51.4,
+            "y": 156,
+            "label": "Torino 2018-19"
+          },
+          {
+            "x": 58.9,
+            "y": 132,
+            "label": "Tottenham 2018-19"
+          },
+          {
+            "x": 48.3,
+            "y": 172,
+            "label": "Toulouse 2018-19"
+          },
+          {
+            "x": 42.4,
+            "y": 167,
+            "label": "Udinese 2018-19"
+          },
+          {
+            "x": 47.1,
+            "y": 171,
+            "label": "Valencia 2018-19"
+          },
+          {
+            "x": 47,
+            "y": 165,
+            "label": "Valladolid 2018-19"
+          },
+          {
+            "x": 48.3,
+            "y": 172,
+            "label": "Villarreal 2018-19"
+          },
+          {
+            "x": 47.1,
+            "y": 163,
+            "label": "Watford 2018-19"
+          },
+          {
+            "x": 52.2,
+            "y": 162,
+            "label": "Werder Bremen 2018-19"
+          },
+          {
+            "x": 48.7,
+            "y": 159,
+            "label": "West Ham 2018-19"
+          },
+          {
+            "x": 53.3,
+            "y": 162,
+            "label": "Wolfsburg 2018-19"
+          },
+          {
+            "x": 46.9,
+            "y": 156,
+            "label": "Wolves 2018-19"
+          },
+          {
+            "x": 41.1,
+            "y": 148,
+            "label": "Alavés 2019-20"
+          },
+          {
+            "x": 45.5,
+            "y": 178,
+            "label": "Amiens 2019-20"
+          },
+          {
+            "x": 45.1,
+            "y": 185,
+            "label": "Angers 2019-20"
+          },
+          {
+            "x": 54,
+            "y": 161,
+            "label": "Arsenal 2019-20"
+          },
+          {
+            "x": 43.9,
+            "y": 154,
+            "label": "Aston Villa 2019-20"
+          },
+          {
+            "x": 57.8,
+            "y": 157,
+            "label": "Atalanta 2019-20"
+          },
+          {
+            "x": 48.7,
+            "y": 143,
+            "label": "Athletic Club 2019-20"
+          },
+          {
+            "x": 48.5,
+            "y": 134,
+            "label": "Atlético Madrid 2019-20"
+          },
+          {
+            "x": 38.1,
+            "y": 166,
+            "label": "Augsburg 2019-20"
+          },
+          {
+            "x": 66.9,
+            "y": 127,
+            "label": "Barcelona 2019-20"
+          },
+          {
+            "x": 65.6,
+            "y": 144,
+            "label": "Bayern Munich 2019-20"
+          },
+          {
+            "x": 57.1,
+            "y": 130,
+            "label": "Betis 2019-20"
+          },
+          {
+            "x": 52.9,
+            "y": 174,
+            "label": "Bologna 2019-20"
+          },
+          {
+            "x": 53.9,
+            "y": 169,
+            "label": "Bordeaux 2019-20"
+          },
+          {
+            "x": 43.8,
+            "y": 179,
+            "label": "Bournemouth 2019-20"
+          },
+          {
+            "x": 40.3,
+            "y": 171,
+            "label": "Brescia 2019-20"
+          },
+          {
+            "x": 49.7,
+            "y": 160,
+            "label": "Brest 2019-20"
+          },
+          {
+            "x": 52.2,
+            "y": 152,
+            "label": "Brighton 2019-20"
+          },
+          {
+            "x": 41.4,
+            "y": 153,
+            "label": "Burnley 2019-20"
+          },
+          {
+            "x": 45.5,
+            "y": 140,
+            "label": "Cagliari 2019-20"
+          },
+          {
+            "x": 51.9,
+            "y": 142,
+            "label": "Celta Vigo 2019-20"
+          },
+          {
+            "x": 60.7,
+            "y": 163,
+            "label": "Chelsea 2019-20"
+          },
+          {
+            "x": 44.5,
+            "y": 165,
+            "label": "Crystal Palace 2019-20"
+          },
+          {
+            "x": 46.5,
+            "y": 170,
+            "label": "Dijon 2019-20"
+          },
+          {
+            "x": 61,
+            "y": 153,
+            "label": "Dortmund 2019-20"
+          },
+          {
+            "x": 45.4,
+            "y": 162,
+            "label": "Düsseldorf 2019-20"
+          },
+          {
+            "x": 46.3,
+            "y": 145,
+            "label": "Eibar 2019-20"
+          },
+          {
+            "x": 51,
+            "y": 174,
+            "label": "Eint Frankfurt 2019-20"
+          },
+          {
+            "x": 47.3,
+            "y": 155,
+            "label": "Espanyol 2019-20"
+          },
+          {
+            "x": 49.2,
+            "y": 160,
+            "label": "Everton 2019-20"
+          },
+          {
+            "x": 47.3,
+            "y": 156,
+            "label": "Fiorentina 2019-20"
+          },
+          {
+            "x": 47.9,
+            "y": 141,
+            "label": "Freiburg 2019-20"
+          },
+          {
+            "x": 49.5,
+            "y": 160,
+            "label": "Genoa 2019-20"
+          },
+          {
+            "x": 44.6,
+            "y": 165,
+            "label": "Getafe 2019-20"
+          },
+          {
+            "x": 43.7,
+            "y": 153,
+            "label": "Granada 2019-20"
+          },
+          {
+            "x": 49.8,
+            "y": 147,
+            "label": "Hellas Verona 2019-20"
+          },
+          {
+            "x": 44.7,
+            "y": 169,
+            "label": "Hertha BSC 2019-20"
+          },
+          {
+            "x": 51.9,
+            "y": 137,
+            "label": "Hoffenheim 2019-20"
+          },
+          {
+            "x": 54.2,
+            "y": 145,
+            "label": "Inter 2019-20"
+          },
+          {
+            "x": 58.3,
+            "y": 137,
+            "label": "Juventus 2019-20"
+          },
+          {
+            "x": 46.7,
+            "y": 186,
+            "label": "Köln 2019-20"
+          },
+          {
+            "x": 50.5,
+            "y": 147,
+            "label": "Lazio 2019-20"
+          },
+          {
+            "x": 44.6,
+            "y": 142,
+            "label": "Lecce 2019-20"
+          },
+          {
+            "x": 43.8,
+            "y": 151,
+            "label": "Leganés 2019-20"
+          },
+          {
+            "x": 57.6,
+            "y": 168,
+            "label": "Leicester City 2019-20"
+          },
+          {
+            "x": 48.4,
+            "y": 131,
+            "label": "Levante 2019-20"
+          },
+          {
+            "x": 63.8,
+            "y": 153,
+            "label": "Leverkusen 2019-20"
+          },
+          {
+            "x": 53,
+            "y": 171,
+            "label": "Lille 2019-20"
+          },
+          {
+            "x": 63.4,
+            "y": 148,
+            "label": "Liverpool 2019-20"
+          },
+          {
+            "x": 56.4,
+            "y": 152,
+            "label": "Lyon 2019-20"
+          },
+          {
+            "x": 52.4,
+            "y": 168,
+            "label": "M'Gladbach 2019-20"
+          },
+          {
+            "x": 43.2,
+            "y": 179,
+            "label": "Mainz 05 2019-20"
+          },
+          {
+            "x": 44.6,
+            "y": 148,
+            "label": "Mallorca 2019-20"
+          },
+          {
+            "x": 66.9,
+            "y": 132,
+            "label": "Manchester City 2019-20"
+          },
+          {
+            "x": 56.2,
+            "y": 154,
+            "label": "Manchester Utd 2019-20"
+          },
+          {
+            "x": 54,
+            "y": 160,
+            "label": "Marseille 2019-20"
+          },
+          {
+            "x": 45.3,
+            "y": 181,
+            "label": "Metz 2019-20"
+          },
+          {
+            "x": 55.1,
+            "y": 164,
+            "label": "Milan 2019-20"
+          },
+          {
+            "x": 50.8,
+            "y": 168,
+            "label": "Monaco 2019-20"
+          },
+          {
+            "x": 47.6,
+            "y": 158,
+            "label": "Montpellier 2019-20"
+          },
+          {
+            "x": 48.1,
+            "y": 172,
+            "label": "Nantes 2019-20"
+          },
+          {
+            "x": 59.5,
+            "y": 147,
+            "label": "Napoli 2019-20"
+          },
+          {
+            "x": 38.6,
+            "y": 158,
+            "label": "Newcastle Utd 2019-20"
+          },
+          {
+            "x": 55,
+            "y": 160,
+            "label": "Nice 2019-20"
+          },
+          {
+            "x": 44.6,
+            "y": 157,
+            "label": "Nîmes 2019-20"
+          },
+          {
+            "x": 49.3,
+            "y": 171,
+            "label": "Norwich City 2019-20"
+          },
+          {
+            "x": 47.5,
+            "y": 144,
+            "label": "Osasuna 2019-20"
+          },
+          {
+            "x": 45.7,
+            "y": 186,
+            "label": "Paderborn 07 2019-20"
+          },
+          {
+            "x": 65.6,
+            "y": 150,
+            "label": "Paris S-G 2019-20"
+          },
+          {
+            "x": 43.6,
+            "y": 164,
+            "label": "Parma 2019-20"
+          },
+          {
+            "x": 55.5,
+            "y": 174,
+            "label": "RB Leipzig 2019-20"
+          },
+          {
+            "x": 59.1,
+            "y": 133,
+            "label": "Real Madrid 2019-20"
+          },
+          {
+            "x": 56.6,
+            "y": 133,
+            "label": "Real Sociedad 2019-20"
+          },
+          {
+            "x": 48.8,
+            "y": 148,
+            "label": "Reims 2019-20"
+          },
+          {
+            "x": 49.8,
+            "y": 160,
+            "label": "Rennes 2019-20"
+          },
+          {
+            "x": 52.9,
+            "y": 134,
+            "label": "Roma 2019-20"
+          },
+          {
+            "x": 48,
+            "y": 168,
+            "label": "Saint-Étienne 2019-20"
+          },
+          {
+            "x": 42.4,
+            "y": 157,
+            "label": "Sampdoria 2019-20"
+          },
+          {
+            "x": 57.8,
+            "y": 144,
+            "label": "Sassuolo 2019-20"
+          },
+          {
+            "x": 49,
+            "y": 180,
+            "label": "Schalke 04 2019-20"
+          },
+          {
+            "x": 58.4,
+            "y": 133,
+            "label": "Sevilla 2019-20"
+          },
+          {
+            "x": 43.1,
+            "y": 168,
+            "label": "Sheffield Utd 2019-20"
+          },
+          {
+            "x": 49.3,
+            "y": 180,
+            "label": "Southampton 2019-20"
+          },
+          {
+            "x": 46.8,
+            "y": 148,
+            "label": "SPAL 2019-20"
+          },
+          {
+            "x": 49.7,
+            "y": 161,
+            "label": "Strasbourg 2019-20"
+          },
+          {
+            "x": 47.5,
+            "y": 151,
+            "label": "Torino 2019-20"
+          },
+          {
+            "x": 52.2,
+            "y": 163,
+            "label": "Tottenham 2019-20"
+          },
+          {
+            "x": 44,
+            "y": 164,
+            "label": "Toulouse 2019-20"
+          },
+          {
+            "x": 44.7,
+            "y": 165,
+            "label": "Udinese 2019-20"
+          },
+          {
+            "x": 41.8,
+            "y": 172,
+            "label": "Union Berlin 2019-20"
+          },
+          {
+            "x": 48.9,
+            "y": 139,
+            "label": "Valencia 2019-20"
+          },
+          {
+            "x": 44.3,
+            "y": 152,
+            "label": "Valladolid 2019-20"
+          },
+          {
+            "x": 53.2,
+            "y": 148,
+            "label": "Villarreal 2019-20"
+          },
+          {
+            "x": 42.5,
+            "y": 179,
+            "label": "Watford 2019-20"
+          },
+          {
+            "x": 48.8,
+            "y": 172,
+            "label": "Werder Bremen 2019-20"
+          },
+          {
+            "x": 44,
+            "y": 170,
+            "label": "West Ham 2019-20"
+          },
+          {
+            "x": 48.3,
+            "y": 180,
+            "label": "Wolfsburg 2019-20"
+          },
+          {
+            "x": 48.3,
+            "y": 164,
+            "label": "Wolves 2019-20"
+          },
+          {
+            "x": 42.7,
+            "y": 143,
+            "label": "Alavés 2020-21"
+          },
+          {
+            "x": 46.2,
+            "y": 162,
+            "label": "Angers 2020-21"
+          },
+          {
+            "x": 42.2,
+            "y": 170,
+            "label": "Arminia 2020-21"
+          },
+          {
+            "x": 53.8,
+            "y": 123,
+            "label": "Arsenal 2020-21"
+          },
+          {
+            "x": 48.1,
+            "y": 143,
+            "label": "Aston Villa 2020-21"
+          },
+          {
+            "x": 54.9,
+            "y": 149,
+            "label": "Atalanta 2020-21"
+          },
+          {
+            "x": 49.8,
+            "y": 138,
+            "label": "Athletic Club 2020-21"
+          },
+          {
+            "x": 52.4,
+            "y": 135,
+            "label": "Atlético Madrid 2020-21"
+          },
+          {
+            "x": 41.3,
+            "y": 150,
+            "label": "Augsburg 2020-21"
+          },
+          {
+            "x": 65.8,
+            "y": 134,
+            "label": "Barcelona 2020-21"
+          },
+          {
+            "x": 61.1,
+            "y": 147,
+            "label": "Bayern Munich 2020-21"
+          },
+          {
+            "x": 42.3,
+            "y": 132,
+            "label": "Benevento 2020-21"
+          },
+          {
+            "x": 53.9,
+            "y": 138,
+            "label": "Betis 2020-21"
+          },
+          {
+            "x": 50.9,
+            "y": 144,
+            "label": "Bologna 2020-21"
+          },
+          {
+            "x": 49.7,
+            "y": 138,
+            "label": "Bordeaux 2020-21"
+          },
+          {
+            "x": 49.3,
+            "y": 154,
+            "label": "Brest 2020-21"
+          },
+          {
+            "x": 51.3,
+            "y": 136,
+            "label": "Brighton 2020-21"
+          },
+          {
+            "x": 41.7,
+            "y": 122,
+            "label": "Burnley 2020-21"
+          },
+          {
+            "x": 34.3,
+            "y": 139,
+            "label": "Cádiz 2020-21"
+          },
+          {
+            "x": 44.6,
+            "y": 151,
+            "label": "Cagliari 2020-21"
+          },
+          {
+            "x": 53.7,
+            "y": 158,
+            "label": "Celta Vigo 2020-21"
+          },
+          {
+            "x": 61.4,
+            "y": 141,
+            "label": "Chelsea 2020-21"
+          },
+          {
+            "x": 46.4,
+            "y": 138,
+            "label": "Crotone 2020-21"
+          },
+          {
+            "x": 40.1,
+            "y": 150,
+            "label": "Crystal Palace 2020-21"
+          },
+          {
+            "x": 46.2,
+            "y": 142,
+            "label": "Dijon 2020-21"
+          },
+          {
+            "x": 59.8,
+            "y": 141,
+            "label": "Dortmund 2020-21"
+          },
+          {
+            "x": 49.6,
+            "y": 132,
+            "label": "Eibar 2020-21"
+          },
+          {
+            "x": 54,
+            "y": 160,
+            "label": "Eint Frankfurt 2020-21"
+          },
+          {
+            "x": 47.6,
+            "y": 136,
+            "label": "Elche 2020-21"
+          },
+          {
+            "x": 46.5,
+            "y": 149,
+            "label": "Everton 2020-21"
+          },
+          {
+            "x": 46.2,
+            "y": 136,
+            "label": "Fiorentina 2020-21"
+          },
+          {
+            "x": 47,
+            "y": 148,
+            "label": "Freiburg 2020-21"
+          },
+          {
+            "x": 49.9,
+            "y": 135,
+            "label": "Fulham 2020-21"
+          },
+          {
+            "x": 44.7,
+            "y": 155,
+            "label": "Genoa 2020-21"
+          },
+          {
+            "x": 42.8,
+            "y": 161,
+            "label": "Getafe 2020-21"
+          },
+          {
+            "x": 41,
+            "y": 132,
+            "label": "Granada 2020-21"
+          },
+          {
+            "x": 49.8,
+            "y": 131,
+            "label": "Hellas Verona 2020-21"
+          },
+          {
+            "x": 49.4,
+            "y": 160,
+            "label": "Hertha BSC 2020-21"
+          },
+          {
+            "x": 51.1,
+            "y": 140,
+            "label": "Hoffenheim 2020-21"
+          },
+          {
+            "x": 48.3,
+            "y": 143,
+            "label": "Huesca 2020-21"
+          },
+          {
+            "x": 52.4,
+            "y": 134,
+            "label": "Inter 2020-21"
+          },
+          {
+            "x": 57.1,
+            "y": 133,
+            "label": "Juventus 2020-21"
+          },
+          {
+            "x": 46.3,
+            "y": 150,
+            "label": "Köln 2020-21"
+          },
+          {
+            "x": 53.1,
+            "y": 149,
+            "label": "Lazio 2020-21"
+          },
+          {
+            "x": 57.6,
+            "y": 175,
+            "label": "Leeds United 2020-21"
+          },
+          {
+            "x": 54.6,
+            "y": 135,
+            "label": "Leicester City 2020-21"
+          },
+          {
+            "x": 51.4,
+            "y": 131,
+            "label": "Lens 2020-21"
+          },
+          {
+            "x": 52.4,
+            "y": 142,
+            "label": "Levante 2020-21"
+          },
+          {
+            "x": 59.9,
+            "y": 141,
+            "label": "Leverkusen 2020-21"
+          },
+          {
+            "x": 53.9,
+            "y": 142,
+            "label": "Lille 2020-21"
+          },
+          {
+            "x": 62.4,
+            "y": 142,
+            "label": "Liverpool 2020-21"
+          },
+          {
+            "x": 44.6,
+            "y": 149,
+            "label": "Lorient 2020-21"
+          },
+          {
+            "x": 54.9,
+            "y": 132,
+            "label": "Lyon 2020-21"
+          },
+          {
+            "x": 51.9,
+            "y": 142,
+            "label": "M'Gladbach 2020-21"
+          },
+          {
+            "x": 40.5,
+            "y": 158,
+            "label": "Mainz 05 2020-21"
+          },
+          {
+            "x": 63.9,
+            "y": 120,
+            "label": "Manchester City 2020-21"
+          },
+          {
+            "x": 55.8,
+            "y": 133,
+            "label": "Manchester Utd 2020-21"
+          },
+          {
+            "x": 53.9,
+            "y": 138,
+            "label": "Marseille 2020-21"
+          },
+          {
+            "x": 45.3,
+            "y": 143,
+            "label": "Metz 2020-21"
+          },
+          {
+            "x": 51.9,
+            "y": 154,
+            "label": "Milan 2020-21"
+          },
+          {
+            "x": 56,
+            "y": 146,
+            "label": "Monaco 2020-21"
+          },
+          {
+            "x": 45.3,
+            "y": 127,
+            "label": "Montpellier 2020-21"
+          },
+          {
+            "x": 43.7,
+            "y": 151,
+            "label": "Nantes 2020-21"
+          },
+          {
+            "x": 55.2,
+            "y": 134,
+            "label": "Napoli 2020-21"
+          },
+          {
+            "x": 38.2,
+            "y": 143,
+            "label": "Newcastle Utd 2020-21"
+          },
+          {
+            "x": 54.5,
+            "y": 133,
+            "label": "Nice 2020-21"
+          },
+          {
+            "x": 44.4,
+            "y": 161,
+            "label": "Nîmes 2020-21"
+          },
+          {
+            "x": 43.1,
+            "y": 140,
+            "label": "Osasuna 2020-21"
+          },
+          {
+            "x": 63.5,
+            "y": 129,
+            "label": "Paris S-G 2020-21"
+          },
+          {
+            "x": 47.7,
+            "y": 146,
+            "label": "Parma 2020-21"
+          },
+          {
+            "x": 60,
+            "y": 155,
+            "label": "RB Leipzig 2020-21"
+          },
+          {
+            "x": 59.7,
+            "y": 128,
+            "label": "Real Madrid 2020-21"
+          },
+          {
+            "x": 55.1,
+            "y": 133,
+            "label": "Real Sociedad 2020-21"
+          },
+          {
+            "x": 44.8,
+            "y": 141,
+            "label": "Reims 2020-21"
+          },
+          {
+            "x": 59.5,
+            "y": 138,
+            "label": "Rennes 2020-21"
+          },
+          {
+            "x": 52.5,
+            "y": 147,
+            "label": "Roma 2020-21"
+          },
+          {
+            "x": 48.3,
+            "y": 156,
+            "label": "Saint-Étienne 2020-21"
+          },
+          {
+            "x": 45.1,
+            "y": 162,
+            "label": "Sampdoria 2020-21"
+          },
+          {
+            "x": 60.8,
+            "y": 130,
+            "label": "Sassuolo 2020-21"
+          },
+          {
+            "x": 44.6,
+            "y": 157,
+            "label": "Schalke 04 2020-21"
+          },
+          {
+            "x": 61.2,
+            "y": 124,
+            "label": "Sevilla 2020-21"
+          },
+          {
+            "x": 41.5,
+            "y": 161,
+            "label": "Sheffield Utd 2020-21"
+          },
+          {
+            "x": 52.2,
+            "y": 151,
+            "label": "Southampton 2020-21"
+          },
+          {
+            "x": 52.2,
+            "y": 140,
+            "label": "Spezia 2020-21"
+          },
+          {
+            "x": 45.6,
+            "y": 140,
+            "label": "Strasbourg 2020-21"
+          },
+          {
+            "x": 51.5,
+            "y": 137,
+            "label": "Stuttgart 2020-21"
+          },
+          {
+            "x": 47.2,
+            "y": 136,
+            "label": "Torino 2020-21"
+          },
+          {
+            "x": 51.7,
+            "y": 154,
+            "label": "Tottenham 2020-21"
+          },
+          {
+            "x": 46.1,
+            "y": 133,
+            "label": "Udinese 2020-21"
+          },
+          {
+            "x": 44.9,
+            "y": 146,
+            "label": "Union Berlin 2020-21"
+          },
+          {
+            "x": 46.9,
+            "y": 128,
+            "label": "Valencia 2020-21"
+          },
+          {
+            "x": 45.1,
+            "y": 156,
+            "label": "Valladolid 2020-21"
+          },
+          {
+            "x": 55.6,
+            "y": 131,
+            "label": "Villarreal 2020-21"
+          },
+          {
+            "x": 43.8,
+            "y": 163,
+            "label": "Werder Bremen 2020-21"
+          },
+          {
+            "x": 37.6,
+            "y": 144,
+            "label": "West Brom 2020-21"
+          },
+          {
+            "x": 42.9,
+            "y": 131,
+            "label": "West Ham 2020-21"
+          },
+          {
+            "x": 51.4,
+            "y": 171,
+            "label": "Wolfsburg 2020-21"
+          },
+          {
+            "x": 49.3,
+            "y": 137,
+            "label": "Wolves 2020-21"
+          },
+          {
+            "x": 41.8,
+            "y": 154,
+            "label": "Alavés 2021-22"
+          },
+          {
+            "x": 48.7,
+            "y": 156,
+            "label": "Angers 2021-22"
+          },
+          {
+            "x": 40.5,
+            "y": 167,
+            "label": "Arminia 2021-22"
+          },
+          {
+            "x": 53.2,
+            "y": 126,
+            "label": "Arsenal 2021-22"
+          },
+          {
+            "x": 46.5,
+            "y": 145,
+            "label": "Aston Villa 2021-22"
+          },
+          {
+            "x": 55.1,
+            "y": 148,
+            "label": "Atalanta 2021-22"
+          },
+          {
+            "x": 48.1,
+            "y": 144,
+            "label": "Athletic Club 2021-22"
+          },
+          {
+            "x": 50.6,
+            "y": 143,
+            "label": "Atlético Madrid 2021-22"
+          },
+          {
+            "x": 41.2,
+            "y": 166,
+            "label": "Augsburg 2021-22"
+          },
+          {
+            "x": 64.8,
+            "y": 137,
+            "label": "Barcelona 2021-22"
+          },
+          {
+            "x": 64.8,
+            "y": 148,
+            "label": "Bayern Munich 2021-22"
+          },
+          {
+            "x": 54.1,
+            "y": 140,
+            "label": "Betis 2021-22"
+          },
+          {
+            "x": 44.5,
+            "y": 167,
+            "label": "Bochum 2021-22"
+          },
+          {
+            "x": 50.7,
+            "y": 142,
+            "label": "Bologna 2021-22"
+          },
+          {
+            "x": 47.3,
+            "y": 150,
+            "label": "Bordeaux 2021-22"
+          },
+          {
+            "x": 44.5,
+            "y": 146,
+            "label": "Brentford 2021-22"
+          },
+          {
+            "x": 43.8,
+            "y": 166,
+            "label": "Brest 2021-22"
+          },
+          {
+            "x": 54.7,
+            "y": 149,
+            "label": "Brighton 2021-22"
+          },
+          {
+            "x": 39.8,
+            "y": 145,
+            "label": "Burnley 2021-22"
+          },
+          {
+            "x": 40.9,
+            "y": 161,
+            "label": "Cádiz 2021-22"
+          },
+          {
+            "x": 44.4,
+            "y": 141,
+            "label": "Cagliari 2021-22"
+          },
+          {
+            "x": 55.6,
+            "y": 168,
+            "label": "Celta Vigo 2021-22"
+          },
+          {
+            "x": 62.3,
+            "y": 146,
+            "label": "Chelsea 2021-22"
+          },
+          {
+            "x": 50,
+            "y": 155,
+            "label": "Clermont Foot 2021-22"
+          },
+          {
+            "x": 50.9,
+            "y": 158,
+            "label": "Crystal Palace 2021-22"
+          },
+          {
+            "x": 59.6,
+            "y": 152,
+            "label": "Dortmund 2021-22"
+          },
+          {
+            "x": 49.6,
+            "y": 175,
+            "label": "Eint Frankfurt 2021-22"
+          },
+          {
+            "x": 48.4,
+            "y": 139,
+            "label": "Elche 2021-22"
+          },
+          {
+            "x": 47.1,
+            "y": 154,
+            "label": "Empoli 2021-22"
+          },
+          {
+            "x": 47.1,
+            "y": 134,
+            "label": "Espanyol 2021-22"
+          },
+          {
+            "x": 39.7,
+            "y": 167,
+            "label": "Everton 2021-22"
+          },
+          {
+            "x": 58.2,
+            "y": 133,
+            "label": "Fiorentina 2021-22"
+          },
+          {
+            "x": 49.2,
+            "y": 142,
+            "label": "Freiburg 2021-22"
+          },
+          {
+            "x": 43.9,
+            "y": 169,
+            "label": "Genoa 2021-22"
+          },
+          {
+            "x": 41.2,
+            "y": 159,
+            "label": "Getafe 2021-22"
+          },
+          {
+            "x": 44.6,
+            "y": 144,
+            "label": "Granada 2021-22"
+          },
+          {
+            "x": 43.4,
+            "y": 166,
+            "label": "Greuther Fürth 2021-22"
+          },
+          {
+            "x": 50.6,
+            "y": 142,
+            "label": "Hellas Verona 2021-22"
+          },
+          {
+            "x": 43.5,
+            "y": 149,
+            "label": "Hertha BSC 2021-22"
+          },
+          {
+            "x": 53.6,
+            "y": 150,
+            "label": "Hoffenheim 2021-22"
+          },
+          {
+            "x": 56.6,
+            "y": 128,
+            "label": "Inter 2021-22"
+          },
+          {
+            "x": 51.7,
+            "y": 138,
+            "label": "Juventus 2021-22"
+          },
+          {
+            "x": 55.1,
+            "y": 168,
+            "label": "Köln 2021-22"
+          },
+          {
+            "x": 55.6,
+            "y": 136,
+            "label": "Lazio 2021-22"
+          },
+          {
+            "x": 52.5,
+            "y": 186,
+            "label": "Leeds United 2021-22"
+          },
+          {
+            "x": 52.1,
+            "y": 157,
+            "label": "Leicester City 2021-22"
+          },
+          {
+            "x": 50.8,
+            "y": 141,
+            "label": "Lens 2021-22"
+          },
+          {
+            "x": 46.9,
+            "y": 147,
+            "label": "Levante 2021-22"
+          },
+          {
+            "x": 53.9,
+            "y": 145,
+            "label": "Leverkusen 2021-22"
+          },
+          {
+            "x": 50.8,
+            "y": 140,
+            "label": "Lille 2021-22"
+          },
+          {
+            "x": 63.3,
+            "y": 141,
+            "label": "Liverpool 2021-22"
+          },
+          {
+            "x": 44.3,
+            "y": 168,
+            "label": "Lorient 2021-22"
+          },
+          {
+            "x": 58.8,
+            "y": 152,
+            "label": "Lyon 2021-22"
+          },
+          {
+            "x": 54.4,
+            "y": 153,
+            "label": "M'Gladbach 2021-22"
+          },
+          {
+            "x": 46.3,
+            "y": 165,
+            "label": "Mainz 05 2021-22"
+          },
+          {
+            "x": 45.1,
+            "y": 142,
+            "label": "Mallorca 2021-22"
+          },
+          {
+            "x": 68.5,
+            "y": 112,
+            "label": "Manchester City 2021-22"
+          },
+          {
+            "x": 52.9,
+            "y": 133,
+            "label": "Manchester Utd 2021-22"
+          },
+          {
+            "x": 62,
+            "y": 126,
+            "label": "Marseille 2021-22"
+          },
+          {
+            "x": 42.8,
+            "y": 161,
+            "label": "Metz 2021-22"
+          },
+          {
+            "x": 54.2,
+            "y": 162,
+            "label": "Milan 2021-22"
+          },
+          {
+            "x": 54.2,
+            "y": 168,
+            "label": "Monaco 2021-22"
+          },
+          {
+            "x": 48.1,
+            "y": 143,
+            "label": "Montpellier 2021-22"
+          },
+          {
+            "x": 43.7,
+            "y": 164,
+            "label": "Nantes 2021-22"
+          },
+          {
+            "x": 58.5,
+            "y": 143,
+            "label": "Napoli 2021-22"
+          },
+          {
+            "x": 39.9,
+            "y": 143,
+            "label": "Newcastle Utd 2021-22"
+          },
+          {
+            "x": 51.6,
+            "y": 139,
+            "label": "Nice 2021-22"
+          },
+          {
+            "x": 42.5,
+            "y": 162,
+            "label": "Norwich City 2021-22"
+          },
+          {
+            "x": 46.7,
+            "y": 145,
+            "label": "Osasuna 2021-22"
+          },
+          {
+            "x": 63.4,
+            "y": 133,
+            "label": "Paris S-G 2021-22"
+          },
+          {
+            "x": 49.9,
+            "y": 161,
+            "label": "Rayo Vallecano 2021-22"
+          },
+          {
+            "x": 56.6,
+            "y": 157,
+            "label": "RB Leipzig 2021-22"
+          },
+          {
+            "x": 60.3,
+            "y": 127,
+            "label": "Real Madrid 2021-22"
+          },
+          {
+            "x": 54.7,
+            "y": 140,
+            "label": "Real Sociedad 2021-22"
+          },
+          {
+            "x": 42.2,
+            "y": 157,
+            "label": "Reims 2021-22"
+          },
+          {
+            "x": 56.3,
+            "y": 144,
+            "label": "Rennes 2021-22"
+          },
+          {
+            "x": 51.4,
+            "y": 158,
+            "label": "Roma 2021-22"
+          },
+          {
+            "x": 49.3,
+            "y": 163,
+            "label": "Saint-Étienne 2021-22"
+          },
+          {
+            "x": 41,
+            "y": 142,
+            "label": "Salernitana 2021-22"
+          },
+          {
+            "x": 45.9,
+            "y": 141,
+            "label": "Sampdoria 2021-22"
+          },
+          {
+            "x": 55.2,
+            "y": 136,
+            "label": "Sassuolo 2021-22"
+          },
+          {
+            "x": 59.8,
+            "y": 125,
+            "label": "Sevilla 2021-22"
+          },
+          {
+            "x": 47.9,
+            "y": 154,
+            "label": "Southampton 2021-22"
+          },
+          {
+            "x": 42.7,
+            "y": 158,
+            "label": "Spezia 2021-22"
+          },
+          {
+            "x": 49.5,
+            "y": 152,
+            "label": "Strasbourg 2021-22"
+          },
+          {
+            "x": 50.7,
+            "y": 155,
+            "label": "Stuttgart 2021-22"
+          },
+          {
+            "x": 53.6,
+            "y": 140,
+            "label": "Torino 2021-22"
+          },
+          {
+            "x": 52,
+            "y": 144,
+            "label": "Tottenham 2021-22"
+          },
+          {
+            "x": 44.2,
+            "y": 156,
+            "label": "Troyes 2021-22"
+          },
+          {
+            "x": 42.3,
+            "y": 149,
+            "label": "Udinese 2021-22"
+          },
+          {
+            "x": 43.4,
+            "y": 157,
+            "label": "Union Berlin 2021-22"
+          },
+          {
+            "x": 43.6,
+            "y": 162,
+            "label": "Valencia 2021-22"
+          },
+          {
+            "x": 42.1,
+            "y": 157,
+            "label": "Venezia 2021-22"
+          },
+          {
+            "x": 57,
+            "y": 127,
+            "label": "Villarreal 2021-22"
+          },
+          {
+            "x": 40.3,
+            "y": 151,
+            "label": "Watford 2021-22"
+          },
+          {
+            "x": 47.8,
+            "y": 129,
+            "label": "West Ham 2021-22"
+          },
+          {
+            "x": 50.6,
+            "y": 162,
+            "label": "Wolfsburg 2021-22"
+          },
+          {
+            "x": 49.6,
+            "y": 146,
+            "label": "Wolves 2021-22"
+          }
+        ],
+        "xLabel": "Possession %",
+        "yLabel": "Press events / 90",
+        "caption": "Every team-season in the dataset: possession share vs. pressing volume (n = 490, all 5 leagues, 2017/18–2021/22). Correlation r = −0.39, p = 5×10<sup>−19</sup> — real, but far from a tight line, which is itself the point: plenty of teams with modest possession press relatively little, and vice versa. Hover a point for the club and season."
+      },
+      {
+        "type": "paragraph",
+        "html": "That relationship is real and fairly strong: r = −0.39 (p = 5×10<sup>−19</sup>). Teams with less of the ball do press more — which is exactly what you'd expect mechanically (you can only press when you don't have the ball, so less possession simply means more time available to do it), as much as it reflects a deliberate tactical choice. Where it gets more interesting is asking which style actually <i>works</i>."
+      },
+      {
+        "type": "chart",
+        "chartType": "line",
+        "series": [
+          {
+            "label": "Correlation: possession ↔ points per game",
+            "color": "var(--good)",
+            "points": [
+              {
+                "x": "2017-18",
+                "y": 0.62
+              },
+              {
+                "x": "2018-19",
+                "y": 0.63
+              },
+              {
+                "x": "2019-20",
+                "y": 0.64
+              },
+              {
+                "x": "2020-21",
+                "y": 0.69
+              },
+              {
+                "x": "2021-22",
+                "y": 0.73
+              }
+            ]
+          },
+          {
+            "label": "Correlation: pressing volume ↔ points per game",
+            "color": "var(--bad)",
+            "points": [
+              {
+                "x": "2017-18",
+                "y": -0.19
+              },
+              {
+                "x": "2018-19",
+                "y": -0.31
+              },
+              {
+                "x": "2019-20",
+                "y": -0.32
+              },
+              {
+                "x": "2020-21",
+                "y": -0.24
+              },
+              {
+                "x": "2021-22",
+                "y": -0.5
+              }
+            ]
+          }
+        ],
+        "yLabel": "correlation (r)",
+        "yMin": -0.6,
+        "caption": "How strongly each style metric correlates with points per game, season by season. Possession's link to winning has stayed strongly positive throughout (all p < 10⁻¹³); pressing volume's link has stayed negative and, if anything, gotten more so by 2021/22 (p = 1×10⁻⁸)."
+      },
+      {
+        "type": "paragraph",
+        "html": "So: no, pressing hasn't replaced possession as the winning recipe — quite the opposite, on this data. Teams that keep the ball more still win more, consistently, every one of the five seasons we tested. Teams with high total pressing volume tend to have <i>fewer</i> points, not more, and that gap has widened rather than closed. That sounds like it contradicts the &ldquo;elite pressing team&rdquo; image (Liverpool under Klopp, Manchester City's own counter-press) — until you separate <i>where</i> the pressing happens, which is the next section."
+      },
+      {
+        "type": "heading",
+        "text": "Rich clubs, poor clubs, and where pressing actually happens on the pitch"
+      },
+      {
+        "type": "paragraph",
+        "html": "We split teams two ways — by final league position (top/middle/bottom third of the table, all five leagues, all five seasons) and, for the Premier League specifically, by total squad market value (bottom/middle/top third by transfer-market valuation, using Transfermarkt data hand-matched to club names). Both cuts tell the same story, independently."
+      },
+      {
+        "type": "chart",
+        "chartType": "stacked_hbar",
+        "data": [
+          {
+            "label": "Top third (table)",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 45.18,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 66.63,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 35.63,
+                "color": "var(--good)"
+              }
+            ]
+          },
+          {
+            "label": "Mid third (table)",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 51.45,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 68.61,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 33.38,
+                "color": "var(--good)"
+              }
+            ]
+          },
+          {
+            "label": "Bottom third (table)",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 54.67,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 69.3,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 32.08,
+                "color": "var(--good)"
+              }
+            ]
+          }
+        ],
+        "segmentLabels": [
+          {
+            "name": "Defensive third",
+            "color": "var(--bad)"
+          },
+          {
+            "name": "Middle third",
+            "color": "var(--accent)"
+          },
+          {
+            "name": "Attacking third",
+            "color": "var(--good)"
+          }
+        ],
+        "caption": "Where pressure events happen on the pitch, by final-table tercile (all 5 leagues, 2017/18–2021/22). A zone-based proxy for a pitch heatmap — we have defensive/middle/attacking-third counts, not raw x/y coordinates, so this shows the pitch-third split rather than a true positional heatmap."
+      },
+      {
+        "type": "paragraph",
+        "html": "Bottom-third teams actually generate <i>more total</i> pressure events than top-third teams (156 vs 147 per 90) — but nearly all of that extra volume sits in their own defensive third (55 vs 45 per 90). Top-third teams press <i>less overall</i>, but more of what they do happens in the attacking third (36 vs 32 per 90). In plain terms: for a struggling side, most of what shows up in the stats as &ldquo;pressing&rdquo; is really just defending under siege deep in their own half — not the front-foot, opponent's-box gegenpress associated with the elite sides."
+      },
+      {
+        "type": "paragraph",
+        "html": "The Premier League squad-value cut lands in exactly the same place, independently sourced: teams in the bottom third by squad market value (average €186m) pressed more overall (157 events/90) than the top third (average €804m, 144 events/90), had far less of the ball (44.7% vs 58.0% possession), and pressed <i>less</i> in the attacking third specifically (33.0 vs 35.6 events/90). Across the whole sample, squad value correlates strongly with possession (r = 0.79, p = 5×10<sup>−22</sup>), negatively with total pressing (r = −0.43, p = 8×10<sup>−6</sup>), and positively with attacking-third pressing specifically (r = +0.25, p = 0.01)."
+      },
+      {
+        "type": "callout",
+        "heading": "“High pressing” is really two different things",
+        "html": "<p>Football media uses one phrase for two different behaviors that show up almost as opposites in the data: a rich, dominant side stepping up and squeezing you high in the attacking third, and a struggling side dropping deep and defending for their lives in their own third. Both generate &ldquo;pressure events.&rdquo; Only one of them is what people usually mean when they say a team &ldquo;presses.&rdquo;</p>"
+      },
+      {
+        "type": "heading",
+        "text": "Forwards' role in the press — and how it's shifted"
+      },
+      {
+        "type": "paragraph",
+        "html": "Forwards do the most attacking-third pressing of any position group by a wide margin — unsurprising, since it's the zone they already occupy — averaging 6.1–6.6 attacking-third pressure events per 90 across the five seasons, versus 1.6–1.9 for everyone else combined (defenders, midfielders and goalkeepers pooled, most of whom rarely operate that high up the pitch by design). The more interesting question isn't the gap — it's how forwards' <i>share</i> of that team-wide effort has moved."
+      },
+      {
+        "type": "chart",
+        "chartType": "line",
+        "series": [
+          {
+            "label": "Forwards' share of team's attacking-third pressing",
+            "color": "var(--analytics)",
+            "points": [
+              {
+                "x": "2017-18",
+                "y": 64
+              },
+              {
+                "x": "2018-19",
+                "y": 62.8
+              },
+              {
+                "x": "2019-20",
+                "y": 61
+              },
+              {
+                "x": "2020-21",
+                "y": 58.7
+              },
+              {
+                "x": "2021-22",
+                "y": 59.4
+              }
+            ]
+          }
+        ],
+        "yLabel": "%",
+        "yMin": 40,
+        "caption": "What share of a team's total attacking-third pressure events came from players listed at forward, by season. Down from 64% to 59% — a statistically significant decline (p = 3×10⁻⁶)."
+      },
+      {
+        "type": "paragraph",
+        "html": "Forwards went from generating roughly two-thirds of their team's high pressing to a little under three-fifths of it (p = 3×10<sup>−6</sup>) — not because forwards are pressing less individually (their own per-90 rate is statistically flat across the five seasons, p = 0.53), but because everyone else's is rising: non-forwards' attacking-third pressing rate climbed significantly over the same window (p < 0.001). The high press hasn't become a forwards' job that's intensified — it's become a whole-team structural job that midfielders and even defenders are being asked to share in more than they used to."
+      },
+      {
+        "type": "heading",
+        "text": "How the top five leagues compare"
+      },
+      {
+        "type": "chart",
+        "chartType": "hbar",
+        "data": [
+          {
+            "label": "Bundesliga",
+            "value": 157.9
+          },
+          {
+            "label": "Ligue 1",
+            "value": 151.7
+          },
+          {
+            "label": "Serie A",
+            "value": 145.8
+          },
+          {
+            "label": "Premier League",
+            "value": 145.6
+          },
+          {
+            "label": "La Liga",
+            "value": 145
+          }
+        ],
+        "caption": "Average defensive-pressure events per 90, 2021/22 (the last season our source has a like-for-like count for). The Bundesliga's press-heavy reputation — the Klopp/Nagelsmann/RB Leipzig lineage — holds up as the real top-line number, with La Liga's more patient, possession-first tradition sitting at the other end."
+      },
+      {
+        "type": "chart",
+        "chartType": "stacked_hbar",
+        "data": [
+          {
+            "label": "Bundesliga",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 31.35,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 44.77,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 23.88,
+                "color": "var(--good)"
+              }
+            ]
+          },
+          {
+            "label": "Premier League",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 33.48,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 42.62,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 23.9,
+                "color": "var(--good)"
+              }
+            ]
+          },
+          {
+            "label": "Ligue 1",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 31.74,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 45.57,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 22.69,
+                "color": "var(--good)"
+              }
+            ]
+          },
+          {
+            "label": "Serie A",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 32.83,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 43.79,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 23.39,
+                "color": "var(--good)"
+              }
+            ]
+          },
+          {
+            "label": "La Liga",
+            "segments": [
+              {
+                "name": "Defensive third",
+                "value": 32.14,
+                "color": "var(--bad)"
+              },
+              {
+                "name": "Middle third",
+                "value": 45.34,
+                "color": "var(--accent)"
+              },
+              {
+                "name": "Attacking third",
+                "value": 22.52,
+                "color": "var(--good)"
+              }
+            ]
+          }
+        ],
+        "segmentLabels": [
+          {
+            "name": "Defensive third",
+            "color": "var(--bad)"
+          },
+          {
+            "name": "Middle third",
+            "color": "var(--accent)"
+          },
+          {
+            "name": "Attacking third",
+            "color": "var(--good)"
+          }
+        ],
+        "caption": "Pitch-zone share of each league's pressing, 2021/22 — the same zone-proxy heatmap as above, split by league. The Premier League and Bundesliga send the largest share of their pressing into the attacking third (≈23.9% each); La Liga sends the least (22.5%) and defends the most in its own third instead."
+      },
+      {
+        "type": "heading",
+        "text": "What this data can't tell us"
+      },
+      {
+        "type": "list",
+        "items": [
+          "Event-count pressing stats (how many times a player closes down an opponent) are a real signal, but they're a coarser tool than a true positional-tracking metric like PPDA (passes-per-defensive-action) or genuine x/y heatmaps — neither of which we could reliably access for this piece. What's here measures <i>how often</i> teams press and roughly <i>where</i>, not the full coordination and intensity a coaching staff would look at.",
+          "The squad-value &ldquo;rich vs poor&rdquo; cut is Premier League-only — name-matching Transfermarkt valuations to the other four leagues' club names by hand wasn't practical for this cycle, though the table-position cut (which covers all five leagues) points the same direction independently.",
+          "This is a research post, not a model change — nothing here feeds PitchMetric's actual predictions today. If a reliable, current cross-league pressing feed becomes available, a team's pressing profile is a plausible future input to how we think about defensive difficulty; that's not built, and this post isn't claiming it is."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "html": "The honest summary: &ldquo;pressing is taking over&rdquo; is a catchier headline than what the last five full seasons of data actually show. Total pressing volume is flat-to-down, not up. Possession still predicts winning better than pressing does, and that gap hasn't closed. What <i>has</i> genuinely changed is more specific and more interesting than the popular version — pressing has gotten more efficient, concentrated closer to the opponent's goal, and spread out across more of the team rather than resting on the forwards alone. See <a href=\"/methodology\">Methodology</a> for how PitchMetric's actual predictions work, and <a href=\"/blog/\">the rest of the blog</a> for our other research posts."
       }
     ]
   }
