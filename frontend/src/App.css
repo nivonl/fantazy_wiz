@@ -743,6 +743,21 @@ ul.flags li {
 
 /* ---------- Blog ---------- */
 
+.blog-filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 18px; }
+.blog-filter-btn {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+.blog-filter-btn:hover { border-color: var(--analytics); color: var(--text); }
+.blog-filter-btn.is-active { background: var(--tint-analytics); border-color: var(--analytics); color: var(--analytics); }
+
 .blog-index-grid { display: flex; flex-direction: column; gap: 16px; }
 
 .blog-index-card {

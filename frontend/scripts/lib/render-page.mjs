@@ -117,7 +117,7 @@ export function renderPage({ title, description, path, bodyHtml, cssHref, breadc
         </div>
       </main>
     </div>
-    <script>${CHART_TOOLTIP_SCRIPT}${SHARE_SCRIPT}</script>
+    <script>${CHART_TOOLTIP_SCRIPT}${SHARE_SCRIPT}${FILTER_SCRIPT}</script>
   </body>
 </html>
 `;
@@ -220,6 +220,29 @@ const SHARE_SCRIPT = `
     } catch (err) {
       done(false);
     }
+  });
+})();
+`;
+
+// Delegated click handler for the blog index's filter bar (see build-static-pages.mjs's
+// renderBlogIndexBody / FILTER_BUCKETS). Only present on /blog/, but registered globally like
+// the two scripts above -- the closest() lookup is a no-op everywhere else. Toggling the .hidden
+// property (not a class) matches this page skeleton's own [hidden]{display:none!important} reset.
+const FILTER_SCRIPT = `
+(function () {
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest && e.target.closest("[data-filter-btn]");
+    if (!btn) return;
+    var bar = btn.closest(".blog-filter-bar");
+    var grid = document.querySelector(".blog-index-grid");
+    if (!bar || !grid) return;
+    var key = btn.getAttribute("data-filter-btn");
+    Array.prototype.forEach.call(bar.querySelectorAll("[data-filter-btn]"), function (b) {
+      b.classList.toggle("is-active", b === btn);
+    });
+    Array.prototype.forEach.call(grid.querySelectorAll(".blog-index-card"), function (card) {
+      card.hidden = key !== "all" && card.getAttribute("data-filter-key") !== key;
+    });
   });
 })();
 `;

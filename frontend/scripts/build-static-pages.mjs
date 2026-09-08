@@ -435,20 +435,48 @@ export function renderBlogPostBody(post, slugById, path) {
   return post.type === "deep_research" ? renderDeepResearchBody(post, path) : renderGameweekSurpriseBody(post, slugById, path);
 }
 
+// Filter-bar taxonomy for the index page -- fixed preferred display order regardless of which
+// order posts happen to appear in the array, and a button only renders for a bucket that
+// actually has at least one post today, so "Miscellaneous" doesn't show up as a permanent
+// always-empty dead end before anything is ever tagged into it.
+const FILTER_BUCKETS = [
+  { key: "research", label: "Research" },
+  { key: "gameweek", label: "PL GW Top Surprise" },
+  { key: "misc", label: "Miscellaneous" },
+];
+
+function filterKeyForPost(post) {
+  if (post.type === "deep_research") return "research";
+  if (post.gameweek != null) return "gameweek";
+  return "misc";
+}
+
 export function renderBlogIndexBody(posts) {
+  const presentKeys = new Set(posts.map(filterKeyForPost));
+  const buckets = FILTER_BUCKETS.filter((b) => presentKeys.has(b.key));
+  const filterBar = buckets.length > 1
+    ? `<div class="blog-filter-bar" role="group" aria-label="Filter posts by type">
+        <button type="button" class="blog-filter-btn is-active" data-filter-btn="all">All</button>
+        ${buckets.map((b) => `<button type="button" class="blog-filter-btn" data-filter-btn="${b.key}">${escapeHtml(b.label)}</button>`).join("")}
+      </div>`
+    : "";
   return `
     <h2>PitchMetric Blog</h2>
     <p class="summary-line">Weekly gameweek surprises -- the biggest gaps between what PitchMetric predicted and what actually happened -- plus our <b>Deep Research</b> series: periodic, methodologically serious dives into the questions behind the numbers, using real data and real held-out testing.</p>
+    ${filterBar}
     <div class="blog-index-grid">
       ${posts
-        .map(
-          (post) => `
-      <a class="blog-index-card" href="/blog/${post.urlSlug}/">
-        <p class="blog-index-meta">${post.type === "deep_research" ? escapeHtml(post.category) : `Gameweek ${post.gameweek}`}</p>
+        .map((post) => {
+          const dateLabel = new Date(post.published + "T00:00:00Z").toLocaleDateString("en-GB", {
+            year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
+          });
+          return `
+      <a class="blog-index-card" href="/blog/${post.urlSlug}/" data-filter-key="${filterKeyForPost(post)}">
+        <p class="blog-index-meta">${post.type === "deep_research" ? escapeHtml(post.category) : `Gameweek ${post.gameweek}`} &middot; ${dateLabel}</p>
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.dek)}</p>
-      </a>`
-        )
+      </a>`;
+        })
         .join("\n")}
     </div>
   `;
