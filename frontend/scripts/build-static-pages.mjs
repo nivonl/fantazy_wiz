@@ -19,6 +19,7 @@ import { renderPage, SITE_URL } from "./lib/render-page.mjs";
 import { renderPointsBarChart, renderPriceLineChart } from "./lib/chart.mjs";
 import { renderRadarChart, formatCategoryDetail } from "../src/charts/radarChart.js";
 import { renderHBarChart, renderDivergingBarChart, renderScatterChart, renderLineChart, renderStackedHBarChart, renderMatrixHeatmap } from "./lib/research-charts.mjs";
+import { renderPassingNetwork, renderSequenceMap } from "./lib/pitch-charts.mjs";
 import { teamColor } from "../src/team-colors.js";
 import { seasonLabel } from "./lib/season.mjs";
 
@@ -363,6 +364,10 @@ function renderResearchChart(block) {
       return renderStackedHBarChart(block.data, { segmentLabels: block.segmentLabels });
     case "matrix_heatmap":
       return renderMatrixHeatmap(block.labels, block.cells);
+    case "passing_network":
+      return renderPassingNetwork(block.nodes, block.edges, { minEdgeCount: block.minEdgeCount, colorMetric: block.colorMetric });
+    case "sequence_map":
+      return renderSequenceMap(block.steps);
     default:
       return "";
   }
@@ -384,6 +389,16 @@ function renderDeepResearchBlock(block) {
       return `<figure class="blog-figure blog-chart-figure">${renderResearchChart(block)}${
         block.caption ? `<figcaption>${block.caption}</figcaption>` : ""
       }</figure>`;
+    // Two charts side by side (e.g. one team's passing network next to the other's) -- each entry
+    // in `charts` is a normal chart block, just laid out in a row instead of stacked full-width.
+    case "chart_row":
+      return `<div class="blog-chart-row">${block.charts
+        .map(
+          (c) => `<figure class="blog-figure blog-chart-figure">${renderResearchChart(c)}${
+            c.caption ? `<figcaption>${c.caption}</figcaption>` : ""
+          }</figure>`
+        )
+        .join("")}</div>`;
     case "callout":
       return `<div class="blog-callout"><p class="blog-callout-heading">${escapeHtml(block.heading)}</p>${block.html}</div>`;
     default:
@@ -431,8 +446,17 @@ function renderDeepResearchBody(post, path) {
   `;
 }
 
+// Long-form posts (Deep Research and Match Analysis) share one body renderer and one evergreen
+// (non-season-prefixed) URL scheme -- both are a typed `blocks` array with a TL;DR/takeaways/
+// share-bar wrapper, just under a different category label. A gameweek-surprise post is the only
+// other shape today, with its own player-card renderer and season-prefixed URL.
+const LONG_FORM_TYPES = new Set(["deep_research", "match_analysis"]);
+function isLongForm(post) {
+  return LONG_FORM_TYPES.has(post.type);
+}
+
 export function renderBlogPostBody(post, slugById, path) {
-  return post.type === "deep_research" ? renderDeepResearchBody(post, path) : renderGameweekSurpriseBody(post, slugById, path);
+  return isLongForm(post) ? renderDeepResearchBody(post, path) : renderGameweekSurpriseBody(post, slugById, path);
 }
 
 // Filter-bar taxonomy for the index page -- fixed preferred display order regardless of which
@@ -442,11 +466,13 @@ export function renderBlogPostBody(post, slugById, path) {
 const FILTER_BUCKETS = [
   { key: "research", label: "Research" },
   { key: "gameweek", label: "PL GW Top Surprise" },
+  { key: "match_analysis", label: "Match Analysis" },
   { key: "misc", label: "Miscellaneous" },
 ];
 
 function filterKeyForPost(post) {
   if (post.type === "deep_research") return "research";
+  if (post.type === "match_analysis") return "match_analysis";
   if (post.gameweek != null) return "gameweek";
   return "misc";
 }
@@ -472,7 +498,7 @@ export function renderBlogIndexBody(posts) {
           });
           return `
       <a class="blog-index-card" href="/blog/${post.urlSlug}/" data-filter-key="${filterKeyForPost(post)}">
-        <p class="blog-index-meta">${post.type === "deep_research" ? escapeHtml(post.category) : `Gameweek ${post.gameweek}`} &middot; ${dateLabel}</p>
+        <p class="blog-index-meta">${isLongForm(post) ? escapeHtml(post.category) : `Gameweek ${post.gameweek}`} &middot; ${dateLabel}</p>
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.dek)}</p>
       </a>`;
@@ -627,7 +653,7 @@ async function main() {
     // page below, so they can never disagree.
     for (const post of posts) {
       post.urlSlug =
-        post.type === "deep_research" ? post.slug : `${seasonLabel(new Date(`${post.published}T00:00:00Z`))}-${post.slug}`;
+        isLongForm(post) ? post.slug : `${seasonLabel(new Date(`${post.published}T00:00:00Z`))}-${post.slug}`;
     }
 
     const blogIndexHtml = renderPage({

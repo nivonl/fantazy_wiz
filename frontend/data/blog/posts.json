@@ -10517,5 +10517,1251 @@
         "html": "See our <a href=\"/blog/is-high-pressing-actually-rising/\">pressing research</a> and its <a href=\"/blog/extending-the-pressing-study-style-clusters/\">follow-up</a> for the same honesty-first approach applied to a different tactical claim, and <a href=\"/methodology\">Methodology</a> for how PitchMetric's actual predictions work."
       }
     ]
+  },
+  {
+    "type": "match_analysis",
+    "slug": "spain-portugal-2018-passing-network",
+    "category": "Match Analysis",
+    "title": "Inside a 3-3 Classic: Mapping Spain vs Portugal's Passing Network With Real Event Data",
+    "dek": "Everything on this blog so far has run on season-aggregate stats. Passing networks and graph theory need something different — real pass-by-pass event data with pitch coordinates. We found a legitimate free source for it and rebuilt one of football analytics' classic visualizations from scratch.",
+    "published": "2026-09-08",
+    "tldr": "We sourced real match event data (StatsBomb's open-data project) to build genuine passing networks — not season aggregates — for Portugal 3-3 Spain at the 2018 World Cup, then applied real graph-theory metrics (degree, betweenness, eigenvector centrality) to find each team's structurally important players. We also built a pass-by-pass sequence map for one of the six goals. This is a capability demonstration on a specific open dataset, not (yet) something feeding this week's Premier League predictions.",
+    "keyTakeaways": [
+      "Passing networks need event-level data (who passed to whom, and from where) — a different, harder-to-get data tier than the season totals every other post on this blog has used.",
+      "StatsBomb's open-data project is a legitimate, free source of that data for a defined set of competitions — several World Cups and Euros, many Champions League seasons, and a large chunk of Barcelona's La Liga history — though it doesn't cover most current-day Premier League or La Liga fixtures.",
+      "Graph theory adds real information beyond raw pass counts: betweenness centrality found Sergio Ramos and Raphaël Guerreiro as each team's structural “bridge” players, distinct from (and more interesting than) simply who touched the ball most.",
+      "Spain's network was denser but less clustered than Portugal's — a real, quantified difference in shape, not just a visual impression.",
+      "This is a demonstrated capability on a specific dataset, not a live feature — it doesn't feed PitchMetric's actual predictions today."
+    ],
+    "lede": "Ronaldo scored a stoppage-time free kick to complete his hat-trick and salvage a 3-3 draw against Spain in the opening game of the 2018 World Cup — still one of the most-replayed group-stage matches in tournament history. It's also, conveniently, a match with full public event data available: every pass, carry and shot, with real pitch coordinates, freely published. That makes it a good test case for a capability question worth answering properly rather than faking: can we build the kind of passing-network and graph-theory visualizations serious football analytics accounts publish — with real data, not a mockup?",
+    "blocks": [
+      {
+        "type": "heading",
+        "text": "A different kind of data for a different kind of chart"
+      },
+      {
+        "type": "paragraph",
+        "html": "Every research post on this blog so far — pressing, style clustering, crossing trends — has run on <i>season-aggregate</i> stats: a player's total progressive passes for a whole year, a team's average possession. A passing network needs something categorically different: <i>event-level</i> data, one row per pass, with who played it, who received it, and exactly where on the pitch both of those happened. FBref (our usual source) doesn't publish that. We went looking for a legitimate public source that does, and found one: <a href=\"https://github.com/statsbomb/open-data\">StatsBomb's open-data project</a>, which freely publishes full event data — coordinates included — for a defined set of competitions: several men's and women's World Cups, the Euros, many Champions League seasons back to the 1970s, and (thanks to a long-running public tracking project) a large chunk of Barcelona's La Liga history."
+      },
+      {
+        "type": "callout",
+        "heading": "Worth being precise about what this covers",
+        "html": "<p>This is real data for specific released matches — not a live feed, and not current-day Premier League or La Liga coverage (StatsBomb's PL open release stops at 2015/16). What follows is a genuine demonstration of the technique on real data, not a new capability quietly powering this week's gameweek posts.</p>"
+      },
+      {
+        "type": "heading",
+        "text": "67′ and 69′: Portugal 3–3 Spain, World Cup 2018"
+      },
+      {
+        "type": "paragraph",
+        "html": "Each network below uses every completed pass up to that team's own first substitution (Portugal, 67′; Spain, 69′) — the standard convention, since a substitution changes the team's actual shape and personnel. A player's position on the pitch is their <i>average</i> pass-origin location across that window — not a formation diagram, an emergent one built from where they actually touched the ball. Node size is pass volume; node color is betweenness centrality (more on that below); edge thickness is passes exchanged between that specific pair."
+      },
+      {
+        "type": "chart_row",
+        "charts": [
+          {
+            "chartType": "passing_network",
+            "nodes": [
+              {
+                "player": "Raphaël Adelino José Guerreiro",
+                "short": "Guerreiro",
+                "jersey": 5,
+                "x": 65.5,
+                "y": 6.9,
+                "passes": 31,
+                "degree_centrality": 0.8,
+                "betweenness_centrality": 0.3148,
+                "eigenvector_centrality": 0.4453
+              },
+              {
+                "player": "William Silva de Carvalho",
+                "short": "W. Carvalho",
+                "jersey": 14,
+                "x": 61,
+                "y": 34.4,
+                "passes": 32,
+                "degree_centrality": 0.9,
+                "betweenness_centrality": 0.2204,
+                "eigenvector_centrality": 0.4215
+              },
+              {
+                "player": "Bernardo Mota Veiga de Carvalho e Silva",
+                "short": "B. Silva",
+                "jersey": 11,
+                "x": 67.7,
+                "y": 59.2,
+                "passes": 16,
+                "degree_centrality": 0.7,
+                "betweenness_centrality": 0.0222,
+                "eigenvector_centrality": 0.2124
+              },
+              {
+                "player": "Cristiano Ronaldo dos Santos Aveiro",
+                "short": "Ronaldo",
+                "jersey": 7,
+                "x": 73.8,
+                "y": 22.7,
+                "passes": 26,
+                "degree_centrality": 1,
+                "betweenness_centrality": 0.0778,
+                "eigenvector_centrality": 0.3852
+              },
+              {
+                "player": "Cédric Ricardo Alves Soares",
+                "short": "Cédric",
+                "jersey": 21,
+                "x": 56.4,
+                "y": 71,
+                "passes": 20,
+                "degree_centrality": 0.8,
+                "betweenness_centrality": 0.0444,
+                "eigenvector_centrality": 0.2385
+              },
+              {
+                "player": "João Filipe Iria Santos Moutinho",
+                "short": "Moutinho",
+                "jersey": 8,
+                "x": 55.6,
+                "y": 41.4,
+                "passes": 29,
+                "degree_centrality": 0.9,
+                "betweenness_centrality": 0.1241,
+                "eigenvector_centrality": 0.3826
+              },
+              {
+                "player": "Kléper Laveran Lima Ferreira",
+                "short": "Pepe",
+                "jersey": 3,
+                "x": 48.4,
+                "y": 55.2,
+                "passes": 19,
+                "degree_centrality": 1,
+                "betweenness_centrality": 0,
+                "eigenvector_centrality": 0.2475
+              },
+              {
+                "player": "Bruno Miguel Borges Fernandes",
+                "short": "B. Fernandes",
+                "jersey": 16,
+                "x": 68.3,
+                "y": 20.1,
+                "passes": 15,
+                "degree_centrality": 0.7,
+                "betweenness_centrality": 0,
+                "eigenvector_centrality": 0.2694
+              },
+              {
+                "player": "Gonçalo Manuel Ganchinho Guedes",
+                "short": "Guedes",
+                "jersey": 17,
+                "x": 70.8,
+                "y": 39.9,
+                "passes": 9,
+                "degree_centrality": 1,
+                "betweenness_centrality": 0,
+                "eigenvector_centrality": 0.1757
+              },
+              {
+                "player": "José Miguel da Rocha Fonte",
+                "short": "Fonte",
+                "jersey": 6,
+                "x": 39.8,
+                "y": 24.8,
+                "passes": 17,
+                "degree_centrality": 1,
+                "betweenness_centrality": 0.0222,
+                "eigenvector_centrality": 0.2034
+              },
+              {
+                "player": "Rui Pedro dos Santos Patrício",
+                "short": "Patrício",
+                "jersey": 1,
+                "x": 9.4,
+                "y": 35.9,
+                "passes": 14,
+                "degree_centrality": 0.6,
+                "betweenness_centrality": 0,
+                "eigenvector_centrality": 0.1457
+              }
+            ],
+            "edges": [
+              {
+                "from": "Raphaël Adelino José Guerreiro",
+                "to": "Bruno Miguel Borges Fernandes",
+                "count": 10
+              },
+              {
+                "from": "Raphaël Adelino José Guerreiro",
+                "to": "William Silva de Carvalho",
+                "count": 5
+              },
+              {
+                "from": "William Silva de Carvalho",
+                "to": "Raphaël Adelino José Guerreiro",
+                "count": 6
+              },
+              {
+                "from": "Bernardo Mota Veiga de Carvalho e Silva",
+                "to": "Cristiano Ronaldo dos Santos Aveiro",
+                "count": 4
+              },
+              {
+                "from": "Cristiano Ronaldo dos Santos Aveiro",
+                "to": "Cédric Ricardo Alves Soares",
+                "count": 1
+              },
+              {
+                "from": "Cédric Ricardo Alves Soares",
+                "to": "João Filipe Iria Santos Moutinho",
+                "count": 3
+              },
+              {
+                "from": "João Filipe Iria Santos Moutinho",
+                "to": "Kléper Laveran Lima Ferreira",
+                "count": 6
+              },
+              {
+                "from": "Kléper Laveran Lima Ferreira",
+                "to": "William Silva de Carvalho",
+                "count": 4
+              },
+              {
+                "from": "Bruno Miguel Borges Fernandes",
+                "to": "Gonçalo Manuel Ganchinho Guedes",
+                "count": 2
+              },
+              {
+                "from": "Kléper Laveran Lima Ferreira",
+                "to": "Raphaël Adelino José Guerreiro",
+                "count": 3
+              },
+              {
+                "from": "William Silva de Carvalho",
+                "to": "Gonçalo Manuel Ganchinho Guedes",
+                "count": 2
+              },
+              {
+                "from": "Gonçalo Manuel Ganchinho Guedes",
+                "to": "Bruno Miguel Borges Fernandes",
+                "count": 1
+              },
+              {
+                "from": "William Silva de Carvalho",
+                "to": "José Miguel da Rocha Fonte",
+                "count": 3
+              },
+              {
+                "from": "José Miguel da Rocha Fonte",
+                "to": "William Silva de Carvalho",
+                "count": 2
+              },
+              {
+                "from": "William Silva de Carvalho",
+                "to": "Cristiano Ronaldo dos Santos Aveiro",
+                "count": 1
+              },
+              {
+                "from": "Cristiano Ronaldo dos Santos Aveiro",
+                "to": "William Silva de Carvalho",
+                "count": 6
+              },
+              {
+                "from": "William Silva de Carvalho",
+                "to": "Kléper Laveran Lima Ferreira",
+                "count": 2
+              },
+              {
+                "from": "Kléper Laveran Lima Ferreira",
+                "to": "Bruno Miguel Borges Fernandes",
+                "count": 1
+              },
+              {
+                "from": "Bruno Miguel Borges Fernandes",
+                "to": "Cristiano Ronaldo dos Santos Aveiro",
+                "count": 5
+              },
+              {
+                "from": "Kléper Laveran Lima Ferreira",
+                "to": "Gonçalo Manuel Ganchinho Guedes",
+                "count": 2
+              },
+              {
+                "from": "Gonçalo Manuel Ganchinho Guedes",
+                "to": "Cristiano Ronaldo dos Santos Aveiro",
+                "count": 1
+              },
+              {
+                "from": "Kléper Laveran Lima Ferreira",
+                "to": "José Miguel da Rocha Fonte",
+                "count": 2
+              },
+              {
+                "from": "José Miguel da Rocha Fonte",
+                "to": "Raphaël Adelino José Guerreiro",
+                "count": 4
+              },
+              {
+                "from": "Raphaël Adelino José Guerreiro",
+                "to": "José Miguel da Rocha Fonte",
+                "count": 1
+              },
+              {
+                "from": "José Miguel da Rocha Fonte",
+                "to": "Rui Pedro dos Santos Patrício",
+                "count": 5
+              },
+              {
+                "from": "Rui Pedro dos Santos Patrício",
+                "to": "Gonçalo Manuel Ganchinho Guedes",
+                "count": 1
+              },
+              {
+                "from": "Rui Pedro dos Santos Patrício",
+                "to": "Raphaël Adelino José Guerreiro",
+                "count": 4
+              },
+              {
+                "from": "Rui Pedro dos Santos Patrício",
+                "to": "Cristiano Ronaldo dos Santos Aveiro",
+                "count": 4
+              },
+              {
+                "from": "Cristiano Ronaldo dos Santos Aveiro",
+                "to": "Gonçalo Manuel Ganchinho Guedes",
+                "count": 5
+              },
+              {
+                "from": "Bernardo Mota Veiga de Carvalho e Silva",
+                "to": "Cédric Ricardo Alves Soares",
+                "count": 4
+              },
+              {
+                "from": "Kléper Laveran Lima Ferreira",
+                "to": "Cristiano Ronaldo dos Santos Aveiro",
+                "count": 3
+              },
+              {
+                "from": "Cristiano Ronaldo dos Santos Aveiro",
+                "to": "Raphaël Adelino José Guerreiro",
+                "count": 8
+              },
+              {
+                "from": "Cédric Ricardo Alves Soares",
+                "to": "Kléper Laveran Lima Ferreira",
+                "count": 6
+              },
+              {
+                "from": "Kléper Laveran Lima Ferreira",
+                "to": "Bernardo Mota Veiga de Carvalho e Silva",
+                "count": 2
+              },
+              {
+                "from": "Cédric Ricardo Alves Soares",
+                "to": "Cristiano Ronaldo dos Santos Aveiro",
+                "count": 1
+              },
+              {
+                "from": "Raphaël Adelino José Guerreiro",
+                "to": "Cristiano Ronaldo dos Santos Aveiro",
+                "count": 7
+              },
+              {
+                "from": "Cristiano Ronaldo dos Santos Aveiro",
+                "to": "José Miguel da Rocha Fonte",
+                "count": 1
+              },
+              {
+                "from": "José Miguel da Rocha Fonte",
+                "to": "Kléper Laveran Lima Ferreira",
+                "count": 2
+              },
+              {
+                "from": "Raphaël Adelino José Guerreiro",
+                "to": "João Filipe Iria Santos Moutinho",
+                "count": 5
+              },
+              {
+                "from": "João Filipe Iria Santos Moutinho",
+                "to": "Cristiano Ronaldo dos Santos Aveiro",
+                "count": 4
+              },
+              {
+                "from": "Gonçalo Manuel Ganchinho Guedes",
+                "to": "William Silva de Carvalho",
+                "count": 3
+              },
+              {
+                "from": "William Silva de Carvalho",
+                "to": "João Filipe Iria Santos Moutinho",
+                "count": 10
+              },
+              {
+                "from": "João Filipe Iria Santos Moutinho",
+                "to": "Cédric Ricardo Alves Soares",
+                "count": 5
+              },
+              {
+                "from": "Raphaël Adelino José Guerreiro",
+                "to": "Rui Pedro dos Santos Patrício",
+                "count": 2
+              },
+              {
+                "from": "Gonçalo Manuel Ganchinho Guedes",
+                "to": "João Filipe Iria Santos Moutinho",
+                "count": 1
+              },
+              {
+                "from": "Cristiano Ronaldo dos Santos Aveiro",
+                "to": "João Filipe Iria Santos Moutinho",
+                "count": 2
+              },
+              {
+                "from": "João Filipe Iria Santos Moutinho",
+                "to": "William Silva de Carvalho",
+                "count": 2
+              },
+              {
+                "from": "William Silva de Carvalho",
+                "to": "Cédric Ricardo Alves Soares",
+                "count": 4
+              },
+              {
+                "from": "Bernardo Mota Veiga de Carvalho e Silva",
+                "to": "José Miguel da Rocha Fonte",
+                "count": 3
+              },
+              {
+                "from": "João Filipe Iria Santos Moutinho",
+                "to": "Bruno Miguel Borges Fernandes",
+                "count": 1
+              },
+              {
+                "from": "Kléper Laveran Lima Ferreira",
+                "to": "Cédric Ricardo Alves Soares",
+                "count": 1
+              },
+              {
+                "from": "Cédric Ricardo Alves Soares",
+                "to": "Bernardo Mota Veiga de Carvalho e Silva",
+                "count": 7
+              },
+              {
+                "from": "Cristiano Ronaldo dos Santos Aveiro",
+                "to": "Bruno Miguel Borges Fernandes",
+                "count": 2
+              },
+              {
+                "from": "Bruno Miguel Borges Fernandes",
+                "to": "Raphaël Adelino José Guerreiro",
+                "count": 3
+              },
+              {
+                "from": "José Miguel da Rocha Fonte",
+                "to": "Bruno Miguel Borges Fernandes",
+                "count": 1
+              },
+              {
+                "from": "Gonçalo Manuel Ganchinho Guedes",
+                "to": "Cédric Ricardo Alves Soares",
+                "count": 1
+              },
+              {
+                "from": "William Silva de Carvalho",
+                "to": "Bruno Miguel Borges Fernandes",
+                "count": 2
+              },
+              {
+                "from": "Bruno Miguel Borges Fernandes",
+                "to": "José Miguel da Rocha Fonte",
+                "count": 1
+              },
+              {
+                "from": "José Miguel da Rocha Fonte",
+                "to": "Cédric Ricardo Alves Soares",
+                "count": 1
+              },
+              {
+                "from": "Cédric Ricardo Alves Soares",
+                "to": "Rui Pedro dos Santos Patrício",
+                "count": 1
+              },
+              {
+                "from": "João Filipe Iria Santos Moutinho",
+                "to": "Bernardo Mota Veiga de Carvalho e Silva",
+                "count": 4
+              },
+              {
+                "from": "Bruno Miguel Borges Fernandes",
+                "to": "William Silva de Carvalho",
+                "count": 3
+              },
+              {
+                "from": "Rui Pedro dos Santos Patrício",
+                "to": "José Miguel da Rocha Fonte",
+                "count": 2
+              },
+              {
+                "from": "José Miguel da Rocha Fonte",
+                "to": "João Filipe Iria Santos Moutinho",
+                "count": 2
+              },
+              {
+                "from": "João Filipe Iria Santos Moutinho",
+                "to": "Raphaël Adelino José Guerreiro",
+                "count": 5
+              },
+              {
+                "from": "Bernardo Mota Veiga de Carvalho e Silva",
+                "to": "William Silva de Carvalho",
+                "count": 4
+              },
+              {
+                "from": "William Silva de Carvalho",
+                "to": "Bernardo Mota Veiga de Carvalho e Silva",
+                "count": 2
+              },
+              {
+                "from": "Raphaël Adelino José Guerreiro",
+                "to": "Gonçalo Manuel Ganchinho Guedes",
+                "count": 1
+              },
+              {
+                "from": "Gonçalo Manuel Ganchinho Guedes",
+                "to": "Raphaël Adelino José Guerreiro",
+                "count": 1
+              },
+              {
+                "from": "João Filipe Iria Santos Moutinho",
+                "to": "José Miguel da Rocha Fonte",
+                "count": 1
+              },
+              {
+                "from": "Cristiano Ronaldo dos Santos Aveiro",
+                "to": "Bernardo Mota Veiga de Carvalho e Silva",
+                "count": 1
+              },
+              {
+                "from": "Bernardo Mota Veiga de Carvalho e Silva",
+                "to": "Gonçalo Manuel Ganchinho Guedes",
+                "count": 1
+              },
+              {
+                "from": "Cédric Ricardo Alves Soares",
+                "to": "William Silva de Carvalho",
+                "count": 2
+              },
+              {
+                "from": "João Filipe Iria Santos Moutinho",
+                "to": "Gonçalo Manuel Ganchinho Guedes",
+                "count": 1
+              },
+              {
+                "from": "Gonçalo Manuel Ganchinho Guedes",
+                "to": "José Miguel da Rocha Fonte",
+                "count": 1
+              },
+              {
+                "from": "Rui Pedro dos Santos Patrício",
+                "to": "Cédric Ricardo Alves Soares",
+                "count": 1
+              },
+              {
+                "from": "Rui Pedro dos Santos Patrício",
+                "to": "Kléper Laveran Lima Ferreira",
+                "count": 2
+              },
+              {
+                "from": "Bruno Miguel Borges Fernandes",
+                "to": "João Filipe Iria Santos Moutinho",
+                "count": 1
+              },
+              {
+                "from": "Kléper Laveran Lima Ferreira",
+                "to": "João Filipe Iria Santos Moutinho",
+                "count": 1
+              }
+            ],
+            "minEdgeCount": 3,
+            "caption": "Portugal, passes 1–67′. Guerreiro (left-back) and Moutinho anchor the network from deep; Ronaldo sits highest up the pitch, touched by fewer connections — exactly what you'd expect from a striker fed rather than a build-up hub."
+          },
+          {
+            "chartType": "passing_network",
+            "nodes": [
+              {
+                "player": "Diego da Silva Costa",
+                "short": "Diego Costa",
+                "jersey": 19,
+                "x": 80.6,
+                "y": 26.2,
+                "passes": 15,
+                "degree_centrality": 0.8,
+                "betweenness_centrality": 0,
+                "eigenvector_centrality": 0.0906
+              },
+              {
+                "player": "Sergio Busquets i Burgos",
+                "short": "Busquets",
+                "jersey": 5,
+                "x": 56.9,
+                "y": 44.4,
+                "passes": 50,
+                "degree_centrality": 0.9,
+                "betweenness_centrality": 0,
+                "eigenvector_centrality": 0.2469
+              },
+              {
+                "player": "Sergio Ramos García",
+                "short": "Ramos",
+                "jersey": 15,
+                "x": 49.3,
+                "y": 24.1,
+                "passes": 95,
+                "degree_centrality": 1,
+                "betweenness_centrality": 0.3111,
+                "eigenvector_centrality": 0.4885
+              },
+              {
+                "player": "Jordi Alba Ramos",
+                "short": "Alba",
+                "jersey": 18,
+                "x": 67.3,
+                "y": 5.7,
+                "passes": 65,
+                "degree_centrality": 0.9,
+                "betweenness_centrality": 0.1778,
+                "eigenvector_centrality": 0.4316
+              },
+              {
+                "player": "Gerard Piqué Bernabéu",
+                "short": "Piqué",
+                "jersey": 3,
+                "x": 45.1,
+                "y": 58.2,
+                "passes": 52,
+                "degree_centrality": 1,
+                "betweenness_centrality": 0.1222,
+                "eigenvector_centrality": 0.2343
+              },
+              {
+                "player": "Andrés Iniesta Luján",
+                "short": "Iniesta",
+                "jersey": 6,
+                "x": 68.5,
+                "y": 20.2,
+                "passes": 61,
+                "degree_centrality": 0.9,
+                "betweenness_centrality": 0,
+                "eigenvector_centrality": 0.3963
+              },
+              {
+                "player": "Francisco Román Alarcón Suárez",
+                "short": "Isco",
+                "jersey": 22,
+                "x": 73.5,
+                "y": 21.4,
+                "passes": 72,
+                "degree_centrality": 1,
+                "betweenness_centrality": 0.2111,
+                "eigenvector_centrality": 0.4303
+              },
+              {
+                "player": "José Ignacio Fernández Iglesias",
+                "short": "Nacho",
+                "jersey": 4,
+                "x": 71,
+                "y": 74.7,
+                "passes": 43,
+                "degree_centrality": 1,
+                "betweenness_centrality": 0,
+                "eigenvector_centrality": 0.1634
+              },
+              {
+                "player": "David de Gea Quintana",
+                "short": "De Gea",
+                "jersey": 1,
+                "x": 12.5,
+                "y": 39.1,
+                "passes": 10,
+                "degree_centrality": 0.6,
+                "betweenness_centrality": 0,
+                "eigenvector_centrality": 0.0525
+              },
+              {
+                "player": "David Josué Jiménez Silva",
+                "short": "D. Silva",
+                "jersey": 21,
+                "x": 81.2,
+                "y": 50.8,
+                "passes": 34,
+                "degree_centrality": 0.9,
+                "betweenness_centrality": 0,
+                "eigenvector_centrality": 0.1637
+              },
+              {
+                "player": "Jorge Resurrección Merodio",
+                "short": "Koke",
+                "jersey": 8,
+                "x": 66.9,
+                "y": 57.1,
+                "passes": 52,
+                "degree_centrality": 0.8,
+                "betweenness_centrality": 0.0667,
+                "eigenvector_centrality": 0.2294
+              }
+            ],
+            "edges": [
+              {
+                "from": "Diego da Silva Costa",
+                "to": "Sergio Busquets i Burgos",
+                "count": 2
+              },
+              {
+                "from": "Sergio Busquets i Burgos",
+                "to": "Sergio Ramos García",
+                "count": 12
+              },
+              {
+                "from": "Sergio Ramos García",
+                "to": "Jordi Alba Ramos",
+                "count": 28
+              },
+              {
+                "from": "Jordi Alba Ramos",
+                "to": "Sergio Ramos García",
+                "count": 16
+              },
+              {
+                "from": "Sergio Ramos García",
+                "to": "Gerard Piqué Bernabéu",
+                "count": 7
+              },
+              {
+                "from": "Gerard Piqué Bernabéu",
+                "to": "Sergio Ramos García",
+                "count": 19
+              },
+              {
+                "from": "Sergio Ramos García",
+                "to": "Andrés Iniesta Luján",
+                "count": 23
+              },
+              {
+                "from": "Andrés Iniesta Luján",
+                "to": "Sergio Ramos García",
+                "count": 15
+              },
+              {
+                "from": "Diego da Silva Costa",
+                "to": "Sergio Ramos García",
+                "count": 1
+              },
+              {
+                "from": "Jordi Alba Ramos",
+                "to": "Andrés Iniesta Luján",
+                "count": 17
+              },
+              {
+                "from": "Andrés Iniesta Luján",
+                "to": "Gerard Piqué Bernabéu",
+                "count": 3
+              },
+              {
+                "from": "Andrés Iniesta Luján",
+                "to": "Francisco Román Alarcón Suárez",
+                "count": 18
+              },
+              {
+                "from": "Francisco Román Alarcón Suárez",
+                "to": "Andrés Iniesta Luján",
+                "count": 10
+              },
+              {
+                "from": "Francisco Román Alarcón Suárez",
+                "to": "Sergio Ramos García",
+                "count": 10
+              },
+              {
+                "from": "Sergio Ramos García",
+                "to": "Francisco Román Alarcón Suárez",
+                "count": 16
+              },
+              {
+                "from": "Francisco Román Alarcón Suárez",
+                "to": "Jordi Alba Ramos",
+                "count": 20
+              },
+              {
+                "from": "Andrés Iniesta Luján",
+                "to": "Jordi Alba Ramos",
+                "count": 10
+              },
+              {
+                "from": "José Ignacio Fernández Iglesias",
+                "to": "Jorge Resurrección Merodio",
+                "count": 16
+              },
+              {
+                "from": "José Ignacio Fernández Iglesias",
+                "to": "David de Gea Quintana",
+                "count": 1
+              },
+              {
+                "from": "David de Gea Quintana",
+                "to": "Sergio Ramos García",
+                "count": 4
+              },
+              {
+                "from": "Jordi Alba Ramos",
+                "to": "Francisco Román Alarcón Suárez",
+                "count": 24
+              },
+              {
+                "from": "Francisco Román Alarcón Suárez",
+                "to": "Sergio Busquets i Burgos",
+                "count": 6
+              },
+              {
+                "from": "Sergio Busquets i Burgos",
+                "to": "Gerard Piqué Bernabéu",
+                "count": 6
+              },
+              {
+                "from": "Gerard Piqué Bernabéu",
+                "to": "José Ignacio Fernández Iglesias",
+                "count": 2
+              },
+              {
+                "from": "José Ignacio Fernández Iglesias",
+                "to": "David Josué Jiménez Silva",
+                "count": 5
+              },
+              {
+                "from": "David Josué Jiménez Silva",
+                "to": "Jorge Resurrección Merodio",
+                "count": 7
+              },
+              {
+                "from": "Andrés Iniesta Luján",
+                "to": "Diego da Silva Costa",
+                "count": 5
+              },
+              {
+                "from": "Diego da Silva Costa",
+                "to": "Jordi Alba Ramos",
+                "count": 6
+              },
+              {
+                "from": "Sergio Ramos García",
+                "to": "Sergio Busquets i Burgos",
+                "count": 11
+              },
+              {
+                "from": "Francisco Román Alarcón Suárez",
+                "to": "Diego da Silva Costa",
+                "count": 4
+              },
+              {
+                "from": "Diego da Silva Costa",
+                "to": "David Josué Jiménez Silva",
+                "count": 1
+              },
+              {
+                "from": "Gerard Piqué Bernabéu",
+                "to": "David de Gea Quintana",
+                "count": 4
+              },
+              {
+                "from": "Sergio Busquets i Burgos",
+                "to": "Jorge Resurrección Merodio",
+                "count": 11
+              },
+              {
+                "from": "Jorge Resurrección Merodio",
+                "to": "Sergio Busquets i Burgos",
+                "count": 9
+              },
+              {
+                "from": "Francisco Román Alarcón Suárez",
+                "to": "Jorge Resurrección Merodio",
+                "count": 7
+              },
+              {
+                "from": "Andrés Iniesta Luján",
+                "to": "Jorge Resurrección Merodio",
+                "count": 4
+              },
+              {
+                "from": "Jorge Resurrección Merodio",
+                "to": "Gerard Piqué Bernabéu",
+                "count": 14
+              },
+              {
+                "from": "Gerard Piqué Bernabéu",
+                "to": "Francisco Román Alarcón Suárez",
+                "count": 2
+              },
+              {
+                "from": "Gerard Piqué Bernabéu",
+                "to": "Sergio Busquets i Burgos",
+                "count": 8
+              },
+              {
+                "from": "Sergio Busquets i Burgos",
+                "to": "David Josué Jiménez Silva",
+                "count": 1
+              },
+              {
+                "from": "David Josué Jiménez Silva",
+                "to": "Gerard Piqué Bernabéu",
+                "count": 1
+              },
+              {
+                "from": "Jorge Resurrección Merodio",
+                "to": "Francisco Román Alarcón Suárez",
+                "count": 5
+              },
+              {
+                "from": "Francisco Román Alarcón Suárez",
+                "to": "David Josué Jiménez Silva",
+                "count": 6
+              },
+              {
+                "from": "David Josué Jiménez Silva",
+                "to": "Andrés Iniesta Luján",
+                "count": 3
+              },
+              {
+                "from": "David de Gea Quintana",
+                "to": "José Ignacio Fernández Iglesias",
+                "count": 2
+              },
+              {
+                "from": "José Ignacio Fernández Iglesias",
+                "to": "Jordi Alba Ramos",
+                "count": 1
+              },
+              {
+                "from": "David Josué Jiménez Silva",
+                "to": "José Ignacio Fernández Iglesias",
+                "count": 6
+              },
+              {
+                "from": "Jorge Resurrección Merodio",
+                "to": "David Josué Jiménez Silva",
+                "count": 11
+              },
+              {
+                "from": "Sergio Busquets i Burgos",
+                "to": "Andrés Iniesta Luján",
+                "count": 6
+              },
+              {
+                "from": "Sergio Ramos García",
+                "to": "Jorge Resurrección Merodio",
+                "count": 4
+              },
+              {
+                "from": "Francisco Román Alarcón Suárez",
+                "to": "José Ignacio Fernández Iglesias",
+                "count": 8
+              },
+              {
+                "from": "David de Gea Quintana",
+                "to": "Jordi Alba Ramos",
+                "count": 1
+              },
+              {
+                "from": "Sergio Busquets i Burgos",
+                "to": "José Ignacio Fernández Iglesias",
+                "count": 7
+              },
+              {
+                "from": "José Ignacio Fernández Iglesias",
+                "to": "Gerard Piqué Bernabéu",
+                "count": 11
+              },
+              {
+                "from": "Gerard Piqué Bernabéu",
+                "to": "David Josué Jiménez Silva",
+                "count": 4
+              },
+              {
+                "from": "David Josué Jiménez Silva",
+                "to": "Sergio Ramos García",
+                "count": 5
+              },
+              {
+                "from": "Andrés Iniesta Luján",
+                "to": "David Josué Jiménez Silva",
+                "count": 2
+              },
+              {
+                "from": "David Josué Jiménez Silva",
+                "to": "Francisco Román Alarcón Suárez",
+                "count": 4
+              },
+              {
+                "from": "Sergio Ramos García",
+                "to": "David Josué Jiménez Silva",
+                "count": 2
+              },
+              {
+                "from": "David Josué Jiménez Silva",
+                "to": "Diego da Silva Costa",
+                "count": 2
+              },
+              {
+                "from": "Diego da Silva Costa",
+                "to": "Francisco Román Alarcón Suárez",
+                "count": 2
+              },
+              {
+                "from": "Jorge Resurrección Merodio",
+                "to": "Sergio Ramos García",
+                "count": 3
+              },
+              {
+                "from": "Jorge Resurrección Merodio",
+                "to": "Andrés Iniesta Luján",
+                "count": 3
+              },
+              {
+                "from": "Gerard Piqué Bernabéu",
+                "to": "Jorge Resurrección Merodio",
+                "count": 8
+              },
+              {
+                "from": "Sergio Ramos García",
+                "to": "José Ignacio Fernández Iglesias",
+                "count": 2
+              },
+              {
+                "from": "Jordi Alba Ramos",
+                "to": "David Josué Jiménez Silva",
+                "count": 3
+              },
+              {
+                "from": "Diego da Silva Costa",
+                "to": "José Ignacio Fernández Iglesias",
+                "count": 1
+              },
+              {
+                "from": "Jordi Alba Ramos",
+                "to": "Diego da Silva Costa",
+                "count": 1
+              },
+              {
+                "from": "Andrés Iniesta Luján",
+                "to": "Sergio Busquets i Burgos",
+                "count": 3
+              },
+              {
+                "from": "Andrés Iniesta Luján",
+                "to": "José Ignacio Fernández Iglesias",
+                "count": 1
+              },
+              {
+                "from": "Jorge Resurrección Merodio",
+                "to": "José Ignacio Fernández Iglesias",
+                "count": 6
+              },
+              {
+                "from": "Diego da Silva Costa",
+                "to": "Andrés Iniesta Luján",
+                "count": 2
+              },
+              {
+                "from": "Gerard Piqué Bernabéu",
+                "to": "Jordi Alba Ramos",
+                "count": 1
+              },
+              {
+                "from": "Sergio Ramos García",
+                "to": "Diego da Silva Costa",
+                "count": 1
+              },
+              {
+                "from": "David Josué Jiménez Silva",
+                "to": "Sergio Busquets i Burgos",
+                "count": 5
+              },
+              {
+                "from": "José Ignacio Fernández Iglesias",
+                "to": "Sergio Busquets i Burgos",
+                "count": 4
+              },
+              {
+                "from": "Gerard Piqué Bernabéu",
+                "to": "Diego da Silva Costa",
+                "count": 1
+              },
+              {
+                "from": "Sergio Busquets i Burgos",
+                "to": "Diego da Silva Costa",
+                "count": 2
+              },
+              {
+                "from": "Sergio Busquets i Burgos",
+                "to": "Francisco Román Alarcón Suárez",
+                "count": 5
+              },
+              {
+                "from": "Jordi Alba Ramos",
+                "to": "David de Gea Quintana",
+                "count": 3
+              },
+              {
+                "from": "David de Gea Quintana",
+                "to": "Gerard Piqué Bernabéu",
+                "count": 1
+              },
+              {
+                "from": "Francisco Román Alarcón Suárez",
+                "to": "Gerard Piqué Bernabéu",
+                "count": 1
+              },
+              {
+                "from": "José Ignacio Fernández Iglesias",
+                "to": "Francisco Román Alarcón Suárez",
+                "count": 5
+              },
+              {
+                "from": "Jordi Alba Ramos",
+                "to": "Gerard Piqué Bernabéu",
+                "count": 1
+              },
+              {
+                "from": "Gerard Piqué Bernabéu",
+                "to": "Andrés Iniesta Luján",
+                "count": 3
+              },
+              {
+                "from": "David Josué Jiménez Silva",
+                "to": "Jordi Alba Ramos",
+                "count": 1
+              },
+              {
+                "from": "David de Gea Quintana",
+                "to": "Francisco Román Alarcón Suárez",
+                "count": 1
+              },
+              {
+                "from": "Sergio Ramos García",
+                "to": "David de Gea Quintana",
+                "count": 1
+              },
+              {
+                "from": "David de Gea Quintana",
+                "to": "Sergio Busquets i Burgos",
+                "count": 1
+              },
+              {
+                "from": "Jorge Resurrección Merodio",
+                "to": "Jordi Alba Ramos",
+                "count": 1
+              }
+            ],
+            "minEdgeCount": 3,
+            "caption": "Spain, passes 1–69′. Busquets and Sergio Ramos sit at the center of a visibly denser web — consistent with Spain's reputation for circulating possession through a settled shape."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "What graph theory actually adds beyond “who has the most passes”"
+      },
+      {
+        "type": "paragraph",
+        "html": "Treating the network as an actual weighted graph (using <a href=\"https://networkx.org/\">NetworkX</a>, the standard Python graph library) unlocks metrics that raw pass counts can't give you. <b>Degree centrality</b> is close to just “how many teammates did you exchange passes with” — useful, but in a possession-heavy match it saturates quickly (several players on both sides touch every one of their ten teammates at least once, so degree centrality maxes out at 1.0 for half the team and stops discriminating). <b>Betweenness centrality</b> is more interesting: it measures how often a player sits on the <i>shortest connecting path</i> between two teammates who don't otherwise link up directly — a structural “bridge” role, not just a busy one."
+      },
+      {
+        "type": "paragraph",
+        "html": "By betweenness, Portugal's most structurally important player wasn't Ronaldo or Bernardo Silva — it was left-back <b>Raphaël Guerreiro</b> (0.31), the connector between defense and attack down the left. For Spain, it was center-back <b>Sergio Ramos</b> (0.31), reflecting his role building from the back rather than just his passing volume (which was high anyway — he led the whole match). Neither is a surprising name in hindsight, but it's a different, sharper claim than “this player touched the ball a lot,” and it's the kind of thing raw stats tables don't surface on their own."
+      },
+      {
+        "type": "paragraph",
+        "html": "The two networks also differ in shape by real, computed measures, not just by eye: Spain's network is denser (0.891 vs Portugal's 0.855 — the share of all possible player pairs who actually exchanged a pass) but less clustered (0.176 vs 0.247 — how much a player's teammates also passed to <i>each other</i>, not just to them). Spain circulated the ball through more total connections; Portugal's connections leaned more on tight local triangles around specific players."
+      },
+      {
+        "type": "heading",
+        "text": "One goal, pass by pass"
+      },
+      {
+        "type": "paragraph",
+        "html": "The same event data lets us reconstruct a single passage of play move by move — useful for a specific goal rather than a whole match's shape. Diego Costa's second goal (54:02, making it 3–2 Spain) started with a long diagonal switch from David Silva, cushioned first-time by Sergio Busquets into Costa's path for the finish:"
+      },
+      {
+        "type": "chart",
+        "chartType": "sequence_map",
+        "steps": [
+          {
+            "type": "pass",
+            "player": "D. Silva",
+            "x1": 89,
+            "y1": 38,
+            "x2": 91,
+            "y2": 35
+          },
+          {
+            "type": "pass",
+            "player": "Koke",
+            "x1": 91,
+            "y1": 35,
+            "x2": 89,
+            "y2": 37
+          },
+          {
+            "type": "carry",
+            "player": "D. Silva",
+            "x1": 89,
+            "y1": 37,
+            "x2": 90,
+            "y2": 39
+          },
+          {
+            "type": "pass",
+            "player": "D. Silva",
+            "x1": 90,
+            "y1": 39,
+            "x2": 118,
+            "y2": 52
+          },
+          {
+            "type": "pass",
+            "player": "Busquets",
+            "x1": 117,
+            "y1": 51,
+            "x2": 118,
+            "y2": 40
+          },
+          {
+            "type": "pass",
+            "player": "Diego Costa (goal)",
+            "x1": 118,
+            "y1": 41,
+            "x2": 120,
+            "y2": 41.3
+          }
+        ],
+        "caption": "Diego Costa's goal, 54:02: David Silva → Koke → David Silva (carries the ball infield) → a long diagonal ball to the edge of the box → Busquets lays it off first-time → Costa finishes. Six real events, numbered in order, dashed arrows are carries rather than passes."
+      },
+      {
+        "type": "heading",
+        "text": "What this means for PitchMetric"
+      },
+      {
+        "type": "list",
+        "items": [
+          "This is a capability demonstration on a specific, freely available dataset — it does not feed PitchMetric's live predictions, and there's no current plan that it will, since we don't have this depth of event data for the current Premier League or La Liga seasons.",
+          "“Value” in these networks is pass count, not an expected-threat (xT) weighting per pass location — some published examples layer an xT model on top of the raw counts, which is a real additional modeling step we haven't built.",
+          "Betweenness and eigenvector centrality here treat mutual passing as one undirected tie (standard practice for pass networks) — it loses some direction information a directed-graph version would keep.",
+          "One match is one match. A single game's network reflects that day's specific tactical plan and scoreline as much as any stable team identity — treat this as an illustration of the method, not a claim about either team's general style."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "html": "See our <a href=\"/blog/is-high-pressing-actually-rising/\">pressing research</a> and <a href=\"/blog/does-crossing-actually-happen-more-now/\">crossing research</a> for the season-aggregate side of this blog's work, and <a href=\"/methodology\">Methodology</a> for how PitchMetric's actual predictions work today."
+      }
+    ]
   }
 ]

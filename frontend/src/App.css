@@ -979,6 +979,11 @@ ul.flags li {
 .research-chart rect, .research-chart circle { cursor: pointer; transition: opacity 0.12s ease; }
 .research-chart rect:hover, .research-chart circle:hover { opacity: 0.8; }
 
+.blog-chart-row { display: flex; gap: 12px; margin: 20px 0; flex-wrap: wrap; }
+.blog-chart-row .blog-figure { flex: 1 1 260px; margin: 0; min-width: 0; }
+.pitch-chart circle, .pitch-chart line { cursor: pointer; }
+.pitch-chart line:hover { stroke-opacity: 0.9 !important; }
+
 .blog-post-body h3 { margin: 26px 0 8px; font-family: var(--display); font-weight: 700; font-size: 1rem; color: var(--text); }
 .blog-post-body p { font-size: 0.9rem; line-height: 1.65; margin: 0 0 14px; color: var(--text-dim); }
 .blog-post-body p b, .blog-post-body p strong { color: var(--text); }
