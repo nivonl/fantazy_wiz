@@ -1,4 +1,4 @@
-# Model improvement notes (from the blog's Gameweek 1 & 2 "surprise" posts)
+# Model improvement notes (from the blog's Gameweek 1, 2 & 3 "surprise" posts)
 
 **Status: implemented and backtested.** See `fantasy_app/services/fpl_service.py` —
 `_fit_price_rate_priors` / `_player_rates` (price prior + minutes-weighted shrinkage, replacing
@@ -109,6 +109,74 @@ Net effect: Gameweek 1 predictions stop being a near-flat floor for the whole le
 players keep some of their known quality; genuine unknowns stay near the floor), and no single
 match — start or substitute appearance — should ever be able to swing a prediction as far as
 De Cuyper's 16.66 or Cherki's 0.74 did.
+
+## Gameweek 3 insights: a different failure mode — team-rating volatility, not player rates
+
+**Status: analyzed, NOT implemented.** Unlike the GW1/2 findings above, this doesn't have a
+shipped fix yet — see "Recommendation" below for why it needs the same backtest rigor the
+(rejected) momentum idea got before touching every single prediction on the site.
+
+Re-ran the real production functions against GW3's five blog surprises (`_player_rates`,
+`_is_unproven_this_season`, `_is_priced_like_backup`, `_is_backup_goalkeeper`, and — new this
+time — `fit_pl_ratings`/`predict_fixture` for the fixture-level side) using each player's actual
+cumulative stats through Gameweek 2 (FPL's `element-summary` per-gameweek history log, real
+data, not simulated) and a team-ratings fit restricted to matches finished before each fixture's
+own kickoff.
+
+**Four of the five are ordinary variance, not a bug** (Tyrick Mitchell, Harvey Barnes, Luka
+Vuškovic, Alexander Isak) — none of the start_prob caps fired for any of them, their own
+goal/assist rates going into GW3 were unremarkable, and the predictions were all modest and
+reasonable given 1-2 matches of evidence. They just had unusually good days (two defenders with
+literal goal returns, in particular — a genuinely hard thing for any rate-based model to see
+coming). The blog post's own player-level analysis already gets this right for all four.
+
+**Jayden Bogle is a different, genuinely interesting case: -13.88, the single biggest miss of
+the round, and it's NOT a player-level issue.** His own inputs were clean — 2 starts, 157
+minutes, no goals/assists yet, no cap fired, an unremarkable ~0.02 goal rate. The miss traces
+entirely to the FIXTURE-level prediction:
+
+- Reconstructing `fit_pl_ratings` as of just before this kickoff (real historical-season blend
+  included, via `_CutoffFPLClient`, a wrapper that filters `client.fixtures()` to matches
+  finished before the target kickoff): Brighton's attack rating had already been pushed to
+  **1.08** off just two matches (a heavy home win and a win at Manchester United) — enough that
+  `predict_fixture` gave Brighton **3.59 expected goals** at home and Leeds (away) just a **2.8%
+  clean-sheet probability**.
+- The match actually finished 1-1. Leeds conceded 1, not ~3.6, and Bogle personally kept a clean
+  sheet for the 60 minutes he played.
+- For any Leeds defender, `player_xp`'s `conceded_xp = -(lam_opponent / 2)` term alone was
+  roughly `-1.8` points off a fixture the model thought was a near-lock for Brighton — that's
+  what crushed Bogle's predicted_xp toward zero, not anything about Bogle himself.
+
+**Why this survives the existing historical-season blend**: `fit_pl_ratings` already blends in
+the last 2 PL seasons when the current season has under `MIN_MATCHES_FOR_FIT` (50) matches — and
+it did fire here (Leeds actually has one full prior PL season on record, so this isn't a
+newly-promoted-club gap). But `fit_ratings`' recency decay (`decay_half_life_days=180`) means the
+two freshest, most unusual results still dominate a team's CURRENT rating this early in a
+season — there simply isn't enough same-season data yet to dilute a hot streak, decay-weighted
+history or not. Checking the same fixture with today's fuller-season ratings: Brighton's attack
+had already cooled from 1.08 to a calmer figure and Leeds' defense rating moved from an unstable
+extreme toward a normal one as more matches came in — the rating genuinely was that volatile,
+confirmed by watching it settle.
+
+### Recommendation (not yet implemented)
+
+Apply the same kind of sample-size-aware shrinkage this file already recommended for player
+rates, but on the team-rating side: something like a per-team regularization term (or an
+adjusted `decay_half_life_days`) that scales with how few CURRENT-season matches a team has
+played, so 1-2 unusually good or bad results can't swing a rating as far as they currently can
+this early in a season. **This needs the same full walk-forward backtest treatment the
+price-prior work got before shipping** — team ratings feed literally every prediction on the
+site, not a narrow player-level case, and this codebase has already learned once (the momentum
+ablation above) that a plausible-sounding idea can net-hurt without real backtesting.
+
+### Process note for next time
+
+This analysis had to be rebuilt from scratch because the GW1/2 backtest script was never
+committed (see the top of this file) — and reconstructing it introduced a real bug of its own
+along the way (an early version of the fixture-rating reconstruction silently ran without
+`FOOTBALL_DATA_TOKEN` loaded, producing a materially different, wrong intermediate answer that
+only got caught by cross-checking against today's post-hoc rating). Worth committing a real,
+reusable backtest harness this time instead of another scratchpad one-off.
 
 ## Deferred: actual transfer fee paid
 
