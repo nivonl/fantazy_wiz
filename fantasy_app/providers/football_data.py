@@ -1,10 +1,15 @@
 """
-football-data.org client — used only for La Liga (competition code PD) historical
-fixtures/results, to fit strength.py's attack/defense ratings. Free tier, requires a
-personal token (FOOTBALL_DATA_TOKEN) from https://www.football-data.org/client/register.
+football-data.org client. Two uses:
+  - La Liga (competition code PD) historical fixtures/results, to fit strength.py's
+    attack/defense ratings. Not used to fit Premier League ratings: FPL's own /fixtures/
+    endpoint already gives us PL results without a second data source.
+  - UEFA Champions League (code CL) fixtures, to flag Premier League teams at rotation risk
+    after a midweek European match — see services/uefa_rotation.py. This is the only UEFA
+    club competition available on the free tier (checked live: Europa League and Conference
+    League both 404 on this plan).
 
-Not used for Premier League: FPL's own /fixtures/ endpoint already gives us PL results
-without a second data source.
+Free tier, requires a personal token (FOOTBALL_DATA_TOKEN) from
+https://www.football-data.org/client/register.
 """
 
 from __future__ import annotations

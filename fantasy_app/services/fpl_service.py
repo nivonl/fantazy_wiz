@@ -37,6 +37,7 @@ from fantasy_app.recommend.fpl import (
 from fantasy_app.services.common import current_season_start_year
 from fantasy_app.services.opponent_history import compute_opponent_stats, shrinkage_factor
 from fantasy_app.services.team_matching import normalize_team_name
+from fantasy_app.services.uefa_rotation import compute_uefa_rotation_factors
 
 MIN_MATCHES_FOR_FIT = 50
 HISTORICAL_SEASONS_BACK = 2  # "previous 2 seasons" fallback when the current one is too thin
@@ -454,6 +455,7 @@ def _candidates_for_gameweek(
     team_games_played: dict[int, int],
     price_priors: dict[str, PriceRatePrior],
     price_thresholds: dict[tuple[int, str], float],
+    fd_client: FootballDataClient | None = None,
 ) -> dict[str, CandidatePlayer]:
     """The single-gameweek xP model for every player with a fixture that week, keyed by
     element id. Factored out of build_candidate_pool so build_candidate_pool_multi_gw can
@@ -463,10 +465,15 @@ def _candidates_for_gameweek(
     caller from data that doesn't vary across which gameweek we're predicting (only whether a
     match has already been played, and this gameweek's bootstrap snapshot) and passed in rather
     than recomputed here, since build_candidate_pool_multi_gw calls this once per gameweek in
-    its window."""
+    its window. `fd_client` (optional — None if no FOOTBALL_DATA_TOKEN is configured) drives the
+    UEFA-fixture-congestion rotation-risk discount below; unlike the other precomputed args it's
+    genuinely per-gameweek (a different PL kickoff each week means a different rest-days
+    calculation), so it's resolved here rather than by the caller."""
     team_name_by_id = {t["id"]: t["name"] for t in bootstrap["teams"]}
     fixture_by_team = _gameweek_fixture_by_team(client, event)
     max_gk_minutes = _max_gk_minutes_by_team(bootstrap)
+    pl_kickoff_by_team = {team_id: _parse_kickoff(f.get("kickoff_time")) for team_id, f in fixture_by_team.items()}
+    uefa_rotation_factor = compute_uefa_rotation_factors(fd_client, fixture_by_team, norm_name_by_id, pl_kickoff_by_team)
 
     candidates: dict[str, CandidatePlayer] = {}
     for element in bootstrap["elements"]:
@@ -490,6 +497,12 @@ def _candidates_for_gameweek(
             start_prob = min(start_prob, BACKUP_GK_START_PROB_CAP)
         if _is_priced_like_backup(element, price_thresholds, team_games_played):
             start_prob = min(start_prob, SQUAD_DEPTH_START_PROB_CAP)
+        # Unlike the caps above (evidence about THIS player specifically), a UEFA-congestion
+        # discount applies uniformly across the whole squad — real squad rotation after a
+        # midweek Champions League game usually touches several positions, not one predictable
+        # player, so a multiplicative derating of everyone's start_prob is more honest than
+        # guessing which individuals get rested.
+        start_prob *= uefa_rotation_factor.get(team_id, 1.0)
         team_avg_goals = max(goal_avgs.get(norm_name_by_id[team_id], 1.0), 0.1)
         # A player can't be responsible for more than the whole team's average output — clamp
         # defensively in case a small-sample rate (even after price-prior blending) or a
@@ -530,6 +543,10 @@ def _candidates_for_gameweek(
 def build_candidate_pool(
     client: FPLClient, event: int | None = None, fd_client: FootballDataClient | None = None
 ) -> list[CandidatePlayer]:
+    # Resolved here (not left to fit_pl_ratings) because fit_pl_ratings only bothers creating a
+    # client when the current season is too young to fit ratings from alone — the UEFA-rotation
+    # enrichment below needs one every gameweek regardless.
+    fd_client = fd_client if fd_client is not None else _try_football_data_client()
     bootstrap = client.bootstrap()
     ratings, goal_avgs, norm_name_by_id = fit_pl_ratings(client, bootstrap, fd_client=fd_client)
     event = event or client.current_event(bootstrap)
@@ -540,7 +557,7 @@ def build_candidate_pool(
     return list(
         _candidates_for_gameweek(
             client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event, team_games_played,
-            price_priors, price_thresholds,
+            price_priors, price_thresholds, fd_client,
         ).values()
     )
 
@@ -561,6 +578,7 @@ def build_candidate_pool_multi_gw(
     the window (the next match) even though `xp` is the full-horizon sum — a multi-opponent
     tooltip isn't a meaningful thing to show.
     """
+    fd_client = fd_client if fd_client is not None else _try_football_data_client()
     bootstrap = client.bootstrap()
     ratings, goal_avgs, norm_name_by_id = fit_pl_ratings(client, bootstrap, fd_client=fd_client)
     start_event = start_event or client.current_event(bootstrap)
@@ -575,7 +593,7 @@ def build_candidate_pool_multi_gw(
         event = start_event + offset
         gw_candidates = _candidates_for_gameweek(
             client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event, team_games_played,
-            price_priors, price_thresholds,
+            price_priors, price_thresholds, fd_client,
         )
         for pid, c in gw_candidates.items():
             total_xp[pid] = total_xp.get(pid, 0.0) + c.xp

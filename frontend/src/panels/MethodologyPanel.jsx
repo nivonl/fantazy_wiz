@@ -78,6 +78,16 @@ export function MethodologyPanel() {
           hint the moment it exists.
         </p>
 
+        <p className="section-heading">European fixture congestion</p>
+        <p className="summary-line">
+          A team that played in the Champions League a couple of days before this gameweek's
+          Premier League match is measurably more likely to rotate — the familiar "rest players
+          after a midweek European game" pattern. When that applies, every player at that club
+          gets a modest across-the-board discount to their start probability (stronger the
+          tighter the turnaround, none at all once there's a normal week's rest) rather than
+          guessing which specific individuals get benched.
+        </p>
+
         <p className="section-heading">Known limitations</p>
         <ul className="flags">
           <li>Predictions are a statistical model — Poisson-distributed expected goals and a
@@ -95,6 +105,9 @@ export function MethodologyPanel() {
             starters a position "usually" has) rather than any one team's actual formation, so it
             can occasionally misjudge a club that plays unusually few or many players in a given
             position.</li>
+          <li>The European fixture-congestion discount only covers the Champions League — the only
+            UEFA club competition available on our current data plan. Europa League and Conference
+            League clubs get no such adjustment yet, which understates their rotation risk.</li>
         </ul>
       </Card>
     </>
