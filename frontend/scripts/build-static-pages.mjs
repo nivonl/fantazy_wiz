@@ -42,6 +42,7 @@ const DIST_DIR = join(FRONTEND_DIR, "dist");
 const GAMEWEEKS_DIR = join(FRONTEND_DIR, "data", "gameweeks");
 const BLOG_POSTS_PATH = join(FRONTEND_DIR, "data", "blog", "posts.json");
 const BREAKDOWN_CONCURRENCY = 6;
+const FORWARD_PROJECTION_GAMEWEEKS = 15; // matches fpl_service.MAX_PLAYER_PROJECTION_GAMEWEEKS
 
 const POS_LABEL = { GK: "Goalkeepers", DEF: "Defenders", MID: "Midfielders", FWD: "Forwards" };
 const POS_ORDER = ["GK", "DEF", "MID", "FWD"];
@@ -135,7 +136,28 @@ function renderRadarSection(radar, pos) {
   return charts ? `<h3>Stat radar</h3><div class="radar-row">${charts}</div>` : "";
 }
 
-function renderPlayerBody(player, breakdown, priceHistory, radar) {
+// Reuses the existing points-bar-chart renderer (built for real past gameweek scores) by
+// mapping a forward projection's {event, xp} onto its {gameweek, total_points} shape -- same
+// visual language for "what actually happened" and "what's predicted next," no second chart
+// implementation needed. xp is rounded first since that chart prints the value verbatim as a
+// bar label (a raw float would render an ugly long decimal).
+function renderForwardProjectionsSection(projections) {
+  if (!projections?.length) return "";
+  const chartRows = projections.map((p) => ({ total_points: Math.round(p.xp * 100) / 100, gameweek: p.event }));
+  const rows = projections
+    .map((p) => `<tr><td>GW${p.event}</td><td>${escapeHtml(p.opponent)}</td><td><b>${p.xp.toFixed(2)}</b></td></tr>`)
+    .join("\n");
+  return `
+    <h3>Predicted points, gameweek by gameweek</h3>
+    <p class="hint">The same model, projected forward week by week -- see the
+    <a href="/fpl-player-info">Player Info tool</a> to check any other player this way.</p>
+    ${renderPointsBarChart(chartRows)}
+    <div class="table-wrap"><table><thead><tr><th>Gameweek</th><th>Opponent</th><th>Predicted pts</th></tr></thead><tbody>
+${rows}
+</tbody></table></div>`;
+}
+
+function renderPlayerBody(player, breakdown, priceHistory, radar, forwardProjections) {
   const stats = player.opponent_stats;
   const priceChart = priceHistory?.length ? renderPriceLineChart(priceHistory) : "";
   return `
@@ -147,6 +169,7 @@ function renderPlayerBody(player, breakdown, priceHistory, radar) {
         ? `<p>Over the last 5 Premier League seasons vs this opponent: ${stats.games_overall} apps, avg ${stats.avg_points_overall} pts, ${stats.goals_overall}G/${stats.assists_overall}A.</p>`
         : ""
     }
+    ${renderForwardProjectionsSection(forwardProjections)}
     <h3>Recent gameweeks</h3>
     ${breakdown?.note ? `<p class="hint">${escapeHtml(breakdown.note)}</p>` : ""}
     ${breakdown?.recent?.length ? renderPointsBarChart(breakdown.recent) : ""}
@@ -459,6 +482,24 @@ export function renderBlogPostBody(post, slugById, path) {
   return isLongForm(post) ? renderDeepResearchBody(post, path) : renderGameweekSurpriseBody(post, slugById, path);
 }
 
+// posts.json's own prose (the `intro`/`closing`/`analysis` HTML strings) cross-links other posts
+// by their raw `slug` -- but a gameweek-surprise post actually publishes under `urlSlug` (season-
+// prefixed, see the loop that sets it above). A hand-written link written against the raw slug
+// used to render as a real <a href> to a page that was never built -- a 200 response with a
+// blank shell, not even a real 404 -- so every rendered post body gets passed through this once,
+// rewriting any stale raw-slug link to wherever that post actually published, rather than trusting
+// every hand-written link in posts.json to already match its target's current season prefix.
+export function fixInternalBlogLinks(html, posts) {
+  let fixed = html;
+  for (const post of posts) {
+    if (post.slug === post.urlSlug) continue; // already correct as written (e.g. deep-research posts)
+    const realHref = `/blog/${post.urlSlug}/`;
+    fixed = fixed.split(`href="/blog/${post.slug}/"`).join(`href="${realHref}"`);
+    fixed = fixed.split(`href="/blog/${post.slug}"`).join(`href="${realHref}"`);
+  }
+  return fixed;
+}
+
 // Filter-bar taxonomy for the index page -- fixed preferred display order regardless of which
 // order posts happen to appear in the array, and a button only renders for a bucket that
 // actually has at least one post today, so "Miscellaneous" doesn't show up as a permanent
@@ -553,12 +594,24 @@ async function main() {
     console.log(`Radar table fetch failed (${err.message}) -- pages will omit the stat radar section.`);
   }
 
+  // One bulk call for every player's forward-looking prediction (one ratings fit shared across
+  // the whole pool), not one per-player request repeating the same fit ~600 times -- same
+  // reasoning as the radar table above.
+  console.log(`Fetching forward-looking predictions (next ${FORWARD_PROJECTION_GAMEWEEKS} gameweeks) for every player...`);
+  let projectionsByPlayer = {};
+  try {
+    const projRes = await fetchJson(`/fpl/players/projections?num_gameweeks=${FORWARD_PROJECTION_GAMEWEEKS}`, { timeoutMs: 60000 });
+    projectionsByPlayer = projRes.projections || {};
+  } catch (err) {
+    console.log(`Forward-projections fetch failed (${err.message}) -- pages will omit the forward prediction table.`);
+  }
+
   for (const player of players) {
     const slug = slugById.get(player.id);
     const path = `/fpl/player/${slug}/`;
     const html = renderPage({
       title: `${player.name} FPL Prediction, Price & Expected Points`,
-      description: `${player.name} (${player.team}, ${player.pos}): FPL price ${player.price.toFixed(1)}m, predicted ${player.xp.toFixed(2)} points this gameweek, and recent gameweek-by-gameweek form.`,
+      description: `${player.name} (${player.team}, ${player.pos}): FPL price ${player.price.toFixed(1)}m, predicted ${player.xp.toFixed(2)} points this gameweek, predicted points for the next ${FORWARD_PROJECTION_GAMEWEEKS} gameweeks, and recent gameweek-by-gameweek form.`,
       path,
       cssHref,
       breadcrumbs: [
@@ -566,7 +619,13 @@ async function main() {
         { name: "Players", path: "/fpl/players/" },
         { name: player.name, path },
       ],
-      bodyHtml: renderPlayerBody(player, breakdownById.get(player.id), priceHistoryById.get(player.id), radarTable[player.id]),
+      bodyHtml: renderPlayerBody(
+        player,
+        breakdownById.get(player.id),
+        priceHistoryById.get(player.id),
+        radarTable[player.id],
+        projectionsByPlayer[player.id]
+      ),
       cardStyle: teamAccentStyle(player.team),
     });
     generatedPaths.push(writePage(path, html));
@@ -693,7 +752,7 @@ async function main() {
             author: { "@type": "Organization", name: "PitchMetric" },
           },
         ],
-        bodyHtml: renderBlogPostBody(post, slugById, path),
+        bodyHtml: fixInternalBlogLinks(renderBlogPostBody(post, slugById, path), posts),
       });
       generatedPaths.push(writePage(path, html));
     }

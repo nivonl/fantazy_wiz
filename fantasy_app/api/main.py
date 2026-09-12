@@ -337,6 +337,25 @@ def fpl_players_radar() -> dict:
     return table
 
 
+@app.get("/fpl/players/projections")
+def fpl_players_projections(num_gameweeks: int = fpl_service.MAX_PLAYER_PROJECTION_GAMEWEEKS, event: int | None = None) -> dict:
+    """
+    Every player's predicted points gameweek-by-gameweek for the next `num_gameweeks` (capped at
+    15 -- see fpl_service.MAX_PLAYER_PROJECTION_GAMEWEEKS), keyed by element id. One ratings fit
+    covering the whole pool, same as /fpl/players/radar -- used by the static-page generator to
+    build each player page's forward-looking prediction table in one call, rather than one
+    per-player request repeating the same fit ~600 times.
+    """
+    num_gameweeks = max(1, min(num_gameweeks, fpl_service.MAX_PLAYER_PROJECTION_GAMEWEEKS))
+    with FPLClient() as client:
+        resolved_event = event or client.current_event(client.bootstrap())
+        by_player = fpl_service.bulk_player_gameweek_projections(client, start_event=event, num_gameweeks=num_gameweeks)
+    return {
+        "event": resolved_event,
+        "projections": {pid: [asdict(p) for p in plist] for pid, plist in by_player.items()},
+    }
+
+
 @app.get("/fpl/player/{element_id}/breakdown")
 def fpl_player_breakdown(element_id: int, n: int = player_breakdown.RECENT_GAMEWEEKS) -> dict:
     """

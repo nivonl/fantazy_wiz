@@ -111,3 +111,32 @@ def test_player_gameweek_projections_are_per_gameweek_not_summed(real_fpl_data):
     assert events == sorted(events)
     assert events[0] >= current_event
     assert all(p.opponent and p.opponent != "?" for p in projections)
+
+
+def test_bulk_player_gameweek_projections_covers_the_whole_pool(real_fpl_data):
+    bootstrap, real_fixtures = real_fpl_data
+    synthetic_finished = _synthesize_finished_fixtures(real_fixtures)
+    current_event = 1
+
+    class PatchedClient(FPLClient):
+        def bootstrap(self) -> dict:
+            return bootstrap
+
+        def fixtures(self, event: int | None = None) -> list[dict]:
+            if event is None:
+                return synthetic_finished
+            return [f for f in real_fixtures if f["event"] == event]
+
+        def current_event(self, bootstrap: dict | None = None) -> int:
+            return current_event
+
+    with PatchedClient() as client:
+        pool = fpl_service.build_candidate_pool(client, event=current_event)
+        by_player = fpl_service.bulk_player_gameweek_projections(client, start_event=current_event, num_gameweeks=3)
+        single = fpl_service.player_gameweek_projections(
+            client, pool[0].id, start_event=current_event, num_gameweeks=3
+        )
+
+    assert len(by_player) > 300  # same real-pool-size expectation as build_candidate_pool_multi_gw
+    # The single-player wrapper is just this same bulk result sliced by id.
+    assert by_player.get(pool[0].id) == single

@@ -699,19 +699,21 @@ class PlayerGameweekProjection:
     xp: float
 
 
-def player_gameweek_projections(
+def bulk_player_gameweek_projections(
     client: FPLClient,
-    player_id: str,
     fd_client: FootballDataClient | None = None,
     start_event: int | None = None,
     num_gameweeks: int = MAX_PLAYER_PROJECTION_GAMEWEEKS,
-) -> list[PlayerGameweekProjection]:
+) -> dict[str, list[PlayerGameweekProjection]]:
     """
-    One player's predicted points gameweek-by-gameweek — the Player Info page's next-5/10/15
-    table. Same ratings-fit-once-then-loop-per-gameweek shape as build_candidate_pool_multi_gw
-    right above, but kept week-by-week instead of collapsed into one horizon total, so each
-    gameweek keeps its own opponent rather than only the first. A blank gameweek for this
-    player's team is simply skipped, same as a multi-gw pool contributing 0 that week.
+    Every player's predicted points gameweek-by-gameweek for the next `num_gameweeks` — one
+    ratings fit, one loop over gameweeks, shared across the whole player pool (same as
+    build_candidate_pool_multi_gw's cost, since _candidates_for_gameweek already prices every
+    player each week regardless of how many the caller actually wants) — kept week-by-week
+    instead of collapsed into one horizon total, so each gameweek keeps its own real opponent.
+    Backs the static player pages' forward-looking prediction table (one call for all ~600
+    players, not one ratings fit per player); see player_gameweek_projections for the
+    single-player convenience wrapper the live Player Info search uses.
     """
     fd_client = fd_client if fd_client is not None else _try_football_data_client()
     bootstrap = client.bootstrap()
@@ -722,19 +724,31 @@ def player_gameweek_projections(
     price_priors = _fit_price_rate_priors(bootstrap)
     price_thresholds = _squad_depth_price_threshold(bootstrap)
 
-    results: list[PlayerGameweekProjection] = []
+    by_player: dict[str, list[PlayerGameweekProjection]] = {}
     for offset in range(num_gameweeks):
         event = start_event + offset
         gw_candidates = _candidates_for_gameweek(
             client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event, team_games_played,
             price_priors, price_thresholds, fd_client,
         )
-        candidate = gw_candidates.get(player_id)
-        if candidate is None:
-            continue  # blank gameweek for this player's team
-        opponent = candidate.opponent_stats.opponent if candidate.opponent_stats else "?"
-        results.append(PlayerGameweekProjection(event=event, opponent=opponent, xp=candidate.xp))
-    return results
+        for pid, c in gw_candidates.items():
+            opponent = c.opponent_stats.opponent if c.opponent_stats else "?"
+            by_player.setdefault(pid, []).append(PlayerGameweekProjection(event=event, opponent=opponent, xp=c.xp))
+    return by_player
+
+
+def player_gameweek_projections(
+    client: FPLClient,
+    player_id: str,
+    fd_client: FootballDataClient | None = None,
+    start_event: int | None = None,
+    num_gameweeks: int = MAX_PLAYER_PROJECTION_GAMEWEEKS,
+) -> list[PlayerGameweekProjection]:
+    """One player's slice of bulk_player_gameweek_projections — the Player Info page's
+    next-5/10/15 search result, when only one player's projections are actually needed."""
+    return bulk_player_gameweek_projections(
+        client, fd_client=fd_client, start_event=start_event, num_gameweeks=num_gameweeks
+    ).get(player_id, [])
 
 
 def build_transfer_targets(
