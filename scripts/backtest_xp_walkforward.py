@@ -233,7 +233,7 @@ def _predict_one(
         goal_share=goal_share,
         assist_share=assist_share,
         save_rate=_expected_saves_if_playing(element, pos),
-        defensive_contribution=_expected_defcon_points_if_playing(element),
+        defensive_contribution=_expected_defcon_points_if_playing(element, pos),
         start_prob=start_prob,
     ).xp
     if version.use_momentum:

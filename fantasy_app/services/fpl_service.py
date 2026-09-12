@@ -514,15 +514,38 @@ def _expected_saves_if_playing(element: dict, pos: str) -> float:
     return saves * 90.0 / minutes
 
 
-def _expected_defcon_points_if_playing(element: dict) -> float:
-    """Expected defensive-contribution *points* if the player features for ~90'. Bootstrap's
-    `defensive_contribution` is cumulative points from that scoring rule (0 when absent / older
-    seasons)."""
+DEFCON_THRESHOLD_BY_POS = {"DEF": 10, "MID": 12, "FWD": 12}  # combined CBIT (MID/FWD: +recoveries) actions needed in a match
+DEFCON_BONUS_POINTS = 2.0
+
+
+def _expected_defcon_points_if_playing(element: dict, pos: str) -> float:
+    """
+    Expected defensive-contribution *bonus* points if the player features for ~90'. FPL awards a
+    flat 2 points for clearing a position-specific action-count threshold in a match (10 combined
+    clearances/blocks/interceptions/tackles for defenders, 12 combined CBIT-plus-recoveries for
+    midfielders/forwards; goalkeepers have no such rule) — not a continuously-scaled score.
+
+    Bootstrap's `defensive_contribution` is cumulative RAW ACTIONS this season, not points,
+    despite the field's name — confirmed against a real player (32 clearances/blocks/
+    interceptions + 7 tackles = 39, exactly bootstrap's `defensive_contribution`). Treating that
+    count as if it were already points and adding it straight into xp was a real bug: a busy
+    defender's ~14 actions per 90 was landing as +14 xp a game instead of the actual flat +2 (a
+    Hull City DEF predicted 20+ points almost every gameweek regardless of opponent was this bug,
+    not the model "getting the opponent right").
+
+    Approximated here as a linear ramp toward the full 2 points as the per-90 action rate
+    approaches and passes the threshold, capped at 2 — a genuinely fickle match-to-match
+    quantity, not one worth a full distributional model over.
+    """
+    threshold = DEFCON_THRESHOLD_BY_POS.get(pos)
+    if threshold is None:
+        return 0.0
     minutes = element.get("minutes", 0) or 0
     if minutes <= 0:
         return 0.0
-    points = element.get("defensive_contribution", 0) or 0
-    return points * 90.0 / minutes
+    actions = element.get("defensive_contribution", 0) or 0
+    rate_per_90 = actions * 90.0 / minutes
+    return min(DEFCON_BONUS_POINTS, DEFCON_BONUS_POINTS * (rate_per_90 / threshold))
 
 
 def _candidates_for_gameweek(
@@ -601,7 +624,7 @@ def _candidates_for_gameweek(
             goal_share=goal_share,
             assist_share=assist_share,
             save_rate=_expected_saves_if_playing(element, pos),
-            defensive_contribution=_expected_defcon_points_if_playing(element),
+            defensive_contribution=_expected_defcon_points_if_playing(element, pos),
             start_prob=start_prob,
         ).xp
 

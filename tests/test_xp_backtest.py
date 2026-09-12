@@ -36,10 +36,21 @@ def test_expected_saves_only_for_gk_with_minutes():
     assert _expected_saves_if_playing({"minutes": 0, "saves": 6}, "GK") == 0.0
 
 
-def test_expected_defcon_points_per_90():
-    el = {"minutes": 90, "defensive_contribution": 2}
-    assert _expected_defcon_points_if_playing(el) == pytest.approx(2.0)
-    assert _expected_defcon_points_if_playing({"minutes": 0}) == 0.0
+def test_expected_defcon_points_ramps_toward_the_flat_bonus_at_threshold():
+    # bootstrap's `defensive_contribution` is a raw action count (clearances+blocks+
+    # interceptions+tackles), not points -- half the defender threshold (10) should be worth
+    # roughly half the flat 2-point bonus, not 2 points outright.
+    half_rate = {"minutes": 90, "defensive_contribution": 5}
+    assert _expected_defcon_points_if_playing(half_rate, "DEF") == pytest.approx(1.0)
+
+    at_threshold = {"minutes": 90, "defensive_contribution": 10}
+    assert _expected_defcon_points_if_playing(at_threshold, "DEF") == pytest.approx(2.0)
+
+    well_above = {"minutes": 90, "defensive_contribution": 20}
+    assert _expected_defcon_points_if_playing(well_above, "DEF") == pytest.approx(2.0)  # capped, not 4.0
+
+    assert _expected_defcon_points_if_playing({"minutes": 0, "defensive_contribution": 20}, "DEF") == 0.0
+    assert _expected_defcon_points_if_playing({"minutes": 90, "defensive_contribution": 20}, "GK") == 0.0
 
 
 def test_mean_absolute_error():
