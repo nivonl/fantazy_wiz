@@ -8,6 +8,7 @@ import { OverviewPanel } from "./panels/OverviewPanel.jsx";
 import { CurrentTeamPanel } from "./panels/CurrentTeamPanel.jsx";
 import { TransferFinderPanel } from "./panels/TransferFinderPanel.jsx";
 import { SquadBuilderPage } from "./panels/SquadBuilderPage.jsx";
+import { PlayerInfoPanel } from "./panels/PlayerInfoPanel.jsx";
 import { PredictionsPage } from "./panels/PredictionsPage.jsx";
 import { MethodologyPanel } from "./panels/MethodologyPanel.jsx";
 import { MorePanel } from "./panels/MorePanel.jsx";
@@ -36,6 +37,11 @@ const ROUTE_META = {
     title: "FPL Squad Builder",
     description:
       "Build the optimal 15-player FPL squad from scratch under the 100m budget, with favorite-team and favorite-player constraints.",
+  },
+  "/fpl-player-info": {
+    title: "FPL Player Info & Gameweek Predictions",
+    description:
+      "Search any FPL player for their card and predicted points gameweek-by-gameweek, out to the next 5, 10, or 15 gameweeks.",
   },
   "/fpl-predictions": {
     title: "FPL & Premier League Score Predictions",
@@ -118,6 +124,9 @@ export default function App() {
         </div>
         <div className={panelClass(path === "/fpl-squad-builder")}>
           <SquadBuilderPage />
+        </div>
+        <div className={panelClass(path === "/fpl-player-info")}>
+          <PlayerInfoPanel />
         </div>
         <div className={panelClass(path === "/fpl-predictions")}>
           <PredictionsPage />

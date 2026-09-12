@@ -6,6 +6,7 @@ export const NAV_ITEMS = [
   { key: "analyzer", path: "/fpl-team-analyzer", label: "Team Analyzer" },
   { key: "transfer", path: "/fpl-transfer-finder", label: "Transfer Finder" },
   { key: "builder", path: "/fpl-squad-builder", label: "Squad Builder" },
+  { key: "player-info", path: "/fpl-player-info", label: "Player Info" },
   { key: "predictions", path: "/fpl-predictions", label: "Predictions" },
   { key: "methodology", path: "/methodology", label: "Methodology" },
   { key: "more", path: "/more", label: "More" },
@@ -19,4 +20,4 @@ export const BOTTOM_NAV_KEYS = ["overview", "analyzer", "transfer", "builder", "
 
 // Home leads the desktop top nav too -- the brand logo already links there, but an explicit
 // link is more discoverable than relying on a visitor to guess the logo is clickable.
-export const TOP_NAV_KEYS = ["overview", "analyzer", "transfer", "builder", "predictions", "methodology", "more"];
+export const TOP_NAV_KEYS = ["overview", "analyzer", "transfer", "builder", "player-info", "predictions", "methodology", "more"];

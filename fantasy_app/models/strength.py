@@ -55,16 +55,47 @@ class Ratings:
         return lam_home, lam_away
 
 
+def _per_team_l2(
+    team_ids: list[str],
+    base_l2: float,
+    team_current_season_matches: dict[str, int] | None,
+    early_season_l2_boost: float,
+    early_season_full_strength_matches: int,
+) -> np.ndarray:
+    """L2 weight per team. Early in a season, teams with few *current-season* matches get
+    stronger shrinkage toward 0 so 1–2 hot/cold results cannot swing attack/defense as far
+    (see NOTES-model-improvements.md Gameweek 3 / Bogle). Historical blended matches still
+    inform the likelihood; only the penalty scale depends on current-season sample size."""
+    if early_season_l2_boost <= 0 or not team_current_season_matches:
+        return np.full(len(team_ids), base_l2)
+    out = np.empty(len(team_ids))
+    full = max(early_season_full_strength_matches, 1)
+    for i, team in enumerate(team_ids):
+        k = team_current_season_matches.get(team, 0)
+        # 0 current-season games -> full boost; full+ games -> base_l2 only
+        frac_thin = max(0.0, (full - k) / full)
+        out[i] = base_l2 * (1.0 + early_season_l2_boost * frac_thin)
+    return out
+
+
 def fit_ratings(
     matches: list[MatchResult],
     as_of: datetime | None = None,
     decay_half_life_days: float = 180.0,
     l2: float = 0.005,
+    team_current_season_matches: dict[str, int] | None = None,
+    early_season_l2_boost: float = 0.0,
+    early_season_full_strength_matches: int = 8,
 ) -> Ratings:
     """
     Fit attack/defense/home-advantage from a list of played matches. Recent matches are
     weighted more heavily via exponential decay (half-life in days, relative to `as_of`,
     which defaults to the most recent match's date).
+
+    When `early_season_l2_boost > 0`, teams with fewer than
+    `early_season_full_strength_matches` current-season appearances (see
+    `team_current_season_matches`) get stronger L2 shrinkage so early-season volatility
+    cannot dominate fixture λ the way it did for Brighton/Leeds around GW3 2025-26.
     """
     if not matches:
         raise ValueError("fit_ratings requires at least one match")
@@ -81,6 +112,9 @@ def fit_ratings(
     away_idx = np.array([idx[m.away_team_id] for m in matches])
     home_goals = np.array([m.home_goals for m in matches], dtype=float)
     away_goals = np.array([m.away_goals for m in matches], dtype=float)
+    team_l2 = _per_team_l2(
+        team_ids, l2, team_current_season_matches, early_season_l2_boost, early_season_full_strength_matches
+    )
 
     def unpack(x: np.ndarray) -> tuple[np.ndarray, np.ndarray, float]:
         return x[:n], x[n : 2 * n], x[2 * n]
@@ -92,7 +126,7 @@ def fit_ratings(
         ll_home = home_goals * np.log(lam_home) - lam_home - gammaln(home_goals + 1)
         ll_away = away_goals * np.log(lam_away) - lam_away - gammaln(away_goals + 1)
         log_lik = float(np.sum(weights * (ll_home + ll_away)))
-        penalty = l2 * float(np.sum(attack**2) + np.sum(defense**2))
+        penalty = float(np.sum(team_l2 * (attack**2 + defense**2)))
         return -log_lik + penalty
 
     x0 = np.zeros(2 * n + 1)

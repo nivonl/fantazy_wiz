@@ -79,3 +79,35 @@ def test_build_and_optimize_squad_end_to_end(real_fpl_data):
     for p in result.squad:
         team_counts[p.team] = team_counts.get(p.team, 0) + 1
     assert all(c <= CLUB_CAP for c in team_counts.values())
+
+
+def test_player_gameweek_projections_are_per_gameweek_not_summed(real_fpl_data):
+    bootstrap, real_fixtures = real_fpl_data
+    synthetic_finished = _synthesize_finished_fixtures(real_fixtures)
+    current_event = 1
+
+    class PatchedClient(FPLClient):
+        def bootstrap(self) -> dict:
+            return bootstrap
+
+        def fixtures(self, event: int | None = None) -> list[dict]:
+            if event is None:
+                return synthetic_finished
+            return [f for f in real_fixtures if f["event"] == event]
+
+        def current_event(self, bootstrap: dict | None = None) -> int:
+            return current_event
+
+    with PatchedClient() as client:
+        pool = fpl_service.build_candidate_pool(client, event=current_event)
+        player = pool[0]
+        projections = fpl_service.player_gameweek_projections(
+            client, player.id, start_event=current_event, num_gameweeks=5
+        )
+
+    assert projections
+    assert len(projections) <= 5
+    events = [p.event for p in projections]
+    assert events == sorted(events)
+    assert events[0] >= current_event
+    assert all(p.opponent and p.opponent != "?" for p in projections)

@@ -17,6 +17,7 @@ export function MorePanel() {
       </Card>
       <Card title="More on PitchMetric">
         <p className="summary-line" style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
+          <Link to="/fpl-player-info">Player info</Link>
           <Link to="/fpl-predictions">Score predictions</Link>
           <a href="/blog/">Blog</a>
           <Link to="/methodology">How the model works</Link>

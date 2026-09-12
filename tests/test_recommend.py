@@ -8,9 +8,11 @@ import pytest
 from fantasy_app.recommend.fpl import (
     CandidatePlayer,
     CLUB_CAP,
+    MAX_SUGGESTED_TRANSFERS,
     best_transfer_targets_by_position,
     find_trade_combos_for_target,
     optimize_squad,
+    suggest_transfer_package,
     suggest_transfers,
 )
 from fantasy_app.recommend.laliga import recommend_laliga
@@ -86,6 +88,18 @@ def test_optimize_squad_maximizes_xp_over_a_cheaper_worse_alternative():
     pool.append(star)
     result = optimize_squad(pool)
     assert star in result.squad
+
+
+def test_optimize_squad_starting_xp_counts_the_captain_twice_and_never_the_bench():
+    pool = _make_pool()
+    result = optimize_squad(pool)
+
+    assert result.captain in result.starters
+    expected = round(sum(p.xp for p in result.starters) + result.captain.xp, 2)
+    assert result.starting_xp == expected
+    # Sanity: that's strictly more than a plain (uncaptained) starting-XI sum whenever the
+    # captain has any xp at all -- the whole point of doubling them.
+    assert result.starting_xp > round(sum(p.xp for p in result.starters), 2)
 
 
 def test_suggest_transfers_finds_obvious_upgrade():
@@ -245,6 +259,106 @@ def test_find_trade_combos_unaffordable_even_liquidating_everything_raises():
     pool = squad + [wanted]
     with pytest.raises(RuntimeError, match="No legal way to fit"):
         find_trade_combos_for_target(squad, wanted, pool, bank=0.0, free_transfers=1)
+
+
+def test_suggest_transfer_package_finds_budget_pooled_upgrade_greedy_cant_reach():
+    squad = _base_squad()
+    # Priced beyond what selling any single MID (6.0) plus 0 bank can cover -- unreachable by a
+    # same-position, self-funded swap. Only affordable by also downgrading a FWD elsewhere, which
+    # greedy would never do on its own since that downgrade is a negative-gain move in isolation.
+    premium_mid = CandidatePlayer(id="premium_mid", name="PremiumMid", pos="MID", team="NewTeam", price=12.0, xp=20.0)
+    cheap_fwd = CandidatePlayer(id="cheap_fwd", name="CheapFwd", pos="FWD", team="CheapTeam", price=1.0, xp=1.0)
+    pool = squad + [premium_mid, cheap_fwd]
+
+    greedy = suggest_transfers(squad, pool, bank=0.0, free_transfers=2)
+    assert premium_mid.id not in {t.player_in.id for t in greedy}
+
+    package = suggest_transfer_package(squad, pool, bank=0.0, free_transfers=2)
+    best = package[0]
+    assert premium_mid in best.players_in
+    assert cheap_fwd in best.players_in
+    assert best.hits == 0
+    assert best.xp_gain > 0
+    new_squad = _new_squad_after(squad, best)
+    assert sum(p.price for p in new_squad) <= sum(p.price for p in squad) + 1e-6
+
+
+def test_suggest_transfer_package_empty_when_nothing_beats_the_current_squad():
+    squad = _base_squad()
+    pool = list(squad)  # no alternative anywhere in the pool
+    assert suggest_transfer_package(squad, pool, bank=0.0, free_transfers=2) == []
+
+
+def test_suggest_transfer_package_never_exceeds_the_transfer_cap():
+    # Every squad member is worthless (e.g. injured/left the club) and the pool is full of much
+    # better replacements at every position -- unbounded, "sell everyone" would be optimal even
+    # after paying for every hit. That's the Wildcard-lift calculation, not a transfer package,
+    # so the default cap (max(MAX_SUGGESTED_TRANSFERS, free_transfers)) must hold it back.
+    squad = [CandidatePlayer(id=p.id, name=p.name, pos=p.pos, team=p.team, price=p.price, xp=0.0) for p in _base_squad()]
+    pool = squad + [
+        CandidatePlayer(id=f"star_{p.pos}_{i}", name=f"Star{p.pos}{i}", pos=p.pos, team=f"Star{i}", price=p.price, xp=20.0)
+        for i, p in enumerate(squad)
+    ]
+
+    combos = suggest_transfer_package(squad, pool, bank=0.0, free_transfers=2)
+
+    assert combos
+    assert len(combos[0].players_out) <= max(MAX_SUGGESTED_TRANSFERS, 2)
+
+
+def test_suggest_transfer_package_never_breaks_club_cap():
+    squad = _base_squad()
+    squad = [
+        p if p.id not in {"def0", "fwd0", "mid0"} else CandidatePlayer(p.id, p.name, p.pos, "Stack", p.price, p.xp)
+        for p in squad
+    ]
+    premium_mid = CandidatePlayer(id="premium_mid", name="PremiumMid", pos="MID", team="Stack", price=12.0, xp=20.0)
+    cheap_fwd = CandidatePlayer(id="cheap_fwd", name="CheapFwd", pos="FWD", team="Stack", price=1.0, xp=1.0)
+    pool = squad + [premium_mid, cheap_fwd]
+
+    combos = suggest_transfer_package(squad, pool, bank=0.0, free_transfers=2, top_k=2)
+    for combo in combos:
+        new_squad = _new_squad_after(squad, combo)
+        team_counts: dict[str, int] = {}
+        for p in new_squad:
+            team_counts[p.team] = team_counts.get(p.team, 0) + 1
+        assert all(count <= CLUB_CAP for count in team_counts.values())
+
+
+def _squad_with_a_clear_bench_gk():
+    """_base_squad(), but with one GK given a commanding lead (always starts) and the other a
+    low score (always benched, since only 1 of 2 GKs ever starts) -- a fixture for proving a
+    "bench-only upgrade" is no longer counted as a real gain."""
+    squad = _base_squad()
+    return [
+        CandidatePlayer(p.id, p.name, p.pos, p.team, p.price, 10.0) if p.id == "gk0"
+        else CandidatePlayer(p.id, p.name, p.pos, p.team, p.price, 1.0) if p.id == "gk1"
+        else p
+        for p in squad
+    ]
+
+
+def test_suggest_transfer_package_does_not_count_a_bench_only_upgrade_as_real_gain():
+    squad = _squad_with_a_clear_bench_gk()
+    # A big raw upgrade over the bench GK (1.0 -> 8.0) but still clearly worse than the starting
+    # GK (10.0) -- neither ever starts, so the real gameweek score doesn't move at all. The old
+    # flat-15-sum objective would have reported this as a +7.0 xp gain.
+    bench_upgrade_gk = CandidatePlayer(id="bench_upgrade_gk", name="BenchUpgradeGK", pos="GK", team="NewTeam", price=4.0, xp=8.0)
+    pool = squad + [bench_upgrade_gk]
+
+    combos = suggest_transfer_package(squad, pool, bank=0.0, free_transfers=1)
+
+    assert not combos or combos[0].xp_gain <= 1e-6
+
+
+def test_suggest_transfers_does_not_suggest_a_bench_only_upgrade():
+    squad = _squad_with_a_clear_bench_gk()
+    bench_upgrade_gk = CandidatePlayer(id="bench_upgrade_gk", name="BenchUpgradeGK", pos="GK", team="NewTeam", price=4.0, xp=8.0)
+    pool = squad + [bench_upgrade_gk]
+
+    suggestions = suggest_transfers(squad, pool, bank=0.0, free_transfers=1)
+
+    assert bench_upgrade_gk.id not in {t.player_in.id for t in suggestions}
 
 
 def test_recommend_laliga_picks_top_xp_captain_and_flags_upgrades():

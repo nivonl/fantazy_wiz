@@ -186,6 +186,27 @@ def _full_recommendation_dict(rec, unmatched_names: list[str] | None = None) -> 
             if rec.best_transfer
             else None
         ),
+        "transfers": [
+            {
+                "out": asdict(t.player_out),
+                "in": asdict(t.player_in),
+                "xp_gain": t.xp_gain,
+                "is_hit": t.is_hit,
+            }
+            for t in rec.transfers
+        ],
+        "transfer_package": (
+            {
+                "players_out": [asdict(p) for p in rec.transfer_package.players_out],
+                "players_in": [asdict(p) for p in rec.transfer_package.players_in],
+                "hits": rec.transfer_package.hits,
+                "hit_cost": rec.transfer_package.hit_cost,
+                "xp_gain": rec.transfer_package.xp_gain,
+                "new_bank": rec.transfer_package.new_bank,
+            }
+            if rec.transfer_package
+            else None
+        ),
         "transfer_horizon_gameweeks": rec.transfer_horizon_gameweeks,
         "chip_lifts": [asdict(c) for c in rec.chip_lifts],
         "free_hit_squad": _squad_result_dict(rec.free_hit_squad),
@@ -339,6 +360,35 @@ def fpl_player_price_history(element_id: int) -> list[dict]:
     with FPLClient() as client:
         points = player_breakdown.build_price_history(client, element_id)
     return [asdict(p) for p in points]
+
+
+@app.get("/fpl/player/{element_id}/card")
+def fpl_player_card(element_id: int, num_gameweeks: int = 5, event: int | None = None) -> dict:
+    """
+    The Player Info tab's search result: this player's current price/status/ownership/season
+    totals, plus their predicted points gameweek-by-gameweek for the next `num_gameweeks`
+    (capped at 15 — see fpl_service.MAX_PLAYER_PROJECTION_GAMEWEEKS — since each extra gameweek
+    re-walks the same ratings-fit-and-score pipeline as every other per-gameweek endpoint here).
+    """
+    num_gameweeks = max(1, min(num_gameweeks, fpl_service.MAX_PLAYER_PROJECTION_GAMEWEEKS))
+    with FPLClient() as client:
+        bootstrap = client.bootstrap()
+        pool = fpl_service.build_candidate_pool(client, event=event)
+        player = next((p for p in pool if p.id == str(element_id)), None)
+        if player is None:
+            raise RuntimeError(f"No player with id {element_id} has a fixture to price right now.")
+        element = next((e for e in bootstrap["elements"] if e["id"] == element_id), {})
+        projections = fpl_service.player_gameweek_projections(
+            client, player.id, start_event=event, num_gameweeks=num_gameweeks
+        )
+    return {
+        "player": asdict(player),
+        "status": element.get("status"),
+        "news": element.get("news") or "",
+        "ownership_percent": float(element["selected_by_percent"]) if element.get("selected_by_percent") else None,
+        "total_points": element.get("total_points"),
+        "projections": [asdict(p) for p in projections],
+    }
 
 
 @app.get("/recommend/fpl/trade-for")

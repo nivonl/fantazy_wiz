@@ -112,9 +112,9 @@ De Cuyper's 16.66 or Cherki's 0.74 did.
 
 ## Gameweek 3 insights: a different failure mode — team-rating volatility, not player rates
 
-**Status: analyzed, NOT implemented.** Unlike the GW1/2 findings above, this doesn't have a
-shipped fix yet — see "Recommendation" below for why it needs the same backtest rigor the
-(rejected) momentum idea got before touching every single prediction on the site.
+**Status: implemented (early-season team L2 + committed harness).** Confirm live-season
+fixture-λ MAE with `scripts/backtest_xp_walkforward.py` before retuning
+`EARLY_SEASON_L2_BOOST`. Analysis below is kept as the motivating case study.
 
 Re-ran the real production functions against GW3's five blog surprises (`_player_rates`,
 `_is_unproven_this_season`, `_is_priced_like_backup`, `_is_backup_goalkeeper`, and — new this
@@ -158,25 +158,28 @@ had already cooled from 1.08 to a calmer figure and Leeds' defense rating moved 
 extreme toward a normal one as more matches came in — the rating genuinely was that volatile,
 confirmed by watching it settle.
 
-### Recommendation (not yet implemented)
+### Recommendation — implemented
 
-Apply the same kind of sample-size-aware shrinkage this file already recommended for player
-rates, but on the team-rating side: something like a per-team regularization term (or an
-adjusted `decay_half_life_days`) that scales with how few CURRENT-season matches a team has
-played, so 1-2 unusually good or bad results can't swing a rating as far as they currently can
-this early in a season. **This needs the same full walk-forward backtest treatment the
-price-prior work got before shipping** — team ratings feed literally every prediction on the
-site, not a narrow player-level case, and this codebase has already learned once (the momentum
-ablation above) that a plausible-sounding idea can net-hurt without real backtesting.
+Sample-size-aware **per-team L2** on attack/defense is in `models/strength.py`
+(`early_season_l2_boost` / `team_current_season_matches`) and wired through `fit_pl_ratings`
+(`EARLY_SEASON_L2_BOOST=3.0`, `EARLY_SEASON_FULL_STRENGTH_MATCHES=8`). Only *current-season*
+FPL fixtures count toward sample size; historical football-data rows still inform the
+likelihood. Unit test: `tests/test_strength.py::test_early_season_l2_shrinks_hot_streak_attack`.
+
+Walk-forward fixture-λ MAE (boost vs 0): `scripts/backtest_xp_walkforward.py` +
+`services/xp_backtest.py` (`CutoffFPLClient`, loud `FOOTBALL_DATA_TOKEN` requirement). Re-run
+when a season completes or when retuning the boost; keep the default only while mean MAE does
+not get worse.
+
+Also shipped in the same pass (player-level LHF, separate from GW3):
+- Fixture-scaled assists (`_fixture_assist_share`) — was raw per-90 as `assist_share`
+- GK `save_rate` and `defensive_contribution` wired from bootstrap into `player_xp`
 
 ### Process note for next time
 
-This analysis had to be rebuilt from scratch because the GW1/2 backtest script was never
-committed (see the top of this file) — and reconstructing it introduced a real bug of its own
-along the way (an early version of the fixture-rating reconstruction silently ran without
-`FOOTBALL_DATA_TOKEN` loaded, producing a materially different, wrong intermediate answer that
-only got caught by cross-checking against today's post-hoc rating). Worth committing a real,
-reusable backtest harness this time instead of another scratchpad one-off.
+GW1/2 backtest lived in a scratchpad; reconstructing for GW3 nearly shipped a wrong answer when
+`FOOTBALL_DATA_TOKEN` was missing. Use `services/xp_backtest.py` /
+`scripts/backtest_xp_walkforward.py` instead of another one-off.
 
 ## Deferred: actual transfer fee paid
 

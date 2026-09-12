@@ -24,6 +24,8 @@ from fantasy_app.providers import fpl_history
 from fantasy_app.providers.football_data import FootballDataClient
 from fantasy_app.providers.fpl import POSITION_BY_ELEMENT_TYPE, FPLClient
 from fantasy_app.recommend.fpl import (
+    PACKAGE_DEAL_MIN_EDGE,
+    TRANSFER_HIT_COST,
     CandidatePlayer,
     SquadResult,
     TradeCombo,
@@ -32,6 +34,7 @@ from fantasy_app.recommend.fpl import (
     find_trade_combos_for_target,
     optimize_squad,
     pick_starting_xi,
+    suggest_transfer_package,
     suggest_transfers,
 )
 from fantasy_app.services.common import current_season_start_year
@@ -42,12 +45,19 @@ from fantasy_app.services.uefa_rotation import compute_uefa_rotation_factors
 MIN_MATCHES_FOR_FIT = 50
 HISTORICAL_SEASONS_BACK = 2  # "previous 2 seasons" fallback when the current one is too thin
 
+# Early-season team-rating shrinkage (NOTES GW3 / Bogle): pull attack/defense harder toward 0
+# while a club has few *current-season* matches, even when historical seasons are blended in.
+# 0 disables. Tuned with scripts/backtest_xp_walkforward.py — do not raise blindly.
+EARLY_SEASON_L2_BOOST = 3.0
+EARLY_SEASON_FULL_STRENGTH_MATCHES = 8
+
 SHORTLIST_PER_POSITION = {"GK": 8, "DEF": 20, "MID": 20, "FWD": 15}
 
 DEFAULT_TRANSFER_HORIZON = 3  # gameweeks a transfer's benefit is evaluated over — it sticks around
 DEFAULT_WILDCARD_HORIZON = 5  # wildcard is permanent, so its lift is judged over a longer run
 DEFAULT_TARGET_HORIZON = 5  # per-position "best affordable target" horizon
 DEFAULT_TRADE_HORIZON = 5  # "trade for this player" combo horizon
+MAX_PLAYER_PROJECTION_GAMEWEEKS = 15  # Player Info page's longest "next N" option
 
 
 @dataclass(frozen=True)
@@ -94,7 +104,9 @@ class FullRecommendation:
     starters: list[CandidatePlayer]
     bench: list[CandidatePlayer]
     lineup_changes: list[str]  # only populated when the caller knows the ACTUAL current XI
-    best_transfer: TransferSuggestion | None
+    best_transfer: TransferSuggestion | None  # == transfers[0] if transfers else None
+    transfers: list[TransferSuggestion]  # up to `free_transfers` independent one-for-one swaps
+    transfer_package: TradeCombo | None  # a pooled-budget alternative, only when it clearly beats `transfers` (see PACKAGE_DEAL_MIN_EDGE)
     transfer_horizon_gameweeks: int
     chip_lifts: list[ChipLift]
     # The actual squads a "lift" number implies — not just the point differential, since
@@ -134,29 +146,61 @@ def _fd_matches_to_results_by_name(matches: list[dict]) -> list[MatchResult]:
     return out
 
 
+def _count_matches_per_team(matches: list[MatchResult]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for m in matches:
+        counts[m.home_team_id] = counts.get(m.home_team_id, 0) + 1
+        counts[m.away_team_id] = counts.get(m.away_team_id, 0) + 1
+    return counts
+
+
 def fit_pl_ratings(
-    client: FPLClient, bootstrap: dict, fd_client: FootballDataClient | None = None
+    client: FPLClient,
+    bootstrap: dict,
+    fd_client: FootballDataClient | None = None,
+    *,
+    as_of: datetime | None = None,
+    early_season_l2_boost: float | None = None,
+    early_season_full_strength_matches: int | None = None,
 ) -> tuple[Ratings, dict[str, float], dict[int, str]]:
     """
     Returns (ratings, goal_averages, normalized_team_name_by_fpl_team_id) — everything keyed
     by *normalized team name* rather than FPL's team ID, because the historical fallback data
     comes from football-data.org, which uses a different ID namespace; name is the only join
     key the two sources share.
+
+    `as_of` (optional) limits which finished fixtures count as "already played" for walk-forward
+    backtests — only fixtures with kickoff < as_of are used as current-season evidence.
+    Historical football-data seasons are still blended when the current-season sample is thin.
     """
     norm_name_by_fpl_id = {t["id"]: normalize_team_name(t["name"]) for t in bootstrap["teams"]}
+    boost = EARLY_SEASON_L2_BOOST if early_season_l2_boost is None else early_season_l2_boost
+    full_strength = (
+        EARLY_SEASON_FULL_STRENGTH_MATCHES
+        if early_season_full_strength_matches is None
+        else early_season_full_strength_matches
+    )
 
     all_fixtures = client.fixtures()
-    matches = [
-        MatchResult(
-            home_team_id=norm_name_by_fpl_id[f["team_h"]],
-            away_team_id=norm_name_by_fpl_id[f["team_a"]],
-            home_goals=f["team_h_score"],
-            away_goals=f["team_a_score"],
-            played_at=_parse_kickoff(f.get("kickoff_time")),
+    current_season_matches: list[MatchResult] = []
+    for f in all_fixtures:
+        if not f.get("finished") or f.get("team_h_score") is None or f.get("team_a_score") is None:
+            continue
+        played_at = _parse_kickoff(f.get("kickoff_time"))
+        if as_of is not None and played_at >= as_of:
+            continue
+        current_season_matches.append(
+            MatchResult(
+                home_team_id=norm_name_by_fpl_id[f["team_h"]],
+                away_team_id=norm_name_by_fpl_id[f["team_a"]],
+                home_goals=f["team_h_score"],
+                away_goals=f["team_a_score"],
+                played_at=played_at,
+            )
         )
-        for f in all_fixtures
-        if f.get("finished") and f.get("team_h_score") is not None and f.get("team_a_score") is not None
-    ]
+    # Sample-size for early-season L2 is current season only — historical rows must not inflate it.
+    team_current_season_matches = _count_matches_per_team(current_season_matches)
+    matches = list(current_season_matches)
 
     if len(matches) < MIN_MATCHES_FOR_FIT:
         fd_client = fd_client if fd_client is not None else _try_football_data_client()
@@ -176,7 +220,14 @@ def fit_pl_ratings(
             "Add FOOTBALL_DATA_TOKEN to .env, or try again once gameweek 1 has kicked off."
         )
 
-    ratings = fit_ratings(matches)
+    fit_as_of = as_of or max(m.played_at for m in matches)
+    ratings = fit_ratings(
+        matches,
+        as_of=fit_as_of,
+        team_current_season_matches=team_current_season_matches,
+        early_season_l2_boost=boost,
+        early_season_full_strength_matches=full_strength,
+    )
     goal_avgs = team_goal_averages(matches)
     return ratings, goal_avgs, norm_name_by_fpl_id
 
@@ -444,6 +495,36 @@ def _gameweek_fixture_by_team(client: FPLClient, event: int) -> dict[int, dict]:
     return fixture_by_team
 
 
+def _fixture_assist_share(assist_rate: float, lam_team: float, team_avg_goals: float) -> float:
+    """Expected assists in this fixture. Mirrors goal scaling: per-90 assist rate is turned into
+    a share of team output, then multiplied by this fixture's expected goals. Passing raw
+    assist_rate as assist_share left assists fixture-blind while goals were fixture-aware."""
+    return lam_team * min(assist_rate / team_avg_goals, 1.0)
+
+
+def _expected_saves_if_playing(element: dict, pos: str) -> float:
+    """GK saves expected over a full appearance from season-to-date saves/minutes. 0 for non-GK
+    or no minutes yet (player_xp already multiplies by start_prob)."""
+    if pos != "GK":
+        return 0.0
+    minutes = element.get("minutes", 0) or 0
+    if minutes <= 0:
+        return 0.0
+    saves = element.get("saves", 0) or 0
+    return saves * 90.0 / minutes
+
+
+def _expected_defcon_points_if_playing(element: dict) -> float:
+    """Expected defensive-contribution *points* if the player features for ~90'. Bootstrap's
+    `defensive_contribution` is cumulative points from that scoring rule (0 when absent / older
+    seasons)."""
+    minutes = element.get("minutes", 0) or 0
+    if minutes <= 0:
+        return 0.0
+    points = element.get("defensive_contribution", 0) or 0
+    return points * 90.0 / minutes
+
+
 def _candidates_for_gameweek(
     client: FPLClient,
     bootstrap: dict,
@@ -508,6 +589,7 @@ def _candidates_for_gameweek(
         # defensively in case a small-sample rate (even after price-prior blending) or a
         # rate/average mismatch from a future data source pushes the raw ratio past 100%.
         goal_share = min(goal_rate / team_avg_goals, 1.0)
+        assist_share = _fixture_assist_share(assist_rate, lam_team, team_avg_goals)
 
         base_xp = player_xp(
             name=element["web_name"],
@@ -517,7 +599,9 @@ def _candidates_for_gameweek(
             lam_opponent=lam_opponent,
             p_cs=p_cs,
             goal_share=goal_share,
-            assist_share=assist_rate,
+            assist_share=assist_share,
+            save_rate=_expected_saves_if_playing(element, pos),
+            defensive_contribution=_expected_defcon_points_if_playing(element),
             start_prob=start_prob,
         ).xp
 
@@ -606,6 +690,51 @@ def build_candidate_pool_multi_gw(
         )
         for pid, t in template_by_id.items()
     ]
+
+
+@dataclass(frozen=True)
+class PlayerGameweekProjection:
+    event: int
+    opponent: str
+    xp: float
+
+
+def player_gameweek_projections(
+    client: FPLClient,
+    player_id: str,
+    fd_client: FootballDataClient | None = None,
+    start_event: int | None = None,
+    num_gameweeks: int = MAX_PLAYER_PROJECTION_GAMEWEEKS,
+) -> list[PlayerGameweekProjection]:
+    """
+    One player's predicted points gameweek-by-gameweek — the Player Info page's next-5/10/15
+    table. Same ratings-fit-once-then-loop-per-gameweek shape as build_candidate_pool_multi_gw
+    right above, but kept week-by-week instead of collapsed into one horizon total, so each
+    gameweek keeps its own opponent rather than only the first. A blank gameweek for this
+    player's team is simply skipped, same as a multi-gw pool contributing 0 that week.
+    """
+    fd_client = fd_client if fd_client is not None else _try_football_data_client()
+    bootstrap = client.bootstrap()
+    ratings, goal_avgs, norm_name_by_id = fit_pl_ratings(client, bootstrap, fd_client=fd_client)
+    start_event = start_event or client.current_event(bootstrap)
+    history_index = fpl_history.index_by_player()
+    team_games_played = _team_games_played(client)
+    price_priors = _fit_price_rate_priors(bootstrap)
+    price_thresholds = _squad_depth_price_threshold(bootstrap)
+
+    results: list[PlayerGameweekProjection] = []
+    for offset in range(num_gameweeks):
+        event = start_event + offset
+        gw_candidates = _candidates_for_gameweek(
+            client, bootstrap, ratings, goal_avgs, norm_name_by_id, history_index, event, team_games_played,
+            price_priors, price_thresholds, fd_client,
+        )
+        candidate = gw_candidates.get(player_id)
+        if candidate is None:
+            continue  # blank gameweek for this player's team
+        opponent = candidate.opponent_stats.opponent if candidate.opponent_stats else "?"
+        results.append(PlayerGameweekProjection(event=event, opponent=opponent, xp=candidate.xp))
+    return results
 
 
 def build_transfer_targets(
@@ -733,9 +862,13 @@ def full_recommendation(
       - risk flags: live news/status right now (the "check before deadline" pass) — no horizon,
         it's a snapshot.
       - captain/vice + starting XI vs bench: this gameweek only.
-      - one best transfer: summed over `transfer_horizon` gameweeks, since a transfer sticks
-        around — a swap that's a wash this week but clearly better over the next few is worth
-        making now, and this-week-only scoring would miss that entirely.
+      - transfers: up to `free_transfers` independent one-for-one swaps, summed over
+        `transfer_horizon` gameweeks since a transfer sticks around — a swap that's a wash this
+        week but clearly better over the next few is worth making now, and this-week-only
+        scoring would miss that entirely. When `free_transfers` >= 2, also checked against a
+        pooled-budget alternative (selling more than one player toward a single bigger upgrade,
+        rather than each sale only funding its own replacement) — surfaced as `transfer_package`
+        only when it clearly beats doing the independent swaps.
       - free_hit lift: this gameweek only (the chip is temporary, reverts next week).
       - wildcard lift: summed over `wildcard_horizon` gameweeks (the chip is permanent).
       - bench_boost / triple_captain lift: this gameweek only (both are single-gameweek chips).
@@ -766,21 +899,36 @@ def full_recommendation(
             elif should_start and not was_starting:
                 lineup_changes.append(f"Start {p.name} — currently on your bench but should start")
 
-    # Best single transfer, over the transfer horizon (not just this gameweek).
+    # Transfers, over the transfer horizon (not just this gameweek).
     pool_transfer_horizon = build_candidate_pool_multi_gw(
         client, fd_client=fd_client, start_event=event, num_gameweeks=transfer_horizon
     )
     multi_by_id = {p.id: p for p in pool_transfer_horizon}
     current_squad_multi = [multi_by_id[p.id] for p in current_squad if p.id in multi_by_id]
-    transfers = suggest_transfers(current_squad_multi, pool_transfer_horizon, bank=bank, free_transfers=1)
+    transfers = suggest_transfers(current_squad_multi, pool_transfer_horizon, bank=bank, free_transfers=free_transfers)
     best_transfer = transfers[0] if transfers else None
+
+    # With 2+ free transfers, also check whether pooling every sale's budget toward one bigger
+    # move beats doing `transfers` as independent swaps -- only surfaced when it's a real edge,
+    # not the ILP's tie-breaking dressed up as a different combo (see PACKAGE_DEAL_MIN_EDGE).
+    transfer_package = None
+    if free_transfers >= 2:
+        greedy_net_gain = sum(t.xp_gain for t in transfers) - TRANSFER_HIT_COST * sum(1 for t in transfers if t.is_hit)
+        package_candidates = suggest_transfer_package(
+            current_squad_multi, pool_transfer_horizon, bank=bank, free_transfers=free_transfers
+        )
+        if package_candidates and package_candidates[0].xp_gain - greedy_net_gain >= PACKAGE_DEAL_MIN_EDGE:
+            transfer_package = package_candidates[0]
 
     # Chip lifts.
     bench_xp = round(sum(p.xp for p in bench), 2)
     triple_lift = round(captain.xp, 2)  # xP already reflects a normal (unmultiplied) captain
 
     optimal_1gw = optimize_squad(pool_1gw)
-    current_1gw_xi_xp = sum(p.xp for p in starters)
+    # + captain.xp to match optimal_1gw.starting_xp's own convention (starting XI total plus the
+    # captain's xp a second time) -- otherwise this "current" side undercounts relative to what
+    # it's being compared against, inflating the lift by exactly one captain's worth of points.
+    current_1gw_xi_xp = sum(p.xp for p in starters) + captain.xp
     free_hit_lift = round(optimal_1gw.starting_xp - current_1gw_xi_xp, 2)
 
     pool_wildcard_horizon = (
@@ -792,7 +940,8 @@ def full_recommendation(
     wc_by_id = {p.id: p for p in pool_wildcard_horizon}
     current_squad_wc = [wc_by_id[p.id] for p in current_squad if p.id in wc_by_id]
     current_wc_starters, _ = pick_starting_xi(current_squad_wc)
-    current_wc_xi_xp = sum(p.xp for p in current_wc_starters)
+    current_wc_captain = max(current_wc_starters, key=lambda p: p.xp)
+    current_wc_xi_xp = sum(p.xp for p in current_wc_starters) + current_wc_captain.xp
     wildcard_lift = round(optimal_wildcard.starting_xp - current_wc_xi_xp, 2)
 
     chip_lifts = [
@@ -827,6 +976,8 @@ def full_recommendation(
         bench=bench,
         lineup_changes=lineup_changes,
         best_transfer=best_transfer,
+        transfers=transfers,
+        transfer_package=transfer_package,
         transfer_horizon_gameweeks=transfer_horizon,
         chip_lifts=chip_lifts,
         free_hit_squad=optimal_1gw,

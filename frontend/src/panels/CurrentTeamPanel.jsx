@@ -37,6 +37,53 @@ function safeCacheKey(squad) {
   }
 }
 
+// Net xP a set of greedy one-for-one suggestions actually banks, once hits are subtracted —
+// the fair baseline to compare a pooled-budget package against (transfer_package's own xp_gain
+// is already net of its hits, from the backend).
+function greedyNetGain(transfers) {
+  return transfers.reduce((sum, t) => sum + t.xp_gain - (t.is_hit ? 4 : 0), 0);
+}
+
+// Same combo shape (players_out/players_in/hits/hit_cost/xp_gain/new_bank) backs both the
+// "trade for a specific player" results and the pooled-budget package deal below — one card
+// renders either.
+function TransferComboCard({ combo, tag }) {
+  return (
+    <div className="chip-card">
+      {tag}
+      <p className="summary-line" style={{ marginTop: 6 }}>
+        OUT{" "}
+        {combo.players_out.map((p, j) => (
+          <span key={p.id}>
+            {j > 0 && ", "}
+            <PlayerTip player={p} />
+          </span>
+        ))}
+        {" "}&rarr; IN{" "}
+        {combo.players_in.map((p, j) => (
+          <span key={p.id}>
+            {j > 0 && ", "}
+            <PlayerTip player={p} />
+          </span>
+        ))}
+      </p>
+      <div className="chip-lift">
+        <SignedValue value={combo.xp_gain} suffix=" xP" />
+      </div>
+      <div className="chip-note">
+        {combo.hits > 0 ? (
+          <Tag variant="hit">
+            {combo.hits} hit{combo.hits > 1 ? "s" : ""} (-{combo.hit_cost})
+          </Tag>
+        ) : (
+          "No hit — within free transfers"
+        )}{" "}
+        · Bank after: {combo.new_bank}m
+      </div>
+    </div>
+  );
+}
+
 export function CurrentTeamPanel({ squad }) {
   const squadCacheKey = safeCacheKey(squad);
   const [state, run] = useCachedAsyncAction("squad-full", squadCacheKey);
@@ -62,7 +109,7 @@ export function CurrentTeamPanel({ squad }) {
   return (
     <Card
       title="Current team & top recommendations"
-      hint="Five kinds of advice, each over the horizon it actually needs: live status flags on your squad right now, this gameweek's captain/vice/bench, the single best transfer (evaluated a few gameweeks ahead, since it sticks around), and a quantified lift for each chip — Free Hit judged over just this gameweek, Wildcard over several. Hover any player name for their scoring history against this week's opponent, over the last 5 PL seasons."
+      hint="Five kinds of advice, each over the horizon it actually needs: live status flags on your squad right now, this gameweek's captain/vice/bench, your recommended transfers (evaluated a few gameweeks ahead, since they stick around — plus a pooled-budget package deal when spending more than one sale on a single bigger upgrade beats making them independently), and a quantified lift for each chip — Free Hit judged over just this gameweek, Wildcard over several. Hover any player name for their scoring history against this week's opponent, over the last 5 PL seasons."
     >
       <div className="mode-toggle">
         <button className={squad.mode === "entry" ? "active" : ""} onClick={() => squad.setMode("entry")}>
@@ -202,53 +249,48 @@ export function CurrentTeamPanel({ squad }) {
                 ) : (
                   <div className="chip-grid">
                     {trade.combos.map((c, i) => (
-                      <div className="chip-card" key={i}>
-                        {c.recommended && <Tag variant="captain">Recommended</Tag>}
-                        <p className="summary-line" style={{ marginTop: 6 }}>
-                          OUT{" "}
-                          {c.players_out.map((p, j) => (
-                            <span key={p.id}>
-                              {j > 0 && ", "}
-                              <PlayerTip player={p} />
-                            </span>
-                          ))}
-                          {" "}&rarr; IN{" "}
-                          {c.players_in.map((p, j) => (
-                            <span key={p.id}>
-                              {j > 0 && ", "}
-                              <PlayerTip player={p} />
-                            </span>
-                          ))}
-                        </p>
-                        <div className="chip-lift">
-                          <SignedValue value={c.xp_gain} suffix=" xP" />
-                        </div>
-                        <div className="chip-note">
-                          {c.hits > 0 ? (
-                            <Tag variant="hit">
-                              {c.hits} hit{c.hits > 1 ? "s" : ""} (-{c.hit_cost})
-                            </Tag>
-                          ) : (
-                            "No hit — within free transfers"
-                          )}{" "}
-                          · Bank after: {c.new_bank}m
-                        </div>
-                      </div>
+                      <TransferComboCard
+                        key={i}
+                        combo={c}
+                        tag={c.recommended && <Tag variant="captain">Recommended</Tag>}
+                      />
                     ))}
                   </div>
                 )}
               </Reveal>
             )}
 
-            <p className="section-heading">Best transfer</p>
-            {rec.best_transfer ? (
-              <p className="summary-line">
-                OUT <PlayerTip player={rec.best_transfer.out} /> &rarr; IN <PlayerTip player={rec.best_transfer.in} />{" "}
-                <SignedValue value={rec.best_transfer.xp_gain} suffix=" xP" /> over the next {rec.transfer_horizon_gameweeks} gameweeks
-                {rec.best_transfer.is_hit && <Tag variant="hit">-4 hit</Tag>}
-              </p>
-            ) : (
+            <p className="section-heading">Recommended transfers</p>
+            <p className="hint" style={{ marginTop: -4 }}>
+              Up to your free transfers, each evaluated over the next {rec.transfer_horizon_gameweeks} gameweeks since a
+              transfer sticks around. Each move below is self-funded independently — sell one player, spend just
+              what that sale frees up.
+            </p>
+            {rec.transfers.length === 0 ? (
               <p className="empty">No transfer worth making over the next {rec.transfer_horizon_gameweeks} gameweeks.</p>
+            ) : (
+              <ul className="flags">
+                {rec.transfers.map((t, i) => (
+                  <li key={i}>
+                    OUT <PlayerTip player={t.out} /> &rarr; IN <PlayerTip player={t.in} />{" "}
+                    <SignedValue value={t.xp_gain} suffix=" xP" />
+                    {t.is_hit && <Tag variant="hit">-4 hit</Tag>}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {rec.transfer_package && (
+              <>
+                <p className="section-heading">Package deal</p>
+                <p className="hint" style={{ marginTop: -4 }}>
+                  Pooling the budget from more than one sale toward a single bigger upgrade beats doing the
+                  transfers above independently by{" "}
+                  <SignedValue value={rec.transfer_package.xp_gain - greedyNetGain(rec.transfers)} suffix=" xP" />{" "}
+                  over the same horizon — the same free transfers, spent differently.
+                </p>
+                <TransferComboCard combo={rec.transfer_package} tag={<Tag variant="captain">Package deal</Tag>} />
+              </>
             )}
 
             <p className="section-heading">Chip lifts</p>

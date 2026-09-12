@@ -46,3 +46,58 @@ def test_fit_ratings_requires_matches():
         assert False, "expected ValueError"
     except ValueError:
         pass
+
+
+def test_early_season_l2_shrinks_hot_streak_attack():
+    """Two blowout wins early in a season should not produce as extreme an attack rating when
+    early_season_l2_boost is on — the GW3 Bogle failure mode in miniature.
+
+    Opponents are given a full current-season sample so only Hot is extra-shrunk; otherwise
+    shrinking a porous defense toward 0 can force Hot's attack *up* to explain the same 4–0s.
+    """
+    base = datetime(2025, 8, 1)
+    history: list[MatchResult] = []
+    for i in range(40):
+        history.append(MatchResult("Hot", "Cold", 1, 1, base + timedelta(days=i)))
+        history.append(MatchResult("Cold", "Hot", 1, 1, base + timedelta(days=i, hours=12)))
+        history.append(MatchResult("Other", "Fourth", 1, 1, base + timedelta(days=i, hours=1)))
+        history.append(MatchResult("Fourth", "Other", 1, 1, base + timedelta(days=i, hours=2)))
+
+    current_start = base + timedelta(days=400)
+    current = [
+        MatchResult("Hot", "Cold", 4, 0, current_start),
+        MatchResult("Hot", "Other", 4, 0, current_start + timedelta(days=7)),
+    ]
+    # Padding matches among the non-Hot clubs so only Hot is sample-thin.
+    for i in range(8):
+        current.append(
+            MatchResult("Cold", "Other", 1, 1, current_start + timedelta(days=i, hours=3))
+        )
+        current.append(
+            MatchResult("Other", "Fourth", 1, 1, current_start + timedelta(days=i, hours=4))
+        )
+        current.append(
+            MatchResult("Fourth", "Cold", 1, 1, current_start + timedelta(days=i, hours=5))
+        )
+
+    matches = history + current
+    as_of = current_start + timedelta(days=10)
+    current_counts = {"Hot": 2, "Cold": 10, "Other": 10, "Fourth": 8}
+
+    baseline = fit_ratings(
+        matches,
+        as_of=as_of,
+        team_current_season_matches=current_counts,
+        early_season_l2_boost=0.0,
+    )
+    shrunk = fit_ratings(
+        matches,
+        as_of=as_of,
+        team_current_season_matches=current_counts,
+        early_season_l2_boost=5.0,
+        early_season_full_strength_matches=8,
+    )
+    assert shrunk.attack["Hot"] < baseline.attack["Hot"]
+    lam_base, _ = baseline.expected_goals("Hot", "Cold")
+    lam_shrunk, _ = shrunk.expected_goals("Hot", "Cold")
+    assert lam_shrunk < lam_base
