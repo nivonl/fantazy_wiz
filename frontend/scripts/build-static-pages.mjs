@@ -136,6 +136,22 @@ function renderRadarSection(radar, pos) {
   return charts ? `<h3>Stat radar</h3><div class="radar-row">${charts}</div>` : "";
 }
 
+// Three non-overlapping quintiles by array position (not by raw gameweek number -- a blank
+// gameweek for this player's team is already skipped upstream, so "next 5" means the next 5
+// real fixtures, not 5 calendar gameweeks that might include a blank). Each bucket's own label
+// uses its actual first/last gameweek numbers rather than a generic "6-10", since a season with
+// a blank in the window would otherwise make that label wrong.
+function projectionBuckets(projections) {
+  return [projections.slice(0, 5), projections.slice(5, 10), projections.slice(10, 15)]
+    .filter((bucket) => bucket.length)
+    .map((bucket) => {
+      const avg = bucket.reduce((sum, p) => sum + p.xp, 0) / bucket.length;
+      const first = bucket[0].event;
+      const last = bucket[bucket.length - 1].event;
+      return { label: first === last ? `GW${first}` : `GW${first}-${last}`, avg };
+    });
+}
+
 // Reuses the existing points-bar-chart renderer (built for real past gameweek scores) by
 // mapping a forward projection's {event, xp} onto its {gameweek, total_points} shape -- same
 // visual language for "what actually happened" and "what's predicted next," no second chart
@@ -143,18 +159,28 @@ function renderRadarSection(radar, pos) {
 // bar label (a raw float would render an ugly long decimal).
 function renderForwardProjectionsSection(projections) {
   if (!projections?.length) return "";
+  const buckets = projectionBuckets(projections);
+  const summaryTiles = buckets
+    .map(({ label, avg }) => `<div class="stat-tile"><div class="stat-label">${label} avg</div><div class="stat-value">${avg.toFixed(2)}</div></div>`)
+    .join("");
+
   const chartRows = projections.map((p) => ({ total_points: Math.round(p.xp * 100) / 100, gameweek: p.event }));
   const rows = projections
     .map((p) => `<tr><td>GW${p.event}</td><td>${escapeHtml(p.opponent)}</td><td><b>${p.xp.toFixed(2)}</b></td></tr>`)
     .join("\n");
+
   return `
     <h3>Predicted points, gameweek by gameweek</h3>
     <p class="hint">The same model, projected forward week by week -- see the
     <a href="/fpl-player-info">Player Info tool</a> to check any other player this way.</p>
-    ${renderPointsBarChart(chartRows)}
-    <div class="table-wrap"><table><thead><tr><th>Gameweek</th><th>Opponent</th><th>Predicted pts</th></tr></thead><tbody>
+    <div class="stat-grid">${summaryTiles}</div>
+    <details class="disclosure">
+      <summary>Full ${projections.length}-gameweek breakdown</summary>
+      ${renderPointsBarChart(chartRows)}
+      <div class="table-wrap"><table><thead><tr><th>Gameweek</th><th>Opponent</th><th>Predicted pts</th></tr></thead><tbody>
 ${rows}
-</tbody></table></div>`;
+</tbody></table></div>
+    </details>`;
 }
 
 function renderPlayerBody(player, breakdown, priceHistory, radar, forwardProjections) {

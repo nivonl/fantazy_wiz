@@ -631,6 +631,32 @@ ul.flags li {
 .stat-tile .stat-label { color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
 .stat-tile .stat-value { font-family: var(--display); font-size: 1.5rem; font-weight: 700; margin-top: 2px; }
 
+/* Native <details> disclosure -- e.g. the forward-projection table on a player page: the
+   compact summary (bucket averages) shows by default, the full week-by-week breakdown stays
+   one click away, with no JS at all (unlike this page's tooltips/radar, plain show/hide is
+   exactly what <details> is built for). */
+details.disclosure { margin-top: 12px; }
+details.disclosure > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  border-radius: 9px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+details.disclosure > summary::marker,
+details.disclosure > summary::-webkit-details-marker { display: none; }
+details.disclosure > summary:hover { border-color: var(--accent); color: var(--text); }
+details.disclosure > summary::after { content: "▾"; margin-left: auto; transition: transform 0.15s ease; }
+details.disclosure[open] > summary::after { transform: rotate(180deg); }
+details.disclosure[open] > summary { margin-bottom: 14px; }
+
 .hero-card {
   background: linear-gradient(120deg, var(--tint-accent), var(--tint-analytics));
   border: 1px solid var(--panel-border);
