@@ -381,35 +381,6 @@ def fpl_player_price_history(element_id: int) -> list[dict]:
     return [asdict(p) for p in points]
 
 
-@app.get("/fpl/player/{element_id}/card")
-def fpl_player_card(element_id: int, num_gameweeks: int = 5, event: int | None = None) -> dict:
-    """
-    The Player Info tab's search result: this player's current price/status/ownership/season
-    totals, plus their predicted points gameweek-by-gameweek for the next `num_gameweeks`
-    (capped at 15 — see fpl_service.MAX_PLAYER_PROJECTION_GAMEWEEKS — since each extra gameweek
-    re-walks the same ratings-fit-and-score pipeline as every other per-gameweek endpoint here).
-    """
-    num_gameweeks = max(1, min(num_gameweeks, fpl_service.MAX_PLAYER_PROJECTION_GAMEWEEKS))
-    with FPLClient() as client:
-        bootstrap = client.bootstrap()
-        pool = fpl_service.build_candidate_pool(client, event=event)
-        player = next((p for p in pool if p.id == str(element_id)), None)
-        if player is None:
-            raise RuntimeError(f"No player with id {element_id} has a fixture to price right now.")
-        element = next((e for e in bootstrap["elements"] if e["id"] == element_id), {})
-        projections = fpl_service.player_gameweek_projections(
-            client, player.id, start_event=event, num_gameweeks=num_gameweeks
-        )
-    return {
-        "player": asdict(player),
-        "status": element.get("status"),
-        "news": element.get("news") or "",
-        "ownership_percent": float(element["selected_by_percent"]) if element.get("selected_by_percent") else None,
-        "total_points": element.get("total_points"),
-        "projections": [asdict(p) for p in projections],
-    }
-
-
 @app.get("/recommend/fpl/trade-for")
 def recommend_fpl_trade_for(
     target: str,

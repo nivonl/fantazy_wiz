@@ -735,8 +735,7 @@ def bulk_player_gameweek_projections(
     player each week regardless of how many the caller actually wants) — kept week-by-week
     instead of collapsed into one horizon total, so each gameweek keeps its own real opponent.
     Backs the static player pages' forward-looking prediction table (one call for all ~600
-    players, not one ratings fit per player); see player_gameweek_projections for the
-    single-player convenience wrapper the live Player Info search uses.
+    players, not one ratings fit per player).
     """
     fd_client = fd_client if fd_client is not None else _try_football_data_client()
     bootstrap = client.bootstrap()
@@ -758,20 +757,6 @@ def bulk_player_gameweek_projections(
             opponent = c.opponent_stats.opponent if c.opponent_stats else "?"
             by_player.setdefault(pid, []).append(PlayerGameweekProjection(event=event, opponent=opponent, xp=c.xp))
     return by_player
-
-
-def player_gameweek_projections(
-    client: FPLClient,
-    player_id: str,
-    fd_client: FootballDataClient | None = None,
-    start_event: int | None = None,
-    num_gameweeks: int = MAX_PLAYER_PROJECTION_GAMEWEEKS,
-) -> list[PlayerGameweekProjection]:
-    """One player's slice of bulk_player_gameweek_projections — the Player Info page's
-    next-5/10/15 search result, when only one player's projections are actually needed."""
-    return bulk_player_gameweek_projections(
-        client, fd_client=fd_client, start_event=start_event, num_gameweeks=num_gameweeks
-    ).get(player_id, [])
 
 
 def build_transfer_targets(

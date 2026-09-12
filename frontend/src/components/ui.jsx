@@ -274,7 +274,7 @@ const CARD_COLUMNS = [
 // Fetched once per session and cached in memory; in local dev (`vite dev`, no static build run
 // yet) this 404s and the link just doesn't render — a graceful no-op, not an error.
 let slugManifestPromise = null;
-function fetchSlugManifest() {
+export function fetchSlugManifest() {
   if (!slugManifestPromise) {
     slugManifestPromise = fetch("/fpl/players/slugs.json")
       .then((res) => (res.ok ? res.json() : {}))

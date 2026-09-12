@@ -5,3 +5,7 @@ __pycache__/
 data.db
 .pytest_cache/
 .cache/
+
+# scripts/backtest_xp_walkforward.py's cached element-summary history and result output --
+# generated locally on demand, not source.
+/data/

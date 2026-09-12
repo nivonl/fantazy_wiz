@@ -27,6 +27,13 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(ROOT / ".env")
+except ImportError:
+    pass
+
 from fantasy_app.models.player_points import player_xp
 from fantasy_app.models.predict import predict_fixture
 from fantasy_app.providers.fpl import POSITION_BY_ELEMENT_TYPE, FPLClient

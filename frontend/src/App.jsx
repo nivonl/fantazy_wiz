@@ -39,9 +39,9 @@ const ROUTE_META = {
       "Build the optimal 15-player FPL squad from scratch under the 100m budget, with favorite-team and favorite-player constraints.",
   },
   "/fpl-player-info": {
-    title: "FPL Player Info & Gameweek Predictions",
+    title: "FPL Player Search",
     description:
-      "Search any FPL player for their card and predicted points gameweek-by-gameweek, out to the next 5, 10, or 15 gameweeks.",
+      "Search any FPL player to open their full page — price, latest stats, stat radar, and predicted points gameweek-by-gameweek.",
   },
   "/fpl-predictions": {
     title: "FPL & Premier League Score Predictions",
