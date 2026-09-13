@@ -53,6 +53,22 @@ def _rest_day_discount(rest_days: float) -> float:
     return 1.0
 
 
+
+# Cache of each competition's raw match list, scoped to one fd_client instance (keyed by
+# id(fd_client) as well as (code, season)) rather than a single process-wide dict -- a fresh
+# FootballDataClient is constructed per top-level request (_try_football_data_client has no
+# singleton), but the SAME instance is threaded through every gameweek of one
+# bulk_player_gameweek_projections call. Without this, that per-gameweek loop (up to
+# MAX_PLAYER_PROJECTION_GAMEWEEKS iterations) called this function, and therefore
+# fd_client.matches(), once per gameweek -- 15 fresh calls to football-data.org's free tier for
+# a single request, which is both slow and an easy way to trip that plan's rate limit. The
+# schedule for a season's UEFA competition doesn't change minute-to-minute, so refetching it on
+# every gameweek in the same projection run bought nothing. Scoping by instance id (rather than
+# a single global (code, season) key) also means two different FootballDataClient instances --
+# e.g. two unrelated tests' fakes, or two separate requests -- never share a cache entry.
+_uefa_matches_cache: dict[tuple[int, str, int], list[dict]] = {}
+
+
 def compute_uefa_rotation_factors(
     fd_client: FootballDataClient | None,
     pl_fixture_by_team: dict[int, dict],
@@ -73,11 +89,15 @@ def compute_uefa_rotation_factors(
     window_start = earliest_kickoff - timedelta(days=LOOKBACK_DAYS)
 
     uefa_matches = []
+    season = current_season_start_year()
     for code in UEFA_COMPETITION_CODES:
-        try:
-            uefa_matches += fd_client.matches(code, season=current_season_start_year())
-        except Exception:
-            continue  # e.g. this plan can't reach the competition, or a transient API error
+        cache_key = (id(fd_client), code, season)
+        if cache_key not in _uefa_matches_cache:
+            try:
+                _uefa_matches_cache[cache_key] = fd_client.matches(code, season=season)
+            except Exception:
+                continue  # e.g. this plan can't reach the competition, or a transient API error
+        uefa_matches += _uefa_matches_cache.get(cache_key, [])
 
     team_id_by_norm_name = {name: team_id for team_id, name in norm_name_by_fpl_id.items()}
 

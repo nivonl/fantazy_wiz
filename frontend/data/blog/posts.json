@@ -3849,8 +3849,13 @@
         "expected_assists": 0.19,
         "ict_index": null,
         "element_id": null,
-        "photo": null,
-        "photo_credit": null,
+        "photo": "pascal-gross.jpg",
+        "photo_credit": {
+          "name": "Bryan Berlin",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Pascal_Gross_Ecuador_v_Germany_25_June_2026-065.jpg"
+        },
         "analysis": "A goal, two assists and a clean sheet as Brighton put five past Coventry away — the model had him as a solid pick against a newly-promoted side, not a season-defining haul. Goal involvement in a rout tends to cluster on whoever's already central to the buildup, and Groß was that player three times over."
       },
       {
