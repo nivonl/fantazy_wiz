@@ -861,6 +861,11 @@ details.disclosure[open] > summary { margin-bottom: 14px; }
   border-radius: 999px;
   margin-left: 6px;
 }
+.blog-rarity-tag-bust { background: var(--tint-bad); color: var(--bad); }
+
+/* Heading for a distinct sub-section within a gameweek post (e.g. "biggest disappointments"
+   after the main surprises list) -- one step down from the post's own h2 title. */
+.blog-section-heading { margin: 28px 0 8px; font-family: var(--display); font-weight: 700; font-size: 1.05rem; color: var(--text); }
 
 @media (max-width: 560px) {
   .blog-player-card { flex-direction: column; }

@@ -297,7 +297,16 @@ function rarityLabel(percentile) {
   return "Notable surprise";
 }
 
-function renderBlogPlayerCard(p, slugById) {
+// Mirrors rarityLabel off the other tail -- a "biggest disappointment" card is rare because its
+// percentile is close to 0 (predicted well, delivered far less), not close to 100.
+function bustLabel(percentile) {
+  if (percentile <= 0.5) return "Rarest bust of the gameweek";
+  if (percentile <= 3) return "Bottom 1-in-40 bust";
+  if (percentile <= 10) return "Bottom-decile bust";
+  return "Notable bust";
+}
+
+function renderBlogPlayerCard(p, slugById, { negative = false } = {}) {
   // No free-licensed photo on Commons for every player yet -- rather than a blank circle or
   // a "no photo" caption drawing attention to the gap, the fallback is the same brand mark
   // used in the site header (App.jsx's BrandMark / render-page.mjs's inline <svg>), so the
@@ -345,13 +354,13 @@ function renderBlogPlayerCard(p, slugById) {
         <div class="blog-player-name-row">
           <span class="blog-player-rank">#${p.rank}</span>${rankWasHtml}
           <span class="blog-player-name">${nameHtml}</span>
-          <span class="blog-rarity-tag">${rarityLabel(p.percentile)}</span>
+          <span class="blog-rarity-tag${negative ? " blog-rarity-tag-bust" : ""}">${negative ? bustLabel(p.percentile) : rarityLabel(p.percentile)}</span>
         </div>
         <p class="blog-player-meta">${POS_LABEL_LONG[p.position] || p.position} &middot; ${escapeHtml(p.team)} &middot; ${p.value.toFixed(1)}m &middot; ${fixtureLine} &middot; ${p.minutes}&prime;</p>
         <div class="blog-stat-row">
           <div><div class="blog-stat-label">Predicted</div><div class="blog-stat-value">${predictedHtml}</div>${revisedTag}</div>
           <div><div class="blog-stat-label">Actual</div><div class="blog-stat-value">${p.actual_points}</div></div>
-          <div><div class="blog-stat-label">Surprise</div><div class="blog-stat-value" style="color:var(--good)">${surpriseHtml}</div></div>
+          <div><div class="blog-stat-label">Surprise</div><div class="blog-stat-value" style="color:var(${negative ? "--bad" : "--good"})">${surpriseHtml}</div></div>
           <div><div class="blog-stat-label">Percentile</div><div class="blog-stat-value">${p.percentile.toFixed(1)}</div></div>
         </div>
         <p class="blog-boxscore"><b>Box score:</b> ${boxscoreParts.length ? escapeHtml(boxscoreParts.join(", ")) : "&mdash;"} &middot; xG ${p.expected_goals.toFixed(2)}, xA ${p.expected_assists.toFixed(2)}${
@@ -377,6 +386,12 @@ function renderGameweekSurpriseBody(post, slugById, path) {
     <p class="hint">Ranked among ${post.qualifying_player_count} players who played at least ${post.min_minutes} minutes in gameweek ${post.gameweek}, by actual points minus predicted xP. Average surprise across that pool: ${fmtSigned(post.mean_surprise)} (std. dev. ${post.stdev_surprise.toFixed(2)}).</p>
     ${post.players.map((p) => renderBlogPlayerCard(p, slugById)).join("\n")}
     <p class="summary-line">${post.closing}</p>
+    ${post.negative_players ? `
+    <h3 class="blog-section-heading">${escapeHtml(post.negative_heading || "This gameweek's biggest disappointments")}</h3>
+    <p class="summary-line">${post.negative_intro || ""}</p>
+    ${post.negative_players.map((p) => renderBlogPlayerCard(p, slugById, { negative: true })).join("\n")}
+    ${post.negative_closing ? `<p class="summary-line">${post.negative_closing}</p>` : ""}
+    ` : ""}
     ${post.model_notes ? `<div class="blog-callout"><p class="blog-callout-heading">Where the model should improve</p>${post.model_notes}</div>` : ""}
     ${shareBar}
     <p><a href="/blog/">&larr; All posts</a> &middot; <a href="/methodology">How predictions work</a></p>
