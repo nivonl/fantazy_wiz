@@ -51,6 +51,30 @@ HISTORICAL_SEASONS_BACK = 2  # "previous 2 seasons" fallback when the current on
 EARLY_SEASON_L2_BOOST = 3.0
 EARLY_SEASON_FULL_STRENGTH_MATCHES = 8
 
+# Additional shrinkage (on top of EARLY_SEASON_L2_BOOST, same taper) for a team with NO rows in
+# the historical blend at all -- a genuinely newly-promoted club (NOTES GW4 / Hull City: 3 clean
+# sheets in their first 3 top-flight games ever produced a fitted defense rating of +3.35, well
+# past Arsenal's +0.57, even with the early-season boost already at its max strength). 0 disables.
+#
+# Two pieces of evidence pull in different directions and neither is strong enough on its own to
+# fully settle this:
+#  - A walk-forward backtest (scripts/backtest_xp_walkforward.py-style, run ad hoc against GW2-3,
+#    the only finished events with a Hull/Coventry fixture so far -- n=3 fixtures total) found
+#    fixture-lambda MAE on those specific fixtures minimized around boost 8-12 (1.08 -> ~0.81),
+#    drifting back up by boost 30+. But every one of those 3 fixtures was against a mid/lower-table
+#    side (Coventry, Aston Villa) -- the backtest has no example of the failure mode that actually
+#    prompted this (an inflated defense rating implying a promoted side nearly shuts out a top
+#    attack), so it can't rule out needing more shrinkage than its own minimum suggests.
+#  - Direct inspection catches exactly that failure mode: at boost=10, Hull's fitted defense
+#    (~2.8) still implied a ~15% chance of Chelsea scoring at all away at Hull, and an 86% Hull
+#    clean-sheet probability -- not plausible for a newly-promoted side's toughest fixture. 40.0
+#    brings that same matchup to Chelsea ~28% chance of no goals and ~75% Hull clean sheet --
+#    still generous, but no longer absurd, while sitting closer to the backtest-supported range
+#    than the boost needed to fully match an established top side's defense rating (100+).
+# Revisit once more promoted-team fixtures (especially against top-half sides) have been played;
+# both the backtest sample and this reasoning are thin.
+NO_HISTORY_L2_BOOST = 40.0
+
 SHORTLIST_PER_POSITION = {"GK": 8, "DEF": 20, "MID": 20, "FWD": 15}
 
 DEFAULT_TRANSFER_HORIZON = 3  # gameweeks a transfer's benefit is evaluated over — it sticks around
@@ -162,6 +186,7 @@ def fit_pl_ratings(
     as_of: datetime | None = None,
     early_season_l2_boost: float | None = None,
     early_season_full_strength_matches: int | None = None,
+    no_history_l2_boost: float | None = None,
 ) -> tuple[Ratings, dict[str, float], dict[int, str]]:
     """
     Returns (ratings, goal_averages, normalized_team_name_by_fpl_team_id) — everything keyed
@@ -180,6 +205,7 @@ def fit_pl_ratings(
         if early_season_full_strength_matches is None
         else early_season_full_strength_matches
     )
+    no_history_boost = NO_HISTORY_L2_BOOST if no_history_l2_boost is None else no_history_l2_boost
 
     all_fixtures = client.fixtures()
     current_season_matches: list[MatchResult] = []
@@ -227,6 +253,7 @@ def fit_pl_ratings(
         team_current_season_matches=team_current_season_matches,
         early_season_l2_boost=boost,
         early_season_full_strength_matches=full_strength,
+        no_history_l2_boost=no_history_boost,
     )
     goal_avgs = team_goal_averages(matches)
     return ratings, goal_avgs, norm_name_by_fpl_id

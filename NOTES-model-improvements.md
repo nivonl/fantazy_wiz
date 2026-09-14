@@ -181,6 +181,73 @@ GW1/2 backtest lived in a scratchpad; reconstructing for GW3 nearly shipped a wr
 `FOOTBALL_DATA_TOKEN` was missing. Use `services/xp_backtest.py` /
 `scripts/backtest_xp_walkforward.py` instead of another one-off.
 
+## Gameweek 4 insights: newly-promoted clubs, and a real name-matching bug
+
+**Status: implemented.** Triggered by a live user report: Semi Ajayi (Hull City, a defender with
+no reputation for attacking or defensive standout play) showing a predicted ~7.8-8.6 points on
+`/fpl/player/ajayi/` for every gameweek regardless of opponent, including a strong away fixture.
+
+**Two separate real bugs, found while investigating:**
+
+1. **`normalize_team_name` (`services/team_matching.py`) silently dropped two clubs' entire
+   historical-season match history from the ratings fit.** It stripped "AFC" only as a *suffix*
+   ("X AFC"), never as football-data.org's *prefix* naming convention ("AFC Bournemouth"), and
+   kept football-data.org's "Brighton & Hove Albion FC" ampersand while the FPL-side alias mapped
+   to "brighton hove albion" (no ampersand) — two different normalized strings for the same club
+   either way, so `fit_pl_ratings`'s historical blend never joined on them. Fixed with a `"afc "`
+   prefix strip and a uniform `"&"` -> space normalization, both applied before suffix/alias
+   handling. Confirmed via a full current-PL-teams-vs-3-seasons-of-history check that these two
+   were the only real mismatches (Coventry and Hull City correctly have no match — genuinely no
+   historical PL data, not a name-join failure). Regression tests:
+   `tests/test_team_matching.py::test_normalize_handles_prefix_club_names` and
+   `::test_normalize_handles_ampersand_variants`.
+
+2. **A genuinely promoted club with zero historical rows gets under-regularized even with the
+   GW3 early-season L2 boost already at max strength.** Hull City's fitted defense rating hit
+   **+3.35** (vs. Arsenal's +0.57, the next-best established side) off 3 clean sheets in their
+   first 3 top-flight games ever — `EARLY_SEASON_L2_BOOST` alone shrinks toward 0 based on
+   *current-season sample size*, but says nothing about whether the *historical* side of the
+   blend has anything real anchoring the team, so a promoted club's thin, lucky sample has nothing
+   pulling against it except the same taper every mid-table team with 3-4 games also gets.
+
+### Recommendation — implemented
+
+`models/strength.py`'s `_per_team_l2` takes an optional `team_has_historical_anchor` +
+`no_history_l2_boost`, applying an *additional* boost (same early-season taper) only to teams
+with no rows in the historical blend at all; `fit_ratings` derives
+`team_has_historical_anchor` itself by comparing each team's total match count in the fit against
+`team_current_season_matches`, so callers don't have to keep a second flag in sync with the same
+match list. Wired through `fit_pl_ratings` as `NO_HISTORY_L2_BOOST=40.0`.
+
+That value is a compromise, not a clean backtest result — see the constant's comment in
+`services/fpl_service.py`. A walk-forward MAE check against the only 3 finished Hull/Coventry
+fixtures so far this season (GW2-3, `scripts/backtest_xp_walkforward.py`-style) minimized around
+boost 8-12, but every one of those fixtures was against a mid/lower-table side — the sample has no
+case of the actual failure mode (an inflated defense implying a promoted side nearly shuts out a
+*strong* attack). Direct inspection filled that gap: at boost=10, Hull's fitted defense still gave
+Chelsea only a ~15% chance of scoring at all away at Hull. 40.0 brings that to ~28% — still
+generous, but no longer absurd — while stopping well short of the boost needed to fully match an
+established side's rating (100+), which the thin backtest doesn't support either. Revisit once
+promoted clubs have played more top-half fixtures.
+
+Unit test: `tests/test_strength.py::test_no_history_l2_boost_shrinks_promoted_team_harder_than_anchored_team`.
+
+### Known residual: player-level goal-rate shrinkage may also be too weak for hot small samples
+
+Even with both fixes above, Ajayi's predicted points only dropped to ~6.5-8.3 (from ~7.8-8.6) —
+still high for a low-reputation defender. Breaking down `player_xp`'s components for the Chelsea
+fixture (boost=40): `clean_sheet` ~2.65-3.49 (the team-rating fix's target, now improved but still
+elevated), but `goals` alone contributes ~0.9 xp/game — implausibly high for a budget defender,
+traced to `_player_rates`'s price-prior blend: Ajayi's 1 goal in ~3.7 effective matches (a 0.27
+per-90 raw rate) only gets diluted to ~0.157 per-90 after blending with `PRICE_PRIOR_WEIGHT_MATCHES
+= 4.0` worth of price-informed prior — still a lot for a defender extrapolated over a season.
+
+**Not implemented.** Unlike the team-rating fix, `PRICE_PRIOR_WEIGHT_MATCHES` (or the shrinkage
+weighting generally) is a single sitewide constant that touches every player's predicted points,
+not just newly-promoted clubs' defenders — raising it needs the same full backtest discipline as
+the price-prior work already has, across many players' actual outcomes, not just one player's
+one fixture. Flagging here rather than retuning blind.
+
 ## Deferred: actual transfer fee paid
 
 The user's original ask also included the real transfer fee a club paid (not just FPL price) as

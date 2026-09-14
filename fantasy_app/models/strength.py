@@ -61,11 +61,25 @@ def _per_team_l2(
     team_current_season_matches: dict[str, int] | None,
     early_season_l2_boost: float,
     early_season_full_strength_matches: int,
+    team_has_historical_anchor: dict[str, bool] | None = None,
+    no_history_l2_boost: float = 0.0,
 ) -> np.ndarray:
     """L2 weight per team. Early in a season, teams with few *current-season* matches get
     stronger shrinkage toward 0 so 1–2 hot/cold results cannot swing attack/defense as far
     (see NOTES-model-improvements.md Gameweek 3 / Bogle). Historical blended matches still
-    inform the likelihood; only the penalty scale depends on current-season sample size."""
+    inform the likelihood; only the penalty scale depends on current-season sample size.
+
+    That fix has a real gap: it shrinks every thin-sample team by the same amount regardless of
+    whether the *likelihood* also has real historical rows anchoring them toward a plausible
+    level. An established team's historical seasons pull it back toward reality on their own,
+    independent of the penalty; a newly-promoted team with zero rows in the historical blend has
+    nothing but this penalty standing between a 2-3 game hot streak and an extreme rating (real
+    incident: Hull City, 3 clean sheets in their first 3 top-flight games ever, fitted defense
+    +3.337 — vs. Arsenal's +0.564 — even with the existing boost near its max strength; see
+    NOTES-model-improvements.md). `team_has_historical_anchor` (True if a team appears in the fit
+    with any match beyond the current season) lets a team missing that anchor get an *additional*
+    boost on the same early-season taper, rather than trying to raise the shared boost enough to
+    cover both cases and over-shrinking every team that already has a real historical anchor."""
     if early_season_l2_boost <= 0 or not team_current_season_matches:
         return np.full(len(team_ids), base_l2)
     out = np.empty(len(team_ids))
@@ -74,7 +88,10 @@ def _per_team_l2(
         k = team_current_season_matches.get(team, 0)
         # 0 current-season games -> full boost; full+ games -> base_l2 only
         frac_thin = max(0.0, (full - k) / full)
-        out[i] = base_l2 * (1.0 + early_season_l2_boost * frac_thin)
+        boost = early_season_l2_boost
+        if team_has_historical_anchor is not None and not team_has_historical_anchor.get(team, True):
+            boost += no_history_l2_boost
+        out[i] = base_l2 * (1.0 + boost * frac_thin)
     return out
 
 
@@ -86,6 +103,7 @@ def fit_ratings(
     team_current_season_matches: dict[str, int] | None = None,
     early_season_l2_boost: float = 0.0,
     early_season_full_strength_matches: int = 8,
+    no_history_l2_boost: float = 0.0,
 ) -> Ratings:
     """
     Fit attack/defense/home-advantage from a list of played matches. Recent matches are
@@ -96,6 +114,13 @@ def fit_ratings(
     `early_season_full_strength_matches` current-season appearances (see
     `team_current_season_matches`) get stronger L2 shrinkage so early-season volatility
     cannot dominate fixture λ the way it did for Brighton/Leeds around GW3 2025-26.
+
+    When `no_history_l2_boost > 0` too, a team gets that *additional* boost (same taper) if it
+    has no rows in `matches` beyond what `team_current_season_matches` already counts — i.e. a
+    genuinely promoted club with nothing in the historical blend anchoring it. Detected here by
+    comparing each team's total appearance count in `matches` against `team_current_season_matches`
+    directly, rather than requiring the caller to pass a separate flag it would have to keep in
+    sync with the same `matches` list.
     """
     if not matches:
         raise ValueError("fit_ratings requires at least one match")
@@ -112,8 +137,25 @@ def fit_ratings(
     away_idx = np.array([idx[m.away_team_id] for m in matches])
     home_goals = np.array([m.home_goals for m in matches], dtype=float)
     away_goals = np.array([m.away_goals for m in matches], dtype=float)
+
+    team_has_historical_anchor = None
+    if team_current_season_matches is not None and no_history_l2_boost > 0:
+        team_total_matches: dict[str, int] = {}
+        for m in matches:
+            team_total_matches[m.home_team_id] = team_total_matches.get(m.home_team_id, 0) + 1
+            team_total_matches[m.away_team_id] = team_total_matches.get(m.away_team_id, 0) + 1
+        team_has_historical_anchor = {
+            t: team_total_matches.get(t, 0) > team_current_season_matches.get(t, 0) for t in team_ids
+        }
+
     team_l2 = _per_team_l2(
-        team_ids, l2, team_current_season_matches, early_season_l2_boost, early_season_full_strength_matches
+        team_ids,
+        l2,
+        team_current_season_matches,
+        early_season_l2_boost,
+        early_season_full_strength_matches,
+        team_has_historical_anchor,
+        no_history_l2_boost,
     )
 
     def unpack(x: np.ndarray) -> tuple[np.ndarray, np.ndarray, float]:
