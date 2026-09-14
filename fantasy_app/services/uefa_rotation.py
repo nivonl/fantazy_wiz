@@ -21,6 +21,7 @@ rest-days study would be the natural follow-up to replace these with fitted numb
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+from weakref import WeakKeyDictionary
 
 from fantasy_app.providers.football_data import FootballDataClient
 from fantasy_app.services.common import current_season_start_year
@@ -54,19 +55,25 @@ def _rest_day_discount(rest_days: float) -> float:
 
 
 
-# Cache of each competition's raw match list, scoped to one fd_client instance (keyed by
-# id(fd_client) as well as (code, season)) rather than a single process-wide dict -- a fresh
-# FootballDataClient is constructed per top-level request (_try_football_data_client has no
-# singleton), but the SAME instance is threaded through every gameweek of one
-# bulk_player_gameweek_projections call. Without this, that per-gameweek loop (up to
-# MAX_PLAYER_PROJECTION_GAMEWEEKS iterations) called this function, and therefore
-# fd_client.matches(), once per gameweek -- 15 fresh calls to football-data.org's free tier for
-# a single request, which is both slow and an easy way to trip that plan's rate limit. The
-# schedule for a season's UEFA competition doesn't change minute-to-minute, so refetching it on
-# every gameweek in the same projection run bought nothing. Scoping by instance id (rather than
-# a single global (code, season) key) also means two different FootballDataClient instances --
-# e.g. two unrelated tests' fakes, or two separate requests -- never share a cache entry.
-_uefa_matches_cache: dict[tuple[int, str, int], list[dict]] = {}
+# Cache of each competition's raw match list, scoped to one fd_client instance rather than a
+# single process-wide dict -- a fresh FootballDataClient is constructed per top-level request
+# (_try_football_data_client has no singleton), but the SAME instance is threaded through every
+# gameweek of one bulk_player_gameweek_projections call. Without this, that per-gameweek loop (up
+# to MAX_PLAYER_PROJECTION_GAMEWEEKS iterations) called this function, and therefore
+# fd_client.matches(), once per gameweek -- 15 fresh calls to football-data.org's free tier for a
+# single request, which is both slow and an easy way to trip that plan's rate limit. The schedule
+# for a season's UEFA competition doesn't change minute-to-minute, so refetching it on every
+# gameweek in the same projection run bought nothing.
+#
+# A WeakKeyDictionary keyed by the client object itself (not id(fd_client)) -- a plain dict keyed
+# by id() was tried first and was a real bug: id() is just a memory address, and once a
+# short-lived client (e.g. a test's fake, or a per-request instance nobody's holding a strong
+# reference to afterward) gets garbage collected, Python is free to hand that same id() to a
+# LATER, completely unrelated object, which would then silently inherit the first one's cached
+# matches. Showed up as flaky test failures that moved between runs. A WeakKeyDictionary ties
+# each entry to the actual object's identity and lifetime -- it disappears when the client does,
+# so there's no window for a recycled id() to collide with anything.
+_uefa_matches_cache: "WeakKeyDictionary[FootballDataClient, dict[tuple[str, int], list[dict]]]" = WeakKeyDictionary()
 
 
 def compute_uefa_rotation_factors(
@@ -90,14 +97,15 @@ def compute_uefa_rotation_factors(
 
     uefa_matches = []
     season = current_season_start_year()
+    client_cache = _uefa_matches_cache.setdefault(fd_client, {})
     for code in UEFA_COMPETITION_CODES:
-        cache_key = (id(fd_client), code, season)
-        if cache_key not in _uefa_matches_cache:
+        cache_key = (code, season)
+        if cache_key not in client_cache:
             try:
-                _uefa_matches_cache[cache_key] = fd_client.matches(code, season=season)
+                client_cache[cache_key] = fd_client.matches(code, season=season)
             except Exception:
                 continue  # e.g. this plan can't reach the competition, or a transient API error
-        uefa_matches += _uefa_matches_cache.get(cache_key, [])
+        uefa_matches += client_cache.get(cache_key, [])
 
     team_id_by_norm_name = {name: team_id for team_id, name in norm_name_by_fpl_id.items()}
 

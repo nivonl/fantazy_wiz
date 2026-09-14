@@ -8,6 +8,13 @@ where FPL uses "Man City").
 from __future__ import annotations
 
 _SUFFIXES = (" fc", " cf", " afc", " sad", " cd")
+# "AFC " as a PREFIX (AFC Bournemouth) is a different club-naming convention than the "afc"
+# SUFFIX case above (a club that plays as "X AFC") -- confirmed real bug: this wasn't handled at
+# all, so "AFC Bournemouth" (football-data.org's name) normalized to "afc bournemouth" while
+# FPL's plain "Bournemouth" normalized to "bournemouth" -- two different strings for the same
+# club, silently dropping Bournemouth's entire historical-season match history from the ratings
+# fit's likelihood (see NOTES-model-improvements.md).
+_PREFIXES = ("afc ",)
 
 # FPL's shortened display names -> the normalized form we key everything on.
 _ALIASES = {
@@ -35,9 +42,19 @@ _ALIASES = {
 
 def normalize_team_name(name: str) -> str:
     n = name.strip().lower()
+    # "&" vs "and" vs dropped entirely is the other real mismatch this fixes: football-data.org's
+    # "Brighton & Hove Albion FC" kept its ampersand after suffix-stripping ("brighton & hove
+    # albion"), while the "brighton" alias below maps FPL's plain "Brighton" to "brighton hove
+    # albion" (no ampersand) -- two different strings for the same club. Stripping "&" uniformly,
+    # before suffix/prefix handling or the alias lookup, makes both sides converge regardless of
+    # which one (if either) happens to spell it out.
+    n = " ".join(n.replace("&", " ").split())
     for suffix in _SUFFIXES:
         if n.endswith(suffix):
             n = n[: -len(suffix)].strip()
+    for prefix in _PREFIXES:
+        if n.startswith(prefix):
+            n = n[len(prefix) :].strip()
     return _ALIASES.get(n, n)
 
 
