@@ -558,11 +558,21 @@ function cacheStorageKey(slot) {
   return STORAGE_PREFIX + "snapshot:" + slot;
 }
 
+// Bump this whenever a cached endpoint's response shape changes in a way older data wouldn't
+// satisfy (a new field a component now reads unconditionally, a renamed/restructured field,
+// etc.) — real incident: /recommend/fpl/full gained `transfers`/`transfer_package`, and a
+// browser with an old snapshot from before that shipped crashed on `rec.transfers.length`
+// (undefined) on every load, silently, with no way to self-heal short of the visitor manually
+// clearing site data. One global version (not per-slot) trades a little unnecessary
+// invalidation of unrelated slots for not having to remember which slot a given change touched.
+const SNAPSHOT_SCHEMA_VERSION = 1;
+
 function readCachedSnapshot(slot, cacheKey) {
   try {
     const stored = window.localStorage.getItem(cacheStorageKey(slot));
     if (!stored) return null;
     const parsed = JSON.parse(stored);
+    if (parsed.version !== SNAPSHOT_SCHEMA_VERSION) return null;
     return parsed.cacheKey === cacheKey ? parsed : null;
   } catch {
     return null;
@@ -603,7 +613,7 @@ export function useCachedAsyncAction(slot, cacheKey) {
       const savedAt = Date.now();
       setState({ loading: false, error: null, data, savedAt });
       try {
-        window.localStorage.setItem(cacheStorageKey(slot), JSON.stringify({ cacheKey, data, savedAt }));
+        window.localStorage.setItem(cacheStorageKey(slot), JSON.stringify({ version: SNAPSHOT_SCHEMA_VERSION, cacheKey, data, savedAt }));
       } catch {
         // localStorage unavailable (private browsing, quota) — snapshot just won't persist
       }
