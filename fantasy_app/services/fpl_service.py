@@ -56,24 +56,26 @@ EARLY_SEASON_FULL_STRENGTH_MATCHES = 8
 # sheets in their first 3 top-flight games ever produced a fitted defense rating of +3.35, well
 # past Arsenal's +0.57, even with the early-season boost already at its max strength). 0 disables.
 #
-# Two pieces of evidence pull in different directions and neither is strong enough on its own to
-# fully settle this:
-#  - A walk-forward backtest (scripts/backtest_xp_walkforward.py-style, run ad hoc against GW2-3,
-#    the only finished events with a Hull/Coventry fixture so far -- n=3 fixtures total) found
-#    fixture-lambda MAE on those specific fixtures minimized around boost 8-12 (1.08 -> ~0.81),
-#    drifting back up by boost 30+. But every one of those 3 fixtures was against a mid/lower-table
-#    side (Coventry, Aston Villa) -- the backtest has no example of the failure mode that actually
-#    prompted this (an inflated defense rating implying a promoted side nearly shuts out a top
-#    attack), so it can't rule out needing more shrinkage than its own minimum suggests.
-#  - Direct inspection catches exactly that failure mode: at boost=10, Hull's fitted defense
-#    (~2.8) still implied a ~15% chance of Chelsea scoring at all away at Hull, and an 86% Hull
-#    clean-sheet probability -- not plausible for a newly-promoted side's toughest fixture. 40.0
-#    brings that same matchup to Chelsea ~28% chance of no goals and ~75% Hull clean sheet --
-#    still generous, but no longer absurd, while sitting closer to the backtest-supported range
-#    than the boost needed to fully match an established top side's defense rating (100+).
-# Revisit once more promoted-team fixtures (especially against top-half sides) have been played;
-# both the backtest sample and this reasoning are thin.
-NO_HISTORY_L2_BOOST = 40.0
+# That shrinkage pulls toward PROMOTED_TEAM_ATTACK_PRIOR / PROMOTED_TEAM_DEFENSE_PRIOR below
+# rather than toward 0 -- see NO_HISTORY_L2_BOOST's tuning note for why, and
+# scripts/compute_promoted_team_prior.py for how those two constants were derived (the average
+# debut-season attack/defense of the last 6 promoted clubs with data available: Ipswich,
+# Leicester, Southampton, Burnley, Leeds, Sunderland).
+PROMOTED_TEAM_ATTACK_PRIOR = -0.229
+PROMOTED_TEAM_DEFENSE_PRIOR = -0.375
+
+# Tuned the same way as EARLY_SEASON_L2_BOOST (scripts/backtest_xp_walkforward.py-style, do not
+# raise blindly) but against a thin sample -- see git blame / NOTES-model-improvements.md before
+# retuning. Once the shrinkage target moved from 0 (a league-average team, a poor prior for a
+# club that was in the Championship last season) to the promoted-team prior above, roughly half
+# the old boost (40) reaches a comparable real-world plausibility check: Chelsea's expected goals
+# away at a promoted side stops being implausibly close to 0 well before 40 is needed. Live-data
+# reruns of this check across this session drifted by roughly +/-0.5 defense rating between
+# otherwise-identical calls (almost certainly the underlying bootstrap/fixture data itself
+# updating between requests, not the optimizer) -- treat this value as good to within a few
+# units, not a precise optimum. Revisit alongside the prior once more promoted-team fixtures
+# (especially against top-half sides) have been played; both are thin.
+NO_HISTORY_L2_BOOST = 20.0
 
 SHORTLIST_PER_POSITION = {"GK": 8, "DEF": 20, "MID": 20, "FWD": 15}
 
@@ -254,6 +256,7 @@ def fit_pl_ratings(
         early_season_l2_boost=boost,
         early_season_full_strength_matches=full_strength,
         no_history_l2_boost=no_history_boost,
+        no_history_prior=(PROMOTED_TEAM_ATTACK_PRIOR, PROMOTED_TEAM_DEFENSE_PRIOR),
     )
     goal_avgs = team_goal_averages(matches)
     return ratings, goal_avgs, norm_name_by_fpl_id

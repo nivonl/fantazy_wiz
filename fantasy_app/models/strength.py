@@ -104,6 +104,7 @@ def fit_ratings(
     early_season_l2_boost: float = 0.0,
     early_season_full_strength_matches: int = 8,
     no_history_l2_boost: float = 0.0,
+    no_history_prior: tuple[float, float] = (0.0, 0.0),
 ) -> Ratings:
     """
     Fit attack/defense/home-advantage from a list of played matches. Recent matches are
@@ -121,6 +122,13 @@ def fit_ratings(
     comparing each team's total appearance count in `matches` against `team_current_season_matches`
     directly, rather than requiring the caller to pass a separate flag it would have to keep in
     sync with the same `matches` list.
+
+    Both of those boosts pull toward 0 by default — a league-average team — which is itself not
+    a great prior for a club that was in the Championship last season: promoted clubs are
+    systematically below average, not average (see fpl_service.py's PROMOTED_TEAM_ATTACK_PRIOR /
+    PROMOTED_TEAM_DEFENSE_PRIOR, derived from other promoted clubs' own debut seasons).
+    `no_history_prior` is the (attack, defense) point a no-historical-anchor team's *entire* L2
+    penalty shrinks toward instead of 0; every other team is untouched, still centered on 0.
     """
     if not matches:
         raise ValueError("fit_ratings requires at least one match")
@@ -139,6 +147,8 @@ def fit_ratings(
     away_goals = np.array([m.away_goals for m in matches], dtype=float)
 
     team_has_historical_anchor = None
+    team_attack_prior = np.zeros(n)
+    team_defense_prior = np.zeros(n)
     if team_current_season_matches is not None and no_history_l2_boost > 0:
         team_total_matches: dict[str, int] = {}
         for m in matches:
@@ -147,6 +157,11 @@ def fit_ratings(
         team_has_historical_anchor = {
             t: team_total_matches.get(t, 0) > team_current_season_matches.get(t, 0) for t in team_ids
         }
+        prior_attack, prior_defense = no_history_prior
+        for i, t in enumerate(team_ids):
+            if not team_has_historical_anchor[t]:
+                team_attack_prior[i] = prior_attack
+                team_defense_prior[i] = prior_defense
 
     team_l2 = _per_team_l2(
         team_ids,
@@ -168,7 +183,9 @@ def fit_ratings(
         ll_home = home_goals * np.log(lam_home) - lam_home - gammaln(home_goals + 1)
         ll_away = away_goals * np.log(lam_away) - lam_away - gammaln(away_goals + 1)
         log_lik = float(np.sum(weights * (ll_home + ll_away)))
-        penalty = float(np.sum(team_l2 * (attack**2 + defense**2)))
+        penalty = float(
+            np.sum(team_l2 * ((attack - team_attack_prior) ** 2 + (defense - team_defense_prior) ** 2))
+        )
         return -log_lik + penalty
 
     x0 = np.zeros(2 * n + 1)

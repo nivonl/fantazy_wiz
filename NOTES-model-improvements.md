@@ -232,6 +232,37 @@ promoted clubs have played more top-half fixtures.
 
 Unit test: `tests/test_strength.py::test_no_history_l2_boost_shrinks_promoted_team_harder_than_anchored_team`.
 
+### Follow-up — implemented: shrink toward a promoted-team prior, not toward 0
+
+The 40.0 compromise above was fighting the wrong target. Shrinking a promoted club toward 0
+treats it as a league-average team, but promoted clubs are *systematically* below average — they
+were in the Championship for a reason — so 0 was never a good prior, just a convenient one. The
+same fix idea as the historical blend itself: use real data instead of a placeholder.
+
+`scripts/compute_promoted_team_prior.py` finds every club promoted into a PL season that
+football-data.org's free tier still exposes (2023-24 is the oldest season available; 2018-2022
+return 403), fits a full, evenly-weighted rating for that whole season, and averages the promoted
+clubs' attack/defense across all of them: **6 examples** (Ipswich, Leicester, Southampton from
+2024-25; Burnley, Leeds, Sunderland from 2025-26) give `PROMOTED_TEAM_ATTACK_PRIOR = -0.229`,
+`PROMOTED_TEAM_DEFENSE_PRIOR = -0.375` — every one of the 6 was below-average on both axes, no
+exceptions, which is itself a useful sanity check on the idea.
+
+`models/strength.py`'s `fit_ratings` gained `no_history_prior: tuple[float, float] = (0.0, 0.0)`:
+a no-historical-anchor team's *entire* L2 penalty (early-season + no-history boost combined, one
+scalar weight) now centers on this point instead of 0. Wired through `fit_pl_ratings` using the
+constants above. With a real prior doing more of the work, `NO_HISTORY_L2_BOOST` dropped from
+40.0 to **20.0** — roughly half the old brute-force shrinkage reaches a comparable real-world
+plausibility check (Chelsea's expected goals away at a promoted side no longer implausibly close
+to 0). Re-running that plausibility check across this session's investigation showed the fitted
+values drifting by roughly ±0.5 on Hull's defense rating between otherwise-identical calls minutes
+apart — almost certainly the live bootstrap/fixture data itself updating, not optimizer
+instability — so treat 20.0 as good to within a few units, not a precise optimum.
+
+Unit test: `tests/test_strength.py::test_no_history_prior_pulls_toward_the_prior_not_zero`.
+
+Re-run `scripts/compute_promoted_team_prior.py` once another season completes (more examples,
+and football-data.org's 403 cutoff will have moved) and update the two constants by hand.
+
 ### Known residual: player-level goal-rate shrinkage may also be too weak for hot small samples
 
 Even with both fixes above, Ajayi's predicted points only dropped to ~6.5-8.3 (from ~7.8-8.6) —

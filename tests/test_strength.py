@@ -154,3 +154,45 @@ def test_no_history_l2_boost_shrinks_promoted_team_harder_than_anchored_team():
     # no_history_l2_boost -- it still moves some from sharing an opponent (Filler) with Promoted
     # in the same joint fit, but should move distinctly less than Promoted itself.
     assert promoted_shrinkage > established_shrinkage > 0
+
+
+def test_no_history_prior_pulls_toward_the_prior_not_zero():
+    """A no-historical-anchor team whose own current-season results are perfectly neutral (all
+    draws -- no evidence pulling it away from 0 on its own) should still get pulled toward a
+    nonzero no_history_prior once no_history_l2_boost is on, since that prior -- not 0 -- is what
+    the penalty now centers on. Without a prior (the default (0, 0)) the same team should stay
+    near 0, since there's nothing else pulling it away."""
+    base = datetime(2023, 8, 1)
+    matches: list[MatchResult] = [
+        MatchResult("Promoted", "Filler", 1, 1, base + timedelta(days=800)),
+        MatchResult("Filler", "Promoted", 1, 1, base + timedelta(days=807)),
+    ]
+    # Filler needs its own thick sample so it isn't sample-thin and doesn't get shrunk itself.
+    for i in range(8):
+        matches.append(MatchResult("Filler", "Other", 1, 1, base + timedelta(days=i, hours=3)))
+        matches.append(MatchResult("Other", "Filler", 1, 1, base + timedelta(days=i, hours=4)))
+
+    as_of = base + timedelta(days=810)
+    current_counts = {"Promoted": 2, "Filler": 18, "Other": 16}
+
+    no_prior = fit_ratings(
+        matches,
+        as_of=as_of,
+        team_current_season_matches=current_counts,
+        early_season_l2_boost=5.0,
+        early_season_full_strength_matches=8,
+        no_history_l2_boost=10.0,
+        no_history_prior=(0.0, 0.0),
+    )
+    with_prior = fit_ratings(
+        matches,
+        as_of=as_of,
+        team_current_season_matches=current_counts,
+        early_season_l2_boost=5.0,
+        early_season_full_strength_matches=8,
+        no_history_l2_boost=10.0,
+        no_history_prior=(-1.0, -1.0),
+    )
+
+    assert abs(no_prior.defense["Promoted"]) < 0.1
+    assert with_prior.defense["Promoted"] < -0.3
