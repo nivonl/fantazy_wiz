@@ -3848,7 +3848,7 @@
         "expected_goals": 0.82,
         "expected_assists": 0.19,
         "ict_index": null,
-        "element_id": null,
+        "element_id": 124,
         "photo": "pascal-gross.jpg",
         "photo_credit": {
           "name": "Bryan Berlin",
@@ -3878,7 +3878,7 @@
         "expected_goals": 0.41,
         "expected_assists": 0.05,
         "ict_index": null,
-        "element_id": null,
+        "element_id": 330,
         "photo": "jayden-bogle.jpg",
         "photo_credit": {
           "name": "Timmy96",
@@ -3908,7 +3908,7 @@
         "expected_goals": 0,
         "expected_assists": 0,
         "ict_index": null,
-        "element_id": null,
+        "element_id": 1,
         "photo": null,
         "photo_credit": null,
         "analysis": "A clean sheet plus two saves away at newly-promoted Sunderland, with 3 bonus points on top — a start_prob discount from Arsenal's midweek Champions League fixture (new this gameweek, see the model notes below) had already shaved his prediction down slightly; the clean sheet itself was still well above what a mid-table away trip usually returns."
@@ -3933,7 +3933,7 @@
         "expected_goals": 0.52,
         "expected_assists": 0.19,
         "ict_index": null,
-        "element_id": null,
+        "element_id": 305,
         "photo": null,
         "photo_credit": null,
         "analysis": "A goal and two assists from left-back as newly-promoted Ipswich won 3-2 away at Crystal Palace — exactly the kind of result our price-prior model is built to under-rate for a £4.0 defender at a promoted club with no attacking track record yet this season."
@@ -3958,7 +3958,7 @@
         "expected_goals": 0.29,
         "expected_assists": 0.04,
         "ict_index": null,
-        "element_id": null,
+        "element_id": 165,
         "photo": null,
         "photo_credit": null,
         "analysis": "A goal and an assist in a 2-2 home draw with Hull — a reminder that goal involvement points don't need a win behind them, and that our opponent-difficulty read on a newly-promoted side's away form is still thin this early in the season."
@@ -3988,7 +3988,7 @@
         "expected_goals": 0,
         "expected_assists": 0,
         "ict_index": null,
-        "element_id": null,
+        "element_id": 204,
         "photo": "tyrick-mitchell.jpg",
         "photo_credit": {
           "name": "Ardfern",
@@ -4018,7 +4018,7 @@
         "expected_goals": 0,
         "expected_assists": 0,
         "ict_index": null,
-        "element_id": null,
+        "element_id": 586,
         "photo": null,
         "photo_credit": null,
         "analysis": "The same sub-60-minute story as his GW2 appearance in this exact section — substituted at 58 minutes of a game his team drew 2-2, still short of both the clean-sheet-bonus cutoff and, this time, an actual clean sheet to be short of. Hull's press-worthy squad depth cuts both ways: real chances for fringe players, and a defense that hasn't settled into one reliably-nailed back line yet."
@@ -4043,7 +4043,7 @@
         "expected_goals": 0,
         "expected_assists": 0,
         "ict_index": null,
-        "element_id": null,
+        "element_id": 153,
         "photo": null,
         "photo_credit": null,
         "analysis": "Sent off after 33 minutes in the same home defeat to Ipswich — a red card is the single most model-invisible outcome in football, and Disasi's finished the match with the worst score of anyone in our qualifying pool this week."
@@ -4068,7 +4068,7 @@
         "expected_goals": 0,
         "expected_assists": 0,
         "ict_index": null,
-        "element_id": null,
+        "element_id": 279,
         "photo": "semi-ajayi.jpg",
         "photo_credit": {
           "name": "Kieran Clarke",
@@ -4098,7 +4098,7 @@
         "expected_goals": 0,
         "expected_assists": 0,
         "ict_index": null,
-        "element_id": null,
+        "element_id": 211,
         "photo": null,
         "photo_credit": null,
         "analysis": "Substituted at 36 minutes as Palace chased the game against Ipswich — the third Palace player in our worst five from one match, the mirror image of Ipswich's Leif Davis appearing in our top five from the same 3-2 scoreline."
