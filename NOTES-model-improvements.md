@@ -279,6 +279,40 @@ not just newly-promoted clubs' defenders — raising it needs the same full back
 the price-prior work already has, across many players' actual outcomes, not just one player's
 one fixture. Flagging here rather than retuning blind.
 
+## Gameweek 7 insights: steady-state shrinkage is close to zero, and it shows by October
+
+**Status: documented, NOT implemented** — it would change every fixture's expected goals, so it
+wants a decision and a longer sample than five gameweeks.
+
+Found while fixing a stale-gameweek bug (the site was predicting finished gameweeks until the next
+deadline; see `FPLClient.current_event`). Once the site pointed at GW7, the model's fixture
+expected goals included Brighton **6.17** at home to Palace, Man City 4.59 v Ipswich, and some
+implausibly low ones (Spurs v Coventry 0.43-0.77). Cause: `fit_ratings`' base `l2=0.005` is
+effectively no regularization once a team has ~6 current-season matches. The GW3 early-season
+boost (`EARLY_SEASON_L2_BOOST=3.0`) multiplies that tiny number and tapers to nothing by 8 matches,
+so by GW6-7 attack/defense are close to raw maximum likelihood on six games, with the two older
+seasons heavily decayed (180-day half-life) behind them.
+
+Walk-forward check (ratings fit as of each gameweek's first kickoff, GW2-GW6 results, 100
+team-scores; Poisson negative log-likelihood per score, lower is better; script was an ad hoc
+sweep over `fit_pl_ratings` with `fit_ratings(l2=...)` patched):
+
+| base l2 | NLL | MAE | max expected goals |
+|---|---|---|---|
+| 0.005 (current) | 1.646 | 1.085 | 4.55 |
+| 0.05 | 1.703 | 1.152 | 3.97 |
+| 0.2 | 1.632 | 1.100 | 2.99 |
+| 0.5 | 1.613 | 1.072 | 2.35 |
+| 1.0 | 1.610 | 1.064 | 2.28 |
+| (no early boost, l2 0.005) | 2.276 | 1.346 | 5.40 |
+
+Stronger base shrinkage helps later gameweeks most (GW5 1.835 -> 1.629, GW6 1.958 -> 1.601 at
+l2=1.0) and costs a little in GW2/GW4; improvement saturates around l2 0.5-1.0 and removes the
+absurd tails. Caveats: ~3.6 nats total improvement on 100 scores is directional, not significant;
+the sweep isn't monotone at the low end (0.02-0.05 is worse than current). A first guess if
+revisited: base l2 around 0.5, re-run the same walk-forward on a bigger sample (e.g. once GW10 is
+in, or replay last season) before shipping.
+
 ## Deferred: actual transfer fee paid
 
 The user's original ask also included the real transfer fee a club paid (not just FPL price) as
