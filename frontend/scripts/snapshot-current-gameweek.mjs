@@ -18,8 +18,17 @@ const GAMEWEEKS_DIR = join(__dirname, "..", "data", "gameweeks");
 
 async function main() {
   await warmUpBackend();
-  const data = await fetchJson("/fpl/players/predicted");
+  const { started, ...data } = await fetchJson("/fpl/players/predicted");
   const path = join(GAMEWEEKS_DIR, `gw${data.event}.json`);
+
+  // The endpoint returns the UPCOMING gameweek between one finishing and the next deadline (an
+  // international break, say). A snapshot must be taken once that gameweek has actually started,
+  // not days or weeks early -- team news and price changes before the deadline would otherwise
+  // be missing from what we later present as "what was predicted beforehand".
+  if (started === false) {
+    console.log(`Gameweek ${data.event} hasn't started yet (deadline not passed) -- not snapshotting.`);
+    return;
+  }
 
   if (existsSync(path)) {
     console.log(`Gameweek ${data.event} is already snapshotted -- nothing to do.`);

@@ -56,12 +56,20 @@ class FPLClient:
         return r.json()
 
     def current_event(self, bootstrap: dict | None = None) -> int:
-        """The gameweek marked is_current (falls back to the next unstarted one)."""
-        data = bootstrap or self.bootstrap()
-        for event in data["events"]:
-            if event.get("is_current"):
-                return event["id"]
-        for event in data["events"]:
+        """The gameweek a manager is picking a team for right now: the one marked is_current while
+        it's still being played, but once that gameweek has finished (FPL keeps is_current pointing
+        at it until the NEXT deadline passes -- all of an international break, say) the next
+        unfinished one instead. Returning the finished one would predict matches that have already
+        happened."""
+        events = bootstrap["events"] if bootstrap else self.bootstrap()["events"]
+        current = next((e for e in events if e.get("is_current")), None)
+        if current is not None and current.get("finished"):
+            upcoming = next((e for e in events if e["id"] > current["id"] and not e.get("finished")), None)
+            if upcoming is not None:
+                return upcoming["id"]
+        if current is not None:
+            return current["id"]
+        for event in events:
             if not event.get("finished"):
                 return event["id"]
-        return data["events"][-1]["id"]
+        return events[-1]["id"]

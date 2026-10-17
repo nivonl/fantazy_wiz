@@ -319,7 +319,12 @@ def fpl_players_predicted(event: int | None = None) -> dict:
         bootstrap = client.bootstrap()
         resolved_event = event or client.current_event(bootstrap)
         pool = fpl_service.build_candidate_pool(client, event=resolved_event)
-    return {"event": resolved_event, "players": [asdict(p) for p in pool]}
+    resolved = next((e for e in bootstrap["events"] if e["id"] == resolved_event), {})
+    # `started`: the gameweek's deadline has passed (it's FPL's is_current, or already finished).
+    # current_event() now returns the upcoming gameweek between a finish and the next deadline,
+    # and the snapshot job must only capture a gameweek once it has actually started.
+    started = bool(resolved.get("is_current") or resolved.get("finished"))
+    return {"event": resolved_event, "started": started, "players": [asdict(p) for p in pool]}
 
 
 @app.get("/fpl/players/radar")

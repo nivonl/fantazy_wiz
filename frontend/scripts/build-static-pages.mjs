@@ -183,13 +183,13 @@ ${rows}
     </details>`;
 }
 
-function renderPlayerBody(player, breakdown, priceHistory, radar, forwardProjections) {
+function renderPlayerBody(player, breakdown, priceHistory, radar, forwardProjections, event) {
   const stats = player.opponent_stats;
   const priceChart = priceHistory?.length ? renderPriceLineChart(priceHistory) : "";
   return `
     <h2>${escapeHtml(player.name)} — FPL Price, Predicted Points &amp; Fixtures</h2>
     <p class="summary-line">${player.pos} &middot; ${escapeHtml(player.team)} &middot; ${player.price.toFixed(1)}m</p>
-    <p class="summary-line">Predicted <b>${player.xp.toFixed(2)}</b> points this gameweek${stats ? ` vs ${escapeHtml(stats.opponent)}` : ""}.</p>
+    <p class="summary-line">Predicted <b>${player.xp.toFixed(2)}</b> points in Gameweek ${event}${stats ? ` vs ${escapeHtml(stats.opponent)}` : ""}.</p>
     ${
       stats && stats.games_overall > 0
         ? `<p>Over the last 5 Premier League seasons vs this opponent: ${stats.games_overall} apps, avg ${stats.avg_points_overall} pts, ${stats.goals_overall}G/${stats.assists_overall}A.</p>`
@@ -652,7 +652,7 @@ async function main() {
     const path = `/fpl/player/${slug}/`;
     const html = renderPage({
       title: `${player.name} FPL Prediction, Price & Expected Points`,
-      description: `${player.name} (${player.team}, ${player.pos}): FPL price ${player.price.toFixed(1)}m, predicted ${player.xp.toFixed(2)} points this gameweek, predicted points for the next ${FORWARD_PROJECTION_GAMEWEEKS} gameweeks, and recent gameweek-by-gameweek form.`,
+      description: `${player.name} (${player.team}, ${player.pos}): FPL price ${player.price.toFixed(1)}m, predicted ${player.xp.toFixed(2)} points in gameweek ${currentEvent}, predicted points for the next ${FORWARD_PROJECTION_GAMEWEEKS} gameweeks, and recent gameweek-by-gameweek form.`,
       path,
       cssHref,
       breadcrumbs: [
@@ -665,7 +665,8 @@ async function main() {
         breakdownById.get(player.id),
         priceHistoryById.get(player.id),
         radarTable[player.id],
-        projectionsByPlayer[player.id]
+        projectionsByPlayer[player.id],
+        currentEvent
       ),
       cardStyle: teamAccentStyle(player.team),
     });
